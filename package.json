@@ -1,0 +1,74 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "build": "vue-cli-service build --skip-plugins @vue/cli-plugin-eslint",
+    "lint": "vue-cli-service lint",
+    "dev": "vue-cli-service serve --skip-plugins @vue/cli-plugin-eslint"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.1.1",
+    "axios": "^0.27.2",
+    "core-js": "^3.6.5",
+    "jwt-decode": "^3.1.2",
+    "jwt-encode": "^1.0.1",
+    "pusher-js": "^7.1.1-beta",
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
+    "v-mask": "^2.3.0",
+    "vue": "^2.6.11",
+    "vue-advanced-cropper": "^1.10.1",
+    "vue-axios": "^3.4.1",
+    "vue-browser-geolocation": "^1.8.0",
+    "vue-inline-svg": "^2.1.0",
+    "vue-meta": "^2.4.0",
+    "vue-router": "^3.2.0",
+    "vue-sweetalert2": "^5.0.5",
+    "vuetify": "^2.6.0",
+    "vuetify-money": "^1.2.0",
+    "vuex": "^3.3.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-plugin-router": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
+    "babel-eslint": "^10.1.0",
+    "dotenv": "^10.0.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "express": "^4.18.1",
+    "material-design-icons-iconfont": "^6.7.0",
+    "sass": "~1.32.0",
+    "sass-loader": "^10.0.0",
+    "serve-static": "^1.15.0",
+    "vue-cli-plugin-vuetify": "~2.5.0",
+    "vue-template-compiler": "^2.6.11",
+    "vuetify-loader": "^1.7.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "engines": {
+    "node": "16.15.1",
+    "npm": "8.11.0"
+  }
+}
