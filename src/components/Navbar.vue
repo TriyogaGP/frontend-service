@@ -157,14 +157,14 @@ export default {
 		this.roleID = localStorage.getItem('roleID')
 		this.Token = localStorage.getItem('user_token')
 		this.getMenu(this.roleID)
-		this.$getLocation({
-      enableHighAccuracy: false, //defaults to false
-      timeout: Infinity, //defaults to Infinity
-      maximumAge: 1000 //defaults to 0
+		// this.$getLocation({
+    //   enableHighAccuracy: false, //defaults to false
+    //   timeout: Infinity, //defaults to Infinity
+    //   maximumAge: 1000 //defaults to 0
       
-    }).then(coordinates => {
-      console.log(coordinates)
-    });
+    // }).then(coordinates => {
+    //   console.log(coordinates)
+    // });
 	},
 	methods: {
 		...mapActions(["fetchData"]),

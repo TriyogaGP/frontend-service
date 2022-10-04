@@ -41,7 +41,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_event"
+					item-key="idEvent"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -52,34 +52,34 @@
 						{{ DataEvent.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.tanggalevent`]="{ item }">
-						<span v-html="item.tanggalevent" /> <span v-html="item.waktu_event" /> 
+						<span v-html="item.startEvent" /> 
 					</template>
 					<template #[`item.kelipatan_bid`]="{ item }">
-						Rp.<span v-html="currencyDotFormat(item.kelipatan_bid)" />
+						Rp.<span v-html="currencyDotFormat(item.kelipatanBid)" />
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_event"
+								:value="item.idEvent"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_event"
+								v-if="item.statusAktif == false"
+								:value="item.idEvent"
 								color="#0bd369"
 								small
 								dense
@@ -90,8 +90,8 @@
 							<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_event"
+								v-else-if="item.statusAktif == true"
+								:value="item.idEvent"
 								color="#0bd369"
 								small
 								dense
@@ -102,19 +102,19 @@
 							<v-icon small>visibility_off</v-icon>	Non Active
 							</v-btn> 
 							<v-btn
-								:value="item.id_event"
+								:value="item.idEvent"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 							<v-icon small>delete</v-icon>	Hapus
 							</v-btn> 
 							<v-btn
-								:value="item.id_event"
+								:value="item.idEvent"
 								color="#04f7f7"
 								small
 								dense
@@ -685,12 +685,12 @@ export default {
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Kode", value: "kode_event", sortable: false },
-      { text: "Nama", value: "nama_event", sortable: false },
+      { text: "Kode", value: "kodeEvent", sortable: false },
+      { text: "Nama", value: "namaEvent", sortable: false },
       { text: "Waktu", value: "tanggalevent", sortable: false },
-      { text: "Deskripsi", value: "deskripsi_event", sortable: false },
+      { text: "Deskripsi", value: "deskripsiEvent", sortable: false },
       { text: "Kelipatan BID", value: "kelipatan_bid", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -789,7 +789,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllEvent`,
+				url: `lelang/getEvent`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -810,16 +810,16 @@ export default {
 				this.clearForm()
       }else{
 				this.inputEvent.UnixText = item.UnixText ? item.UnixText : ''
-				this.inputEvent.id_event = item.id_event ? item.id_event : ''
+				this.inputEvent.id_event = item.idEvent ? item.idEvent : ''
         this.inputEvent.kode_event = item.kodeevent_split ? item.kodeevent_split : ''
-        this.inputEvent.nama_event = item.nama_event ? item.nama_event : ''
-        this.inputEvent.pass_event = item.katasandi_event ? item.katasandi_event : ''
-        this.inputEvent.kelipatan_bid = item.kelipatan_bid ? item.kelipatan_bid : ''
-        this.inputEvent.tanggal_event = item.tanggal_event ? item.tanggal_event : ''
-        this.inputEvent.waktu_event = item.waktu_event ? item.waktu_event : ''
-        this.inputEvent.deskripsi_event = item.deskripsi_event ? item.deskripsi_event : ''
-        this.inputEvent.alamat_event = item.alamat_event ? item.alamat_event : ''
-        this.inputEvent.link_maps = item.link_maps ? item.link_maps : ''
+        this.inputEvent.nama_event = item.namaEvent ? item.namaEvent : ''
+        this.inputEvent.pass_event = item.kataSandiEvent ? item.kataSandiEvent : ''
+        this.inputEvent.kelipatan_bid = item.kelipatanBid ? item.kelipatanBid : ''
+        this.inputEvent.tanggal_event = item.tanggalEvent ? item.tanggalEvent : ''
+        this.inputEvent.waktu_event = item.waktuEvent ? item.waktuEvent : ''
+        this.inputEvent.deskripsi_event = item.deskripsiEvent ? item.deskripsiEvent : ''
+        this.inputEvent.alamat_event = item.alamatEvent ? item.alamatEvent : ''
+        this.inputEvent.link_maps = item.linkMaps ? item.linkMaps : ''
         this.inputEvent.fileevent = item.gambar ? item.gambar : ''
 			}
 			this.DialogEvent = true
@@ -849,7 +849,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesEvent`,
+				url: `lelang/postEvent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -857,7 +857,7 @@ export default {
 			.then(async (res) => {
 				if(this.FileEVENT){
 					let uploadEVENT = await this.uploadLampiran(index, dataUpload)
-					if(uploadEVENT.data.kode == 200){
+					if(uploadEVENT.data.status == 200){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
 						this.notifikasi("error", 'Gagal proses data', "1")
@@ -899,14 +899,14 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_event: item.id_event,
-        kode_event: item.kode_event,
-        nama_event: item.nama_event,
+        id_event: item.idEvent,
+        kode_event: item.kodeEvent,
+        nama_event: item.namaEvent,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesEvent`,
+				url: `lelang/postEvent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -923,14 +923,14 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_event: item.id_event,
-        kode_event: item.kode_event,
-        nama_event: item.nama_event,
+        id_event: item.idEvent,
+        kode_event: item.kodeEvent,
+        nama_event: item.namaEvent,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesEvent`,
+				url: `lelang/postEvent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1007,7 +1007,7 @@ export default {
       let url = this[d] ? 'decryptPass' : 'encryptPass' 
       let payload = {
 				method: "get",
-				url: `moduleMain/${url}?kata=${this.inputEvent.pass_event}`,
+				url: `settings/${url}?kata=${this.inputEvent.pass_event}`,
 				authToken: localStorage.getItem('user_token')
 			};
       this.inputEvent.pass_event = ''

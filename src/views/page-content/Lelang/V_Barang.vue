@@ -66,10 +66,10 @@
             No. Mesin : <span v-html="item.noMesin" /> 
           </template>
           <template #[`item.statusAktif`]="{ item }">
-            <v-icon small v-if="item.statusAktif == 1" color="green">check</v-icon>
-            <v-icon small v-else-if="item.statusAktif == 0" color="red">clear</v-icon>
+            <v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+            <v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
             <br>
-            <span v-html="item.statusAktif == 1 ? 'Active' : 'Non Active'" /> 
+            <span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
           </template>
           <template #expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="white">
@@ -80,13 +80,13 @@
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.statusAktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="bukaDialog(item, 1)"
               >
                 <v-icon small>edit</v-icon>	Ubah
               </v-btn> 
               <v-btn
-                v-if="item.statusAktif == 0"
+                v-if="item.statusAktif == false"
                 :value="item.idBarangLelang"
                 color="#0bd369"
                 small
@@ -98,7 +98,7 @@
                 <v-icon small>visibility</v-icon>	Active
               </v-btn> 
               <v-btn
-                v-else-if="item.statusAktif == 1"
+                v-else-if="item.statusAktif == true"
                 :value="item.idBarangLelang"
                 color="#0bd369"
                 small
@@ -116,7 +116,7 @@
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.statusAktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="HapusRecord(item)"
               >
                 <v-icon small>delete</v-icon>	Hapus
@@ -139,7 +139,7 @@
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.statusAktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="() => { 
                   inputBarangLelang.UnixText = item.UnixText; 
                   inputBarangLelang.id_barang_lelang = item.idBarangLelang; 
@@ -211,7 +211,7 @@
                     v-model="inputBarangLelang.id_kategori"
                     :items="kategoriOptions"
                     item-text="kategori"
-                    item-value="id_kategori"
+                    item-value="idKategori"
                     placeholder="Kategori"
                     label="Kategori"
                     outlined
@@ -1555,7 +1555,7 @@ export default {
         this.clearForm()
         this.inputBarangLelang.UnixText = `BarangLelang${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`
       }else{
-        if(index == 2){ this.getFotoBarangLelang(item.id_barang_lelang) }
+        if(index == 2){ this.getFotoBarangLelang(item.idBarangLelang) }
         this.inputBarangLelang.UnixText = item.UnixText ? item.UnixText : ''
         this.inputBarangLelang.id_kategori = item.statusKategoriLelang == true ? item.idKategori ? item.idKategori : '' : ''
         this.inputBarangLelang.id_barang_lelang = item.idBarangLelang ? item.idBarangLelang : ''

@@ -41,7 +41,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_pembelian_npl"
+					item-key="idPembelianNPL"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -52,16 +52,16 @@
 						{{ DataPembelianNPL.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.event`]="{ item }"> 
-						<strong><span v-html="item.data_event.nama_event" /></strong>
+						<strong><span v-html="item.namaEvent" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
 								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
 							</template>
-							Kode Event : <span v-html="item.data_event.kode_event" /> <br>
-							Nama Event : <strong><span v-html="item.data_event.nama_event" /></strong> <br>
-							Tanggal Event : (<span v-html="item.data_event.tanggalevent" /> <span v-html="item.data_event.waktu_event" />)
+							Kode Event : <span v-html="item.kodeEvent" /> <br>
+							Nama Event : <strong><span v-html="item.namaEvent" /></strong> <br>
+							Tanggal Event : (<span v-html="item.tanggalEvent" />)
 						</v-tooltip>
-						<v-tooltip v-if="item.data_event.status_aktif == 0" bottom>
+						<v-tooltip v-if="item.statusEvent == false" bottom>
 							<template v-slot:activator="{ on, attrs }">
 								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
 							</template>
@@ -69,16 +69,16 @@
 						</v-tooltip>
 					</template>
 					<template #[`item.peserta`]="{ item }">
-						<strong><span v-html="item.data_peserta.nama" /></strong>
+						<strong><span v-html="item.nama" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
 								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
 							</template>
-							NIK : <strong><span v-html="item.data_peserta.nik" /></strong> <br>
-							Nama : <strong><span v-html="item.data_peserta.nama" /></strong> <br>
-							Email : <strong><span v-html="item.data_peserta.email" /></strong>
+							NIK : <strong><span v-html="item.nik" /></strong> <br>
+							Nama : <strong><span v-html="item.nama" /></strong> <br>
+							Email : <strong><span v-html="item.email" /></strong>
 						</v-tooltip>
-						<v-tooltip v-if="item.data_peserta.status_aktif == 0" bottom>
+						<v-tooltip v-if="item.statusPeserta == false" bottom>
 							<template v-slot:activator="{ on, attrs }">
 								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
 							</template>
@@ -92,29 +92,29 @@
 						<v-icon small v-if="item.verifikasi == 1" color="green">check</v-icon>
 						<v-icon small v-else-if="item.verifikasi == 0" color="red">clear</v-icon>
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == V_FasilitasMallVue" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_pembelian_npl"
+								:value="item.idPembelianNPL"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 								<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_pembelian_npl"
+								v-if="item.statusAktif == false"
+								:value="item.idPembelianNPL"
 								color="#0bd369"
 								small
 								dense
@@ -125,8 +125,8 @@
 								<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_pembelian_npl"
+								v-else-if="item.statusAktif == true"
+								:value="item.idPembelianNPL"
 								color="#0bd369"
 								small
 								dense
@@ -138,12 +138,12 @@
 							</v-btn> 
 							<v-btn
 								v-if="item.verifikasi == 0"
-								:value="item.id_pembelian_npl"
+								:value="item.idPembelianNPL"
 								color="#0bd369"
 								small
 								dense
 								depressed
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								class="ma-2 white--text text--darken-2"
 								@click="questionProses(item, 1)"
 							>
@@ -151,31 +151,31 @@
 							</v-btn> 
 							<v-btn
 								v-else-if="item.verifikasi == 1"
-								:value="item.id_pembelian_npl"
+								:value="item.idPembelianNPL"
 								color="#0bd369"
 								small
 								dense
 								depressed
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="questionProses(item, 0)"
 								class="ma-2 white--text text--darken-2"
 							>
 								<v-icon small>gpp_bad</v-icon>	Tidak Verifikasi
 							</v-btn> 
 							<v-btn
-								:value="item.id_pembelian_npl"
+								:value="item.idPembelianNPL"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 								<v-icon small>delete</v-icon>	Hapus
 							</v-btn> 
 							<v-btn
-								:value="item.id_pembelian_npl"
+								:value="item.idPembelianNPL"
 								color="#04f7f7"
 								small
 								dense
@@ -247,7 +247,7 @@
                     v-model="inputPembelianNPL.id_peserta"
                     :items="DataPeserta"
                     item-text="nama"
-                    item-value="id_peserta"
+                    item-value="idPeserta"
                     placeholder="Peserta"
                     label="Peserta"
                     outlined
@@ -282,8 +282,8 @@
                   <v-autocomplete
                     v-model="inputPembelianNPL.id_event"
                     :items="DataEvent"
-                    item-text="nama_event"
-                    item-value="id_event"
+                    item-text="namaEvent"
+                    item-value="idEvent"
                     placeholder="Event"
                     label="Event"
                     outlined
@@ -293,10 +293,10 @@
                     :readonly="editedIndex == 2"
                   >
 										<template v-slot:selection="{ item }">
-											{{item.kode_event}} - {{item.nama_event}} ({{item.tanggalevent}} {{item.waktu_event}})
+											{{item.kodeEvent}} - {{item.namaEvent}} ({{item.tanggalEvent}})
 										</template>
 										<template v-slot:item="{ item }">
-											{{item.kode_event}} - {{item.nama_event}} ({{item.tanggalevent}} {{item.waktu_event}})
+											{{item.kodeEvent}} - {{item.namaEvent}} ({{item.tanggalEvent}})
 										</template>
 									</v-autocomplete>
                   <span v-html="editedIndex != 0 && inputPembelianNPL.id_event == '' ? 'Event yang dipilih tidak aktif' : ''" class="red--text"></span>
@@ -849,10 +849,10 @@ export default {
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Event", value: "event", sortable: false },
       { text: "Peserta", value: "peserta", sortable: false },
-      { text: "No. Pembelian", value: "no_pembelian", sortable: false },
+      { text: "No. Pembelian", value: "noPembelian", sortable: false },
       { text: "Nominal", value: "nominal", sortable: false },
       { text: "Verifikasi", value: "verifikasi", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -997,7 +997,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllPembelianNPL`,
+				url: `lelang/getNPL`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1013,7 +1013,7 @@ export default {
 		getPeserta() {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllPeserta?status_aktif=1`,
+				url: `admin/getPeserta?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1027,7 +1027,7 @@ export default {
 		getEvent() {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllEvent?status_aktif=1`,
+				url: `lelang/getEvent?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1041,13 +1041,13 @@ export default {
 		getNoNPL(id) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllNPLBy?id_event=${id}`,
+				url: `lelang/getNPL?kategori=NPL&id_event=${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
 				if(Object.entries(res.data.result).length){
-					this.lastNoNPL = res.data.result.no_npl;
+					this.lastNoNPL = res.data.result.dataNPL.no_npl;
 				}else{
 					this.lastNoNPL = 'NPL-00000';
 				}
@@ -1063,17 +1063,17 @@ export default {
 			if(index == 0){
 				this.clearForm()
       }else{
-				this.inputPembelianNPL.id_pembelian_npl = item.id_pembelian_npl ? item.id_pembelian_npl : ''
-				this.inputPembelianNPL.id_peserta = item.id_peserta ? item.id_peserta : ''
-				this.inputPembelianNPL.id_event = item.id_event ? item.id_event : ''
-        this.inputPembelianNPL.type_pembelian = item.type_pembelian ? item.type_pembelian : ''
-        this.inputPembelianNPL.type_transaksi = item.type_transaksi ? item.type_transaksi : ''
+				this.inputPembelianNPL.id_pembelian_npl = item.idPembelianNPL ? item.idPembelianNPL : ''
+				this.inputPembelianNPL.id_peserta = item.idPeserta ? item.idPeserta : ''
+				this.inputPembelianNPL.id_event = item.idEvent ? item.idEvent : ''
+        this.inputPembelianNPL.type_pembelian = item.typePembelian ? item.typePembelian : ''
+        this.inputPembelianNPL.type_transaksi = item.typeTransaksi ? item.typeTransaksi : ''
         this.inputPembelianNPL.verifikasi = item.verifikasi
         this.inputPembelianNPL.nominal = item.nominal ? item.nominal : ''
-        this.inputPembelianNPL.tanggal_transfer = item.tanggal_transfer ? this.convertDateToPicker2(item.tanggal_transfer) : ''
-        this.tampungNoPembelian = item.no_pembelian ? item.no_pembelian : ''
+        this.inputPembelianNPL.tanggal_transfer = item.tanggalTransfer ? this.convertDateToPicker2(item.tanggalTransfer) : ''
+        this.tampungNoPembelian = item.noPembelian ? item.noPembelian : ''
         this.inputVerifikasi.bukti = item.bukti ? item.bukti : ''
-        this.inputVerifikasi.pesan_verifikasi = item.pesan_verifikasi ? item.pesan_verifikasi : ''
+        this.inputVerifikasi.pesan_verifikasi = item.pesanVerifikasi ? item.pesanVerifikasi : ''
 			}
 			this.DialogPembelianNPL = true
 		},
@@ -1097,7 +1097,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPembelianNPL`,
+				url: `lelang/postPembelianNPL`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1125,7 +1125,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPembelianNPL`,
+				url: `lelang/postPembelianNPL`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1133,7 +1133,7 @@ export default {
 			.then(async (res) => {
 				if(this.FileBUKTI){
 					let uploadBUKTI = await this.uploadLampiran(dataUpload)
-					if(uploadBUKTI.data.kode == 200){
+					if(uploadBUKTI.data.status == 200){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
 						this.notifikasi("error", 'Gagal proses data', "1")
@@ -1173,12 +1173,12 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_pembelian_npl: item.id_pembelian_npl,
+        id_pembelian_npl: item.idPembelianNPL,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPembelianNPL`,
+				url: `lelang/postPembelianNPL`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1195,12 +1195,12 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_pembelian_npl: item.id_pembelian_npl,
+        id_pembelian_npl: item.idPembelianNPL,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPembelianNPL`,
+				url: `lelang/postPembelianNPL`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1319,7 +1319,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPembelianNPL`,
+				url: `lelang/postPembelianNPL`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};

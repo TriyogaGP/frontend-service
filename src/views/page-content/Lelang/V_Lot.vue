@@ -41,7 +41,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_lot"
+					item-key="idLot"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -52,16 +52,16 @@
 						{{ DataLot.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.event`]="{ item }"> 
-						<strong><span v-html="item.data_event.nama_event" /></strong>
+						<strong><span v-html="item.Event.namaEvent" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
 								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
 							</template>
-							Kode Event : <span v-html="item.data_event.kode_event" /> <br>
-							Nama Event : <strong><span v-html="item.data_event.nama_event" /></strong> <br>
-							Tanggal Event : (<span v-html="item.data_event.tanggalevent" /> <span v-html="item.data_event.waktu_event" />)
+							Kode Event : <span v-html="item.Event.kodeEvent" /> <br>
+							Nama Event : <strong><span v-html="item.Event.namaEvent" /></strong> <br>
+							Tanggal Event : (<span v-html="item.Event.startEvent" />)
 						</v-tooltip>
-						<v-tooltip v-if="item.data_event.status_aktif == 0" bottom>
+						<v-tooltip v-if="item.Event.statusAktif == false" bottom>
 							<template v-slot:activator="{ on, attrs }">
 								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
 							</template>
@@ -69,9 +69,9 @@
 						</v-tooltip>
 					</template>
 					<template #[`item.barang_lelang`]="{ item }">
-						Kategori : <strong><span v-html="item.data_barang_lelang.data_kategori.kategori" /></strong> <br>
-						Nama Barang Lelang : <strong><span v-html="item.data_barang_lelang.nama_barang_lelang" /></strong> <br>
-						<v-tooltip v-if="item.data_barang_lelang.data_kategori.status_aktif == 0 || item.data_barang_lelang.status_aktif == 0" bottom>
+						Kategori : <strong><span v-html="item.BarangLelang.KategoriLelang.namaKategori" /></strong> <br>
+						Nama Barang Lelang : <strong><span v-html="item.BarangLelang.namaBarangLelang" /></strong> <br>
+						<v-tooltip v-if="item.BarangLelang.KategoriLelang.statusKategoriLelang == false || item.BarangLelang.statusAktif == false" bottom>
 							<template v-slot:activator="{ on, attrs }">
 								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
 							</template>
@@ -79,34 +79,34 @@
 						</v-tooltip>
 					</template>
 					<template #[`item.harga_awal`]="{ item }">
-						Rp.<span v-html="currencyDotFormat(item.harga_awal)" />
+						Rp.<span v-html="currencyDotFormat(item.hargaAwal)" />
 					</template>
 					<template #[`item.status_lot`]="{ item }">
-						<span v-html="item.status_lot == 1 ? 'Tidak Aktif' : item.status_lot == 2 ? 'Aktif' : item.status_lot == 3 ? 'Lelang' : 'Terjual'" /> 
+						<span v-html="item.statusLot == 1 ? 'Tidak Aktif' : item.statusLot == 2 ? 'Aktif' : item.statusLot == 3 ? 'Lelang' : 'Terjual'" /> 
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_lot"
+								:value="item.idLot"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_lot"
+								v-if="item.statusAktif == false"
+								:value="item.idLot"
 								color="#0bd369"
 								small
 								dense
@@ -117,8 +117,8 @@
 							<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_lot"
+								v-else-if="item.statusAktif == true"
+								:value="item.idLot"
 								color="#0bd369"
 								small
 								dense
@@ -129,19 +129,19 @@
 							<v-icon small>visibility_off</v-icon>	Non Active
 							</v-btn> 
 							<v-btn
-								:value="item.id_lot"
+								:value="item.idLot"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 							<v-icon small>delete</v-icon>	Hapus
 							</v-btn> 
 							<v-btn
-								:value="item.id_lot"
+								:value="item.idLot"
 								color="#04f7f7"
 								small
 								dense
@@ -212,8 +212,8 @@
                   <v-autocomplete
                     v-model="inputLot.id_barang_lelang"
                     :items="DataBarangLelang"
-                    item-text="nama_barang_lelang"
-                    item-value="id_barang_lelang"
+                    item-text="namaBarangLelang"
+                    item-value="idBarangLelang"
                     placeholder="Barang Lelang"
                     label="Barang Lelang"
                     outlined
@@ -223,10 +223,10 @@
                     :readonly="editedIndex == 2"
                   >
 										<template v-slot:selection="{ item }">
-											{{item.nama_barang_lelang}} ({{item.data_kategori.kategori}})
+											{{item.namaBarangLelang}} ({{item.namaKategori}})
 										</template>
 										<template v-slot:item="{ item }">
-											{{item.nama_barang_lelang}} ({{item.data_kategori.kategori}})
+											{{item.namaBarangLelang}} ({{item.namaKategori}})
 										</template>
 									</v-autocomplete>
                   <span v-html="editedIndex != 0 && inputLot.id_barang_lelang == '' ? 'Barang Lelang yang dipilih tidak aktif' : ''" class="red--text"></span>
@@ -248,8 +248,8 @@
                   <v-autocomplete
                     v-model="inputLot.id_event"
                     :items="DataEvent"
-                    item-text="nama_event"
-                    item-value="id_event"
+                    item-text="namaEvent"
+                    item-value="idEvent"
                     placeholder="Event"
                     label="Event"
                     outlined
@@ -259,10 +259,10 @@
                     :readonly="editedIndex == 2"
                   >
 										<template v-slot:selection="{ item }">
-											{{item.kode_event}} - {{item.nama_event}} ({{item.tanggalevent}} {{item.waktu_event}})
+											{{item.kodeEvent}} - {{item.namaEvent}} ({{item.startEvent}})
 										</template>
 										<template v-slot:item="{ item }">
-											{{item.kode_event}} - {{item.nama_event}} ({{item.tanggalevent}} {{item.waktu_event}})
+											{{item.kodeEvent}} - {{item.namaEvent}} ({{item.startEvent}})
 										</template>
 									</v-autocomplete>
                   <span v-html="editedIndex != 0 && inputLot.id_event == '' ? 'Event yang dipilih tidak aktif' : ''" class="red--text"></span>
@@ -435,10 +435,10 @@ export default {
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Event", value: "event", sortable: false },
       { text: "Barang Lelang", value: "barang_lelang", sortable: false },
-      { text: "No. Lot", value: "no_lot", sortable: false },
+      { text: "No. Lot", value: "noLot", sortable: false },
       { text: "harga Awal", value: "harga_awal", sortable: false },
       { text: "Status Lot", value: "status_lot", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -510,7 +510,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllLot`,
+				url: `lelang/getLot`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -527,7 +527,7 @@ export default {
 			this.DataBarangLelang = []
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllBarangLelang?status_aktif=1`,
+				url: `lelang/getBarangLelang?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -535,12 +535,12 @@ export default {
 				let data = res.data.result;
 				let lot = []
 				this.DataLot.map((el) => {
-					lot.push(el.id_barang_lelang)
+					lot.push(el.idBarangLelang)
 				})
-				console.log(lot)
+				// console.log(lot)
 				if(lot.length){
 					data.map((el) => {
-						let result = lot.includes(el.id_barang_lelang)
+						let result = lot.includes(el.idBarangLelang)
 						if(!result) return this.DataBarangLelang.push(el);
 						// if(result && lot.length){
 						// 	console.log(el)
@@ -558,7 +558,7 @@ export default {
 		getEvent() {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllEvent?status_aktif=1`,
+				url: `lelang/getEvent?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -576,12 +576,12 @@ export default {
 			if(index == 0){
 				this.clearForm()
       }else{
-				this.inputLot.id_lot = item.id_lot ? item.id_lot : ''
-				this.inputLot.id_barang_lelang = item.data_barang_lelang.data_kategori.status_aktif == 0 || item.data_barang_lelang.status_aktif == 0 ? '' : item.id_barang_lelang ? item.id_barang_lelang : ''
-				this.inputLot.id_event = item.data_event.status_aktif == 1 ? item.id_event ? item.id_event : '' : ''
-				this.inputLot.no_lot = item.no_lot ? item.no_lot : ''
-				this.inputLot.harga_awal = item.harga_awal ? item.harga_awal : ''
-				this.inputLot.status_lot = item.status_lot ? item.status_lot : ''
+				this.inputLot.id_lot = item.idLot ? item.idLot : ''
+				this.inputLot.id_barang_lelang = item.BarangLelang.KategoriLelang.statusKategoriLelang == false || item.BarangLelang.statusAktif == false ? '' : item.BarangLelang.idBarangLelang ? item.BarangLelang.idBarangLelang : ''
+				this.inputLot.id_event = item.Event.statusAktif == true ? item.Event.idEvent ? item.Event.idEvent : '' : ''
+				this.inputLot.no_lot = item.noLot ? item.noLot : ''
+				this.inputLot.harga_awal = item.hargaAwal ? item.hargaAwal : ''
+				this.inputLot.status_lot = item.statusLot ? item.statusLot : ''
 			}
 			this.DialogLot = true
 		},
@@ -603,7 +603,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesLot`,
+				url: `lelang/postLot`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -622,12 +622,12 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_lot: item.id_lot,
+        id_lot: item.idLot,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesLot`,
+				url: `lelang/postLot`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -645,12 +645,12 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_lot: item.id_lot,
+        id_lot: item.idLot,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesLot`,
+				url: `lelang/postLot`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};

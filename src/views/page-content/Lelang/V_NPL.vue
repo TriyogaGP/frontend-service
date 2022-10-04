@@ -30,7 +30,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_pembelian_npl"
+					item-key="idPembelianNPL"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -41,16 +41,16 @@
 						{{ DataNPL.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.event`]="{ item }"> 
-						<strong><span v-html="item.data_event.nama_event" /></strong>
+						<strong><span v-html="item.namaEvent" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
 								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
 							</template>
-							Kode Event : <span v-html="item.data_event.kode_event" /> <br>
-							Nama Event : <strong><span v-html="item.data_event.nama_event" /></strong> <br>
-							Tanggal Event : (<span v-html="item.data_event.tanggalevent" /> <span v-html="item.data_event.waktu_event" />)
+							Kode Event : <span v-html="item.kodeEvent" /> <br>
+							Nama Event : <strong><span v-html="item.namaEvent" /></strong> <br>
+							Tanggal Event : (<span v-html="item.tanggalEvent" />)
 						</v-tooltip>
-						<v-tooltip v-if="item.data_event.status_aktif == 0" bottom>
+						<v-tooltip v-if="item.statusEvent == false" bottom>
 							<template v-slot:activator="{ on, attrs }">
 								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
 							</template>
@@ -58,16 +58,16 @@
 						</v-tooltip>
 					</template>
 					<template #[`item.peserta`]="{ item }">
-						<strong><span v-html="item.data_peserta.nama" /></strong>
+						<strong><span v-html="item.nama" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
 								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
 							</template>
-							NIK : <strong><span v-html="item.data_peserta.nik" /></strong> <br>
-							Nama : <strong><span v-html="item.data_peserta.nama" /></strong> <br>
-							Email : <strong><span v-html="item.data_peserta.email" /></strong>
+							NIK : <strong><span v-html="item.nik" /></strong> <br>
+							Nama : <strong><span v-html="item.nama" /></strong> <br>
+							Email : <strong><span v-html="item.email" /></strong>
 						</v-tooltip>
-						<v-tooltip v-if="item.data_peserta.status_aktif == 0" bottom>
+						<v-tooltip v-if="item.statusPeserta == false" bottom>
 							<template v-slot:activator="{ on, attrs }">
 								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
 							</template>
@@ -75,19 +75,19 @@
 						</v-tooltip>
 					</template>
 					<template #[`item.no_npl`]="{ item }">
-						<v-row v-if="item.data_npl.length" no-gutters>
+						<v-row v-if="item.NPL.length" no-gutters>
 							<v-col>
-								<span v-for="(val, i) in item.data_npl" :key="i" class="box fourcorners">
+								<span v-for="(val, i) in item.NPL" :key="i" class="box fourcorners">
 									<v-tooltip top>
 										<template v-slot:activator="{ on, attrs }">
 												<strong>
-													<span v-if="val.status_npl == 2 && !Object.entries(val.data_refund_npl).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.no_npl" @click="bukaDialogBuktiRefund(val, item.data_peserta)" />
-													<span v-else-if="val.status_npl == 2 && Object.entries(val.data_refund_npl).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.no_npl" @click="viewLampiran(val.data_refund_npl.bukti)" />
-													<span v-else style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.no_npl" @click="() => { notifikasi('warning', 'Tidak bisa mengajukan refund karena status no npl bukan Refund Jaminan', '1') }"/>
+													<span v-if="val.statusNPL == 2 && !Object.entries(val.RefundNPL).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.noNpl" @click="bukaDialogBuktiRefund(val, item)" />
+													<span v-else-if="val.statusNPL == 2 && Object.entries(val.RefundNPL).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.noNpl" @click="viewLampiran(val.RefundNPL.bukti)" />
+													<span v-else style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.noNpl" @click="() => { notifikasi('warning', 'Tidak bisa mengajukan refund karena status no npl bukan Refund Jaminan', '1') }"/>
 												</strong>
 										</template>
 										<span>NPL : {{val.npl}}</span> <br>
-										<span>Status : {{val.status_npl == 0 ? 'Belum digunakan' : val.status_npl == 1 ? 'Sudah digunakan' : 'Refund jaminan'}}</span>
+										<span>Status : {{val.statusNPL == 0 ? 'Belum digunakan' : val.statusNPL == 1 ? 'Sudah digunakan' : 'Refund jaminan'}}</span>
 									</v-tooltip>
 								</span>
 							</v-col>
@@ -103,13 +103,13 @@
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_pembelian_npl"
+								:value="item.idPembelianNPL"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="!item.data_npl.length"
+								:disabled="!item.NPL.length"
 								@click="bukaDialog(item)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
@@ -445,7 +445,7 @@ export default {
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Event", value: "event", sortable: false },
       { text: "Peserta", value: "peserta", sortable: false },
-      { text: "No NPL", value: "no_npl", sortable: false },
+      { text: "No NPL", value: "noNpl", sortable: false },
       // { text: "Status", value: "status_aktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
@@ -526,7 +526,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllNPL`,
+				url: `lelang/getNPL?kategori=withNPL`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
