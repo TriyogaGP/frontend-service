@@ -213,10 +213,10 @@ export default {
       .get('https://api.ipify.org?format=json')
       .then(response => (this.ip = response.data.ip))
     axios
-      .get(`http://ip-api.com/json/${this.ip}`)
+      .get(`https://ipapi.co/${this.ip}/json/`)
       .then(response => {
-        this.latitude = response.data.lat;
-        this.longitude = response.data.lon;
+        this.latitude = response.data.latitude;
+        this.longitude = response.data.longitude;
       })
   },
   methods: {
