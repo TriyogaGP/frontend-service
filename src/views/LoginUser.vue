@@ -156,6 +156,7 @@
 <script>
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "./Layout/PopUpNotifikasi.vue";
+import axios from "axios";
 export default {
   name: 'Login',
   components: {
@@ -168,6 +169,7 @@ export default {
     katasandi: '',
     latitude: '',
     longitude: '',
+    ip: '',
 
     //notifikasi
     dialogNotifikasi: false,
@@ -180,15 +182,24 @@ export default {
   },
   mounted() {
     if(localStorage.getItem('user_token')) return this.$router.push({name: "Dashboard"});
-    this.$getLocation({
-      enableHighAccuracy: false, //defaults to false
-      timeout: Infinity, //defaults to Infinity
-      maximumAge: 1000 //defaults to 0
+    // this.$getLocation({
+    //   enableHighAccuracy: false, //defaults to false
+    //   timeout: Infinity, //defaults to Infinity
+    //   maximumAge: 1000 //defaults to 0
       
-    }).then(coordinates => {
-      this.latitude = coordinates.lat;
-      this.longitude = coordinates.lng;
-    });
+    // }).then(coordinates => {
+    //   this.latitude = coordinates.lat;
+    //   this.longitude = coordinates.lng;
+    // });
+    axios
+      .get('https://api.ipify.org?format=json')
+      .then(response => (this.ip = response.data.ip))
+    axios
+      .get(`http://ip-api.com/json/${this.ip}`)
+      .then(response => {
+        this.latitude = response.data.lat;
+        this.longitude = response.data.lon;
+      })
   },
   methods: {
     ...mapActions({
