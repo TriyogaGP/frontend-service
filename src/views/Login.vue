@@ -205,6 +205,7 @@ export default {
     }).then(coordinates => {
       this.latitude = coordinates.lat;
       this.longitude = coordinates.lng;
+      console.log(coordinates);
     });
   },
   methods: {
