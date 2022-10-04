@@ -41,7 +41,7 @@
           :single-expand="singleExpand"
           :expanded.sync="expanded"
           show-expand
-          item-key="id_barang_lelang"
+          item-key="idBarangLelang"
           hide-default-footer
           class="elevation-1"
           :page.sync="page"
@@ -52,8 +52,8 @@
             {{ DataBarangLelang.indexOf(item) + 1 }}
           </template>
           <template #[`item.kategori`]="{ item }">
-            <span v-html="item.data_kategori.kategori" /><br> 
-            <v-tooltip v-if="item.data_kategori.status_aktif == 0" bottom>
+            <span v-html="item.namaKategori" /><br> 
+            <v-tooltip v-if="item.statusKategoriLelang == false" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
               </template>
@@ -61,33 +61,33 @@
             </v-tooltip>
           </template>
           <template #[`item.no_kelengkapan`]="{ item }">
-            No. Polisi : <span v-html="item.no_polisi" /> <br> 
-            No. Rangka : <span v-html="item.no_rangka" /> <br>
-            No. Mesin : <span v-html="item.no_mesin" /> 
+            No. Polisi : <span v-html="item.noPolisi" /> <br> 
+            No. Rangka : <span v-html="item.noRangka" /> <br>
+            No. Mesin : <span v-html="item.noMesin" /> 
           </template>
-          <template #[`item.status_aktif`]="{ item }">
-            <v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-            <v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+          <template #[`item.statusAktif`]="{ item }">
+            <v-icon small v-if="item.statusAktif == 1" color="green">check</v-icon>
+            <v-icon small v-else-if="item.statusAktif == 0" color="red">clear</v-icon>
             <br>
-            <span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+            <span v-html="item.statusAktif == 1 ? 'Active' : 'Non Active'" /> 
           </template>
           <template #expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="white">
               <v-btn
-                :value="item.id_barang_lelang"
+                :value="item.idBarangLelang"
                 color="#0bd369"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == 0"
                 @click="bukaDialog(item, 1)"
               >
                 <v-icon small>edit</v-icon>	Ubah
               </v-btn> 
               <v-btn
-                v-if="item.status_aktif == 0"
-                :value="item.id_barang_lelang"
+                v-if="item.statusAktif == 0"
+                :value="item.idBarangLelang"
                 color="#0bd369"
                 small
                 dense
@@ -98,8 +98,8 @@
                 <v-icon small>visibility</v-icon>	Active
               </v-btn> 
               <v-btn
-                v-else-if="item.status_aktif == 1"
-                :value="item.id_barang_lelang"
+                v-else-if="item.statusAktif == 1"
+                :value="item.idBarangLelang"
                 color="#0bd369"
                 small
                 dense
@@ -110,19 +110,19 @@
                 <v-icon small>visibility_off</v-icon>	Non Active
               </v-btn> 
               <v-btn
-                :value="item.id_barang_lelang"
+                :value="item.idBarangLelang"
                 color="#bd3a07"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == 0"
                 @click="HapusRecord(item)"
               >
                 <v-icon small>delete</v-icon>	Hapus
               </v-btn> 
               <v-btn
-                :value="item.id_barang_lelang"
+                :value="item.idBarangLelang"
                 color="#04f7f7"
                 small
                 dense
@@ -133,17 +133,17 @@
                 <v-icon small>info</v-icon>	Detail
               </v-btn>
               <v-btn
-                :value="item.id_barang_lelang"
+                :value="item.idBarangLelang"
                 color="#0bd369"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == 0"
                 @click="() => { 
                   inputBarangLelang.UnixText = item.UnixText; 
-                  inputBarangLelang.id_barang_lelang = item.id_barang_lelang; 
-                  inputBarangLelang.nama_barang_lelang = item.nama_barang_lelang; 
+                  inputBarangLelang.id_barang_lelang = item.idBarangLelang; 
+                  inputBarangLelang.nama_barang_lelang = item.namaBarangLelang; 
                   DialogUploadMultipleBarangLelang = true; 
                 }"
               >
@@ -1315,9 +1315,9 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Kategori", value: "kategori", sortable: false },
-      { text: "Nama Barang", value: "nama_barang_lelang", sortable: false },
+      { text: "Nama Barang", value: "namaBarangLelang", sortable: false },
       { text: "No. Kelengkapan", value: "no_kelengkapan", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -1503,7 +1503,7 @@ export default {
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `moduleMain/getAllBarangLelang`,
+				url: `lelang/getBarangLelang`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1519,7 +1519,7 @@ export default {
 		getKategoriBarangLelang() {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllKategoriBarangLelang?status_aktif=1`,
+				url: `lelang/getKategoriLelang?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1533,7 +1533,7 @@ export default {
 		getFotoBarangLelang(id) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllFotoBarangLelang/${id}`,
+				url: `lelang/getFotoBarangLelang/${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1557,33 +1557,33 @@ export default {
       }else{
         if(index == 2){ this.getFotoBarangLelang(item.id_barang_lelang) }
         this.inputBarangLelang.UnixText = item.UnixText ? item.UnixText : ''
-        this.inputBarangLelang.id_kategori = item.data_kategori.status_aktif == 1 ? item.id_kategori ? item.id_kategori : '' : ''
-        this.inputBarangLelang.id_barang_lelang = item.id_barang_lelang ? item.id_barang_lelang : ''
-        this.inputBarangLelang.nama_barang_lelang = item.nama_barang_lelang ? item.nama_barang_lelang : ''
+        this.inputBarangLelang.id_kategori = item.statusKategoriLelang == true ? item.idKategori ? item.idKategori : '' : ''
+        this.inputBarangLelang.id_barang_lelang = item.idBarangLelang ? item.idBarangLelang : ''
+        this.inputBarangLelang.nama_barang_lelang = item.namaBarangLelang ? item.namaBarangLelang : ''
 				this.inputBarangLelang.brand = item.brand ? item.brand : ''
 				this.inputBarangLelang.warna = item.warna ? item.warna : ''
 				this.inputBarangLelang.tahun = item.tahun ? item.tahun : ''
-				this.inputBarangLelang.lokasi_barang = item.lokasi_barang ? item.lokasi_barang : ''
-				this.inputBarangLelang.no_rangka = item.no_rangka ? item.no_rangka : ''
-				this.inputBarangLelang.no_mesin = item.no_mesin ? item.no_mesin : ''
-				this.inputBarangLelang.tipe_model = item.tipe_model ? item.tipe_model : ''
+				this.inputBarangLelang.lokasi_barang = item.lokasiBarang ? item.lokasiBarang : ''
+				this.inputBarangLelang.no_rangka = item.noRangka ? item.noRangka : ''
+				this.inputBarangLelang.no_mesin = item.noMesin ? item.noMesin : ''
+				this.inputBarangLelang.tipe_model = item.tipeModel ? item.tipeModel : ''
 				this.inputBarangLelang.transmisi = item.transmisi ? item.transmisi : ''
-				this.inputBarangLelang.bahan_bakar = item.bahan_bakar ? item.bahan_bakar : ''
+				this.inputBarangLelang.bahan_bakar = item.bahanBakar ? item.bahanBakar : ''
 				this.inputBarangLelang.odometer = item.odometer ? item.odometer : ''
 				this.inputBarangLelang.grade = item.grade ? item.grade : ''
-				this.inputBarangLelang.grade_interior = item.grade_interior ? item.grade_interior : ''
-				this.inputBarangLelang.grade_eksterior = item.grade_eksterior ? item.grade_eksterior : ''
-				this.inputBarangLelang.grade_mesin = item.grade_mesin ? item.grade_mesin : ''
-				this.inputBarangLelang.no_polisi = item.no_polisi ? item.no_polisi : ''
-				this.inputBarangLelang.valid_stnk = item.valid_stnk ? item.valid_stnk : ''
+				this.inputBarangLelang.grade_interior = item.gradeInterior ? item.gradeInterior : ''
+				this.inputBarangLelang.grade_eksterior = item.gradeEksterior ? item.gradeEksterior : ''
+				this.inputBarangLelang.grade_mesin = item.gradeMesin ? item.gradeMesin : ''
+				this.inputBarangLelang.no_polisi = item.noPolisi ? item.noPolisi : ''
+				this.inputBarangLelang.valid_stnk = item.validSTNK ? item.validSTNK : ''
 				this.inputBarangLelang.sph = item.sph ? item.sph : ''
 				this.inputBarangLelang.kir = item.kir ? item.kir : ''
-				this.inputBarangLelang.kapasitas_kendaraan = item.kapasitas_kendaraan ? item.kapasitas_kendaraan : ''
+				this.inputBarangLelang.kapasitas_kendaraan = item.kapasitasKendaraan ? item.kapasitasKendaraan : ''
 				this.inputBarangLelang.deskripsi = item.deskripsi ? item.deskripsi : ''
 				this.inputBarangLelang.filestnk = item.stnk ? item.stnk : ''
 				this.inputBarangLelang.filebpkb = item.bpkb ? item.bpkb : ''
 				this.inputBarangLelang.filefaktur = item.faktur ? item.faktur : ''
-				this.inputBarangLelang.filektp = item.ktp_pemilik ? item.ktp_pemilik : ''
+				this.inputBarangLelang.filektp = item.ktpPemilik ? item.ktpPemilik : ''
 				this.inputBarangLelang.filekwitansi = item.kwitansi ? item.kwitansi : ''
       }
       this.DialogBarangLelang = true
@@ -1629,7 +1629,7 @@ export default {
 			}
 			let payload = {
 				method: "post",
-				url: `moduleMain/prosesBarangLelang`,
+				url: `lelang/postBarangLelang`,
 			  body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1690,14 +1690,14 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_barang_lelang: item.id_barang_lelang,
-        id_kategori: item.id_kategori,
-        nama_barang_lelang: item.nama_barang_lelang,
+        id_barang_lelang: item.idBarangLelang,
+        id_kategori: item.idKategori,
+        nama_barang_lelang: item.namaBarangLelang,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesBarangLelang`,
+				url: `lelang/postBarangLelang`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1716,14 +1716,14 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_barang_lelang: item.id_barang_lelang,
-        id_kategori: item.id_kategori,
-        nama_barang_lelang: item.nama_barang_lelang,
+        id_barang_lelang: item.idBarangLelang,
+        id_kategori: item.idKategori,
+        nama_barang_lelang: item.namaBarangLelang,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesBarangLelang`,
+				url: `lelang/postBarangLelang`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1959,9 +1959,9 @@ export default {
 				};
 				try {
 					let response = await this.uploadFiles(bodyData);
-          status.push(response.data.kode)
+          status.push(response.data.status)
 				} catch (err) {
-          status.push(err.response.data.kode)
+          status.push(err.response.data.status)
 				}
         return status[0]
       }))

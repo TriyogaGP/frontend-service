@@ -41,7 +41,7 @@
           :single-expand="singleExpand"
           :expanded.sync="expanded"
           show-expand
-          item-key="id_peserta"
+          item-key="idPeserta"
           hide-default-footer
           class="elevation-1"
           :page.sync="page"
@@ -51,29 +51,29 @@
           <template #[`item.number`]="{ item }">
             {{ DataPeserta.indexOf(item) + 1 }}
           </template>
-          <template #[`item.status_aktif`]="{ item }">
-            <v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-            <v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+          <template #[`item.statusAktif`]="{ item }">
+            <v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+            <v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
             <br>
-            <span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+            <span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
           </template>
           <template #expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="white">
               <v-btn
-                :value="item.id_peserta"
+                :value="item.idPeserta"
                 color="#0bd369"
                 small
                 dense
 								depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == 0"
                 @click="bukaDialog(item, 1)"
               >
                 <v-icon small>edit</v-icon>	Ubah
               </v-btn> 
               <v-btn
-                v-if="item.status_aktif == 0"
-                :value="item.id_peserta"
+                v-if="item.statusAktif == 0"
+                :value="item.idPeserta"
                 color="#0bd369"
                 small
                 dense
@@ -84,8 +84,8 @@
                 <v-icon small>visibility</v-icon>	Active
               </v-btn> 
               <v-btn
-                v-else-if="item.status_aktif == 1"
-                :value="item.id_peserta"
+                v-else-if="item.statusAktif == 1"
+                :value="item.idPeserta"
                 color="#0bd369"
                 small
                 dense
@@ -96,19 +96,19 @@
                 <v-icon small>visibility_off</v-icon>	Non Active
               </v-btn> 
               <v-btn
-                :value="item.id_peserta"
+                :value="item.idPeserta"
                 color="#bd3a07"
                 small
                 dense
 								depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == 0"
                 @click="HapusRecord(item)"
               >
                 <v-icon small>delete</v-icon>	Hapus
               </v-btn> 
               <v-btn
-                :value="item.id_peserta"
+                :value="item.idPeserta"
                 color="#04f7f7"
                 small
                 dense
@@ -984,7 +984,7 @@ export default {
       { text: "NIK", value: "nik", sortable: false },
       { text: "Nama", value: "nama", sortable: false },
       { text: "Email", value: "email", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -1136,7 +1136,7 @@ export default {
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `moduleMain/getAllPeserta`,
+				url: `admin/getPeserta`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1159,28 +1159,28 @@ export default {
         this.inputDataPeserta.UnixText = `Peserta${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`
       }else{
         this.inputDataPeserta.UnixText = item.UnixText ? item.UnixText : ''
-        this.inputDataPeserta.id_peserta = item.id_peserta ? item.id_peserta : ''
+        this.inputDataPeserta.id_peserta = item.idPeserta ? item.idPeserta : ''
         this.inputDataPeserta.nik = item.nik ? item.nik : ''
         this.inputDataPeserta.nama_lengkap = item.nama ? item.nama : ''
         this.inputDataPeserta.email = item.email ? item.email : ''
-        this.inputDataPeserta.password = item.katasandi ? item.katasandi : ''
-        this.inputDataPeserta.noHP = item.no_hp ? item.no_hp : ''
+        this.inputDataPeserta.password = item.kataSandi ? item.kataSandi : ''
+        this.inputDataPeserta.noHP = item.noHP ? item.noHP : ''
         this.inputDataPeserta.alamat = item.alamat ? item.alamat : ''
-        this.inputDataPeserta.kode_pos = item.kode_pos ? item.kode_pos : ''
+        this.inputDataPeserta.kode_pos = item.kodePos ? item.kodePos : ''
         this.inputDataPeserta.npwp = item.npwp ? this.npwpFormat(item.npwp) : ''
-        this.inputDataPeserta.no_rek = item.no_rek ? item.no_rek : ''
-        this.inputDataPeserta.nama_rek = item.nama_rek ? item.nama_rek : ''
-        this.inputDataPeserta.bertindak_mewakili = item.bertindak_mewakili ? item.bertindak_mewakili : ''
-        this.inputDataPeserta.sumber_dana = item.sumber_dana ? item.sumber_dana : ''
-        this.inputDataPeserta.filektp = item.foto_ktp ? item.foto_ktp : ''
-        this.inputDataPeserta.filenpwp = item.foto_npwp ? item.foto_npwp : ''
-        this.inputDataPeserta.foto_peserta = item.foto_peserta ? item.foto_peserta : ''
-				if(item.bertindak_mewakili == 'Perusahaan'){
-					this.inputDataPeserta.nama_perusahaan = item.nama_perusahaan ? item.nama_perusahaan : ''
-					this.inputDataPeserta.npwp_perusahaan = item.npwp_perusahaan ? this.npwpFormat(item.npwp_perusahaan) : ''
-					this.inputDataPeserta.alamat_perusahaan = item.alamat_perusahaan ? item.alamat_perusahaan : ''
-					this.inputDataPeserta.telp_kantor = item.telp_kantor ? item.telp_kantor : ''
-					this.inputDataPeserta.email_kantor = item.email_kantor ? item.email_kantor : ''
+        this.inputDataPeserta.no_rek = item.noRek ? item.noRek : ''
+        this.inputDataPeserta.nama_rek = item.namaRek ? item.namaRek : ''
+        this.inputDataPeserta.bertindak_mewakili = item.bertindakMewakili ? item.bertindakMewakili : ''
+        this.inputDataPeserta.sumber_dana = item.sumberDana ? item.sumberDana : ''
+        this.inputDataPeserta.filektp = item.fotoKTP ? item.fotoKTP : ''
+        this.inputDataPeserta.filenpwp = item.fotoNPWP ? item.fotoNPWP : ''
+        this.inputDataPeserta.foto_peserta = item.fotoPeserta ? item.fotoPeserta : ''
+				if(item.bertindakMewakili == 'Perusahaan'){
+					this.inputDataPeserta.nama_perusahaan = item.namaPerusahaan ? item.namaPerusahaan : ''
+					this.inputDataPeserta.npwp_perusahaan = item.npwpPerusahaan ? this.npwpFormat(item.npwpPerusahaan) : ''
+					this.inputDataPeserta.alamat_perusahaan = item.alamatPerusahaan ? item.alamatPerusahaan : ''
+					this.inputDataPeserta.telp_kantor = item.telpKantor ? item.telpKantor : ''
+					this.inputDataPeserta.email_kantor = item.emailKantor ? item.emailKantor : ''
 				}
       }
       this.DialogPeserta = true
@@ -1220,7 +1220,7 @@ export default {
 			}
 			let payload = {
 				method: "post",
-				url: `moduleMain/prosesPeserta`,
+				url: `admin/postPeserta`,
 			  body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1276,14 +1276,14 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_peserta: item.id_peserta,
+        id_peserta: item.idPeserta,
         nik: item.nik,
         email: item.email,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPeserta`,
+				url: `admin/postPeserta`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1300,14 +1300,14 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_peserta: item.id_peserta,
+        id_peserta: item.idPeserta,
         nik: item.nik,
         email: item.email,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPeserta`,
+				url: `admin/postPeserta`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1460,7 +1460,7 @@ export default {
       let url = this[d] ? 'decryptPass' : 'encryptPass' 
       let payload = {
 				method: "get",
-				url: `moduleMain/${url}?kata=${this.inputDataPeserta.password}`,
+				url: `settings/${url}?kata=${this.inputDataPeserta.password}`,
 				authToken: localStorage.getItem('user_token')
 			};
       this.inputDataPeserta.password = ''

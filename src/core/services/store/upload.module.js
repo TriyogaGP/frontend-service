@@ -32,7 +32,7 @@ const actions = {
       fData.append('file', data.files); //data files
       // fData.append('id_profile', idProfile ? idProfile : null); //id profile user
       // axios services
-      ApiService.postFile('moduleMain/updateFile', fData)
+      ApiService.postFile('settings/updateFile', fData)
         .then((res) => resolve(res))
         .catch((err) => reject(err))
     });
