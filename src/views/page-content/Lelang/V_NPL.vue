@@ -74,7 +74,7 @@
 							<span>Harus Diubah Peserta tidak aktif</span>
 						</v-tooltip>
 					</template>
-					<template #[`item.no_npl`]="{ item }">
+					<template #[`item.noNpl`]="{ item }">
 						<v-row v-if="item.NPL.length" no-gutters>
 							<v-col>
 								<span v-for="(val, i) in item.NPL" :key="i" class="box fourcorners">
@@ -541,14 +541,14 @@ export default {
 		},
 		bukaDialog(item){
 			this.clearForm()
-			this.inputNPL.id_pembelian_npl = item.id_pembelian_npl
-			this.inputNPL.id_peserta = item.id_peserta
-			this.inputNPL.id_event = item.id_event
-			this.NPLData = item.data_npl ? item.data_npl : []
+			this.inputNPL.id_pembelian_npl = item.idPembelianNPL
+			this.inputNPL.id_peserta = item.idPeserta
+			this.inputNPL.id_event = item.idEvent
+			this.NPLData = item.NPL ? item.NPL : []
 			this.NPLData.map((el, i) => {
-				this.inputNPL.id_npl[i] = el.id_npl
-				this.inputNPL.no_npl[i] = el.no_npl
-				this.inputNPL.status_npl[i] = el.status_npl
+				this.inputNPL.id_npl[i] = el.idNpl
+				this.inputNPL.no_npl[i] = el.noNpl
+				this.inputNPL.status_npl[i] = el.statusNPL
 			})
 			this.DialogNPL = true
 		},
@@ -568,15 +568,15 @@ export default {
 				}
 				let payload = {
 					method: "post",
-					url: `moduleMain/prosesNPL`,
+					url: `lelang/postNPL`,
 					body: bodyData,
 					authToken: localStorage.getItem('user_token')
 				};
 				try { 
 					let response = await this.fetchData(payload)
-					status.push(response.data.kode)
+					status.push(response.data.status)
 				} catch(err) {
-					status.push(err.response.data.kode)
+					status.push(err.response.data.status)
 				}
 				return status[0]
 			}))
@@ -591,7 +591,7 @@ export default {
     },
 		async SimpanFormRefund(dataUpload) {
 			let uploadBUKTI = await this.uploadLampiran(dataUpload)
-			if(uploadBUKTI.data.kode == 200){
+			if(uploadBUKTI.data.status == 200){
 				this.notifikasi("success", 'Berhasil upload bukti refund', "1")
 			}else{
 				this.notifikasi("error", 'Gagal proses data', "1")
@@ -660,8 +660,9 @@ export default {
 			this.urlView = path ? `${API_URL}image/berkas/${path}` : no_image
 		},
 		bukaDialogBuktiRefund(dataNPL, dataPeserta) {
-			this.inputRefund.id_npl = dataNPL.id_npl
+			this.inputRefund.id_npl = dataNPL.idNpl
 			this.inputRefund.UnixText = dataPeserta.UnixText
+			console.log(this.inputRefund);
 			this.DialogBuktiRefund = true
 		},
 		tutupDialogBuktiRefund() {

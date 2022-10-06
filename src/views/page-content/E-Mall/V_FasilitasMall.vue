@@ -41,7 +41,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_fasilitas_mall"
+					item-key="idFasilitasMall"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -51,32 +51,32 @@
 					<template #[`item.number`]="{ item }">
 						{{ DataFasilitasMall.indexOf(item) + 1 }}
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #[`item.mall`]="{ item }">
-						<span v-html="item.data_mall.nama_mall" /> 
+						<span v-html="item.namaMall" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_fasilitas_mall"
+								:value="item.idFasilitasMall"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_fasilitas_mall"
+								v-if="item.statusAktif == false"
+								:value="item.idFasilitasMall"
 								color="#0bd369"
 								small
 								dense
@@ -87,8 +87,8 @@
 							<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_fasilitas_mall"
+								v-else-if="item.statusAktif == true"
+								:value="item.idFasilitasMall"
 								color="#0bd369"
 								small
 								dense
@@ -99,13 +99,13 @@
 							<v-icon small>visibility_off</v-icon>	Non Active
 							</v-btn> 
 							<v-btn
-								:value="item.id_fasilitas_mall"
+								:value="item.idFasilitasMall"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 							<v-icon small>delete</v-icon>	Hapus
@@ -167,8 +167,8 @@
 								<v-autocomplete
 									v-model="inputFasilitasMall.id_mall"
 									:items="MallOptions"
-									item-text="nama_mall"
-									item-value="id_mall"
+									item-text="namaMall"
+									item-value="idMall"
 									placeholder="Mall"
 									label="Mall"
 									outlined
@@ -178,10 +178,10 @@
 									:readonly="editedIndex == 2"
 								>
 									<template v-slot:selection="{ item }">
-										{{item.nama_mall}} {{roleID == 1 ? ' | '+item.data_admin.nama : ''}} 
+										{{item.namaMall}} {{roleID == 1 ? ' | '+item.nama : ''}} 
 									</template>
 									<template v-slot:item="{ item }">
-										{{item.nama_mall}} {{roleID == 1 ? ' | '+item.data_admin.nama : ''}}
+										{{item.namaMall}} {{roleID == 1 ? ' | '+item.nama : ''}}
 									</template>
 								</v-autocomplete>
 							</v-col>
@@ -295,8 +295,8 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Mall", value: "mall", sortable: false },
-      { text: "Kategori", value: "fasilitas_mall", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Kategori", value: "fasilitasMall", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -348,7 +348,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllFasilitasMall`,
+				url: `emall/getFasilitasMall`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -371,7 +371,7 @@ export default {
 			let link = this.roleID != 1 ? '?id_admin='+this.idLogin+'&status_aktif=1' : ''
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllMall${link}`,
+				url: `emall/getMall${link}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -391,9 +391,9 @@ export default {
 				this.roleID = localStorage.getItem('roleID')
 				this.clearForm()
       }else{
-				this.inputFasilitasMall.id_fasilitas_mall = item.id_fasilitas_mall
-				this.inputFasilitasMall.id_mall = item.id_mall
-        this.inputFasilitasMall.fasilitas_mall = item.fasilitas_mall
+				this.inputFasilitasMall.id_fasilitas_mall = item.idFasilitasMall
+				this.inputFasilitasMall.id_mall = item.idMall
+        this.inputFasilitasMall.fasilitas_mall = item.fasilitasMall
 			}
 			this.DialogFasilitasMall = true
 		},
@@ -411,7 +411,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesFasilitasMall`,
+				url: `emall/postFasilitasMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -428,13 +428,13 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_fasilitas_mall: item.id_fasilitas_mall,
-        fasilitas_mall: item.fasilitas_mall,
+        id_fasilitas_mall: item.idFasilitasMall,
+        fasilitas_mall: item.fasilitasMall,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesFasilitasMall`,
+				url: `emall/postFasilitasMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -451,13 +451,13 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_fasilitas_mall: item.id_fasilitas_mall,
-        fasilitas_mall: item.fasilitas_mall,
+        id_fasilitas_mall: item.idFasilitasMall,
+        fasilitas_mall: item.fasilitasMall,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesFasilitasMall`,
+				url: `emall/postFasilitasMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};

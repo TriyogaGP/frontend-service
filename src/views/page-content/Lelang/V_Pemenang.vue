@@ -30,7 +30,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_pemenang_lelang"
+					item-key="idPemenangLelang"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -47,37 +47,37 @@
 						Rp.<span v-html="currencyDotFormat(item.nominal)" /> 
 					</template>
 					<template #[`item.tipe_pelunasan`]="{ item }">
-						<span v-html="item.tipe_pelunasan == null ? '-' : item.tipe_pelunasan == 1 ? 'Cash' : 'Transfer'" /> 
+						<span v-html="item.tipePelunasan == null ? '-' : item.tipePelunasan == 1 ? 'Cash' : 'Transfer'" /> 
 					</template>
 					<template #[`item.status_pembayaran`]="{ item }">
-						<v-icon small v-if="item.status_pembayaran == 2" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_pembayaran == 1" color="red">clear</v-icon>
+						<v-icon small v-if="item.statusPembayaran == 2" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusPembayaran == 1" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_pembayaran == 2 ? 'Sudah Bayar' : 'Belum Bayar'" /> 
+						<span v-html="item.statusPembayaran == 2 ? 'Sudah Bayar' : 'Belum Bayar'" /> 
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_pemenang_lelang"
+								:value="item.idPemenangLelang"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_pemenang_lelang"
+								v-if="item.statusAktif == false"
+								:value="item.idPemenangLelang"
 								color="#0bd369"
 								small
 								dense
@@ -88,8 +88,8 @@
 							<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_pemenang_lelang"
+								v-else-if="item.statusAktif == true"
+								:value="item.idPemenangLelang"
 								color="#0bd369"
 								small
 								dense
@@ -100,19 +100,19 @@
 							<v-icon small>visibility_off</v-icon>	Non Active
 							</v-btn> 
 							<v-btn
-								:value="item.id_pemenang_lelang"
+								:value="item.idPemenangLelang"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 							<v-icon small>delete</v-icon>	Hapus
 							</v-btn>
 							<v-btn
-								:value="item.id_pemenang_lelang"
+								:value="item.idPemenangLelang"
 								color="#04f7f7"
 								small
 								dense
@@ -615,7 +615,7 @@ export default {
       { text: "Nominal", value: "nominal", sortable: false },
       { text: "Type Pelunasan", value: "tipe_pelunasan", sortable: false },
       { text: "Status Pembayaran", value: "status_pembayaran", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -709,7 +709,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllPemenang`,
+				url: `lelang/getPemenang`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -727,8 +727,8 @@ export default {
 			if(index == 0){
 				this.clearForm()
       }else{
-				if(item.tanggal_transfer){
-					let kumpultanggal = item.tanggal_transfer.split(' ')
+				if(item.tanggalTransfer){
+					let kumpultanggal = item.tanggalTransfer.split(' ')
 					this.inputPemenang.tanggal = kumpultanggal[0]
 					this.inputPemenang.waktu = kumpultanggal[1]
 					this.inputPemenang.tanggal_transfer = `${kumpultanggal[0]} ${kumpultanggal[1]}`
@@ -737,13 +737,13 @@ export default {
 					this.inputPemenang.waktu = ''
 					this.inputPemenang.tanggal_transfer = ''
 				}
-				this.inputPemenang.id_pemenang_lelang = item.id_pemenang_lelang ? item.id_pemenang_lelang : ''
-        this.inputPemenang.no_rek = item.no_rek ? item.no_rek : ''
-        this.inputPemenang.nama_pemilik = item.nama_pemilik ? item.nama_pemilik : ''
+				this.inputPemenang.id_pemenang_lelang = item.idPemenangLelang ? item.idPemenangLelang : ''
+        this.inputPemenang.no_rek = item.noRek ? item.noRek : ''
+        this.inputPemenang.nama_pemilik = item.namaPemilik ? item.namaPemilik : ''
         this.inputPemenang.nominal = item.nominal ? item.nominal : ''
         this.inputPemenang.bukti = item.bukti
-        this.inputPemenang.tipe_pelunasan = item.tipe_pelunasan
-        this.inputPemenang.status_pembayaran = item.status_pembayaran
+        this.inputPemenang.tipe_pelunasan = item.tipePelunasan
+        this.inputPemenang.status_pembayaran = item.statusPembayaran
 			}
 			this.DialogPemenang = true
 		},
@@ -765,7 +765,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPemenang`,
+				url: `lelang/postPemenang`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -773,7 +773,7 @@ export default {
 			.then(async (res) => {
 				if(this.FileBUKTI){
 					let uploadBUKTI = await this.uploadLampiran(index, dataUpload)
-					if(uploadBUKTI.data.kode == 200){
+					if(uploadBUKTI.data.status == 200){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
 						this.notifikasi("error", 'Gagal proses data', "1")
@@ -811,13 +811,13 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_pemenang_lelang: item.id_pemenang_lelang,
-        id_bidding: item.id_bidding,
+        id_pemenang_lelang: item.idPemenangLelang,
+        id_bidding: item.idBidding,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPemenang`,
+				url: `lelang/postPemenang`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -834,13 +834,13 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_pemenang_lelang: item.id_pemenang_lelang,
-        id_bidding: item.id_bidding,
+        id_pemenang_lelang: item.idPemenangLelang,
+        id_bidding: item.idBidding,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesPemenang`,
+				url: `lelang/postPemenang`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};

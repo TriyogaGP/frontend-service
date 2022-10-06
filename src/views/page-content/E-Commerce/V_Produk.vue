@@ -41,7 +41,7 @@
           :single-expand="singleExpand"
           :expanded.sync="expanded"
           show-expand
-          item-key="id_produk"
+          item-key="idProduk"
           hide-default-footer
           class="elevation-1"
           :page.sync="page"
@@ -52,8 +52,8 @@
             {{ DataProduk.indexOf(item) + 1 }}
           </template>
           <template #[`item.kategori`]="{ item }">
-            <span v-html="item.data_kategori.kategori_produk" /><br> 
-            <v-tooltip v-if="item.data_kategori.status_aktif == 0" bottom>
+            <span v-html="item.kategoriProduk" /><br> 
+            <v-tooltip v-if="item.statusKategoriProduk == false" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
               </template>
@@ -64,29 +64,29 @@
             Stok Awal : <span v-html="item.stok" /><br> 
             Stok Akhir : <span v-html="item.sisaStok"/> 
           </template>
-          <template #[`item.status_aktif`]="{ item }">
-            <v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-            <v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+          <template #[`item.statusAktif`]="{ item }">
+            <v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+            <v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
             <br>
-            <span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+            <span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
           </template>
           <template #expanded-item="{ headers, item }">
             <td :colspan="headers.length" class="white">
               <v-btn
-                :value="item.id_produk"
+                :value="item.idProduk"
                 color="#0bd369"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="bukaDialog(item, 1)"
               >
                 <v-icon small>edit</v-icon>	Ubah
               </v-btn> 
               <v-btn
-                v-if="item.status_aktif == 0"
-                :value="item.id_produk"
+                v-if="item.statusAktif == false"
+                :value="item.idProduk"
                 color="#0bd369"
                 small
                 dense
@@ -97,8 +97,8 @@
                 <v-icon small>visibility</v-icon>	Active
               </v-btn> 
               <v-btn
-                v-else-if="item.status_aktif == 1"
-                :value="item.id_produk"
+                v-else-if="item.statusAktif == true"
+                :value="item.idProduk"
                 color="#0bd369"
                 small
                 dense
@@ -109,19 +109,19 @@
                 <v-icon small>visibility_off</v-icon>	Non Active
               </v-btn> 
               <v-btn
-                :value="item.id_produk"
+                :value="item.idProduk"
                 color="#bd3a07"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="HapusRecord(item)"
               >
                 <v-icon small>delete</v-icon>	Hapus
               </v-btn> 
               <v-btn
-                :value="item.id_produk"
+                :value="item.idProduk"
                 color="#04f7f7"
                 small
                 dense
@@ -132,24 +132,24 @@
                 <v-icon small>info</v-icon>	Detail
               </v-btn>
               <v-btn
-                :value="item.id_produk"
+                :value="item.idProduk"
                 color="#0bd369"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="() => { 
                   inputProduk.UnixText = item.UnixText; 
-                  inputProduk.id_produk = item.id_produk; 
-                  inputProduk.nama_barang_lelang = item.nama_barang_lelang; 
+                  inputProduk.id_produk = item.idProduk; 
+                  inputProduk.nama_produk = item.namaProduk; 
                   DialogUploadMultipleProduk = true; 
                 }"
               >
                 <v-icon small>upload</v-icon>	Upload Foto
               </v-btn>
               <v-btn
-                :value="item.id_produk"
+                :value="item.idProduk"
                 color="#0bd369"
                 small
                 dense
@@ -220,8 +220,8 @@
                   <v-autocomplete
                     v-model="inputProduk.id_kategori_produk"
                     :items="kategoriOptions"
-                    item-text="kategori_produk"
-                    item-value="id_kategori_produk"
+                    item-text="kategoriProduk"
+                    item-value="idKategoriProduk"
                     placeholder="Kategori Produk"
                     label="Kategori Produk"
                     outlined
@@ -231,6 +231,35 @@
                     :readonly="editedIndex == 2"
                   />
                   <span v-html="editedIndex != 0 && inputProduk.id_kategori_produk == '' ? 'Kategori yang dipilih tidak aktif' : ''" class="red--text"></span>
+                </v-col>
+              </v-row>
+							<v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center"
+                >
+                  Measurement
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-autocomplete
+                    v-model="inputProduk.id_measurement"
+                    :items="MeasurementOptions"
+                    item-text="deskripsi"
+                    item-value="idMeasurement"
+                    placeholder="Measurement"
+                    label="Measurement"
+                    outlined
+                    dense
+                    hide-details
+                    :clearable="editedIndex != 2"
+                    :readonly="editedIndex == 2"
+                  />
+                  <span v-html="editedIndex != 0 && inputProduk.id_measurement == '' ? 'Measurement yang dipilih tidak aktif' : ''" class="red--text"></span>
                 </v-col>
               </v-row>
 							<v-row no-gutters>
@@ -654,7 +683,7 @@
                   :single-expand="singleExpandHistoryStok"
                   :expanded.sync="expandedHistoryStok"
                   show-expand
-                  item-key="id_update_stok"
+                  item-key="idUpdateStok"
                   hide-default-footer
                   class="elevation-1"
                   :page.sync="pageHistoryStok"
@@ -666,17 +695,17 @@
                   </template>
                   <template #[`item.tambah_stok`]="{ item }">
                     <v-edit-dialog
-                      :return-value.sync="item.tambah_stok"
+                      :return-value.sync="item.tambahStok"
                       persistent
-                      @open="() => { inputTemp[item.id_update_stok] = item.tambah_stok; }"
+                      @open="() => { inputTemp[item.idUpdateStok] = item.tambahStok; }"
                       @save="simpanPerubahan(item, 'tambah')"
-                      @cancel="() => { inputTemp[item.id_update_stok] = ''; }"
+                      @cancel="() => { inputTemp[item.idUpdateStok] = ''; }"
                     >
-                      <span class="stokPlus" v-html="item.tambah_stok ? `+${item.tambah_stok}` : 0" /> <v-icon small>edit</v-icon>
+                      <span class="stokPlus" v-html="item.tambahStok ? `+${item.tambahStok}` : 0" /> <v-icon small>edit</v-icon>
                       <template v-slot:input>
                         <v-text-field
                           class="ma-3"
-                          v-model="inputTemp[item.id_update_stok]"
+                          v-model="inputTemp[item.idUpdateStok]"
                           placeholder="Ubah Stok Masuk"
                           label="Ubah Stok Masuk"
                           outlined
@@ -684,24 +713,24 @@
                           hint="untuk batal klik ESC"
                           persistent-hint
                           color="light-blue darken-3"
-                          @keypress.native="onlyNumber($event, 5, inputTemp[item.id_update_stok])"                          
+                          @keypress.native="onlyNumber($event, 5, inputTemp[item.idUpdateStok])"                          
                         />
                       </template>
                     </v-edit-dialog>
                   </template>
                   <template #[`item.kurang_stok`]="{ item }">
                     <v-edit-dialog
-                      :return-value.sync="item.kurang_stok"
+                      :return-value.sync="item.kurangStok"
                       persistent
-                      @open="() => { inputTemp[item.id_update_stok] = item.kurang_stok; }"
+                      @open="() => { inputTemp[item.idUpdateStok] = item.kurangStok; }"
                       @save="simpanPerubahan(item, 'kurang')"
-                      @cancel="() => { inputTemp[item.id_update_stok] = ''; }"
+                      @cancel="() => { inputTemp[item.idUpdateStok] = ''; }"
                     >
-                      <span class="stokMin" v-html="item.kurang_stok ? `+${item.kurang_stok}` : 0" /> <v-icon small>edit</v-icon>
+                      <span class="stokMin" v-html="item.kurangStok ? `+${item.kurangStok}` : 0" /> <v-icon small>edit</v-icon>
                       <template v-slot:input>
                         <v-text-field
                           class="ma-3"
-                          v-model="inputTemp[item.id_update_stok]"
+                          v-model="inputTemp[item.idUpdateStok]"
                           placeholder="Ubah Stok Keluar"
                           label="Ubah Stok Keluar"
                           outlined
@@ -709,34 +738,34 @@
                           hint="untuk batal klik ESC"
                           persistent-hint
                           color="light-blue darken-3"
-                          @keypress.native="onlyNumber($event, 5, inputTemp[item.id_update_stok])"                          
+                          @keypress.native="onlyNumber($event, 5, inputTemp[item.idUpdateStok])"                          
                         />
                       </template>
                     </v-edit-dialog>
                   </template>
-                  <template #[`item.status_aktif`]="{ item }">
-                    <v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-                    <v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+                  <template #[`item.statusAktif`]="{ item }">
+                    <v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+                    <v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
                     <br>
-                    <span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+                    <span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
                   </template>
                   <template #expanded-item="{ headers, item }">
                     <td :colspan="headers.length" class="white">
                       <v-btn
-                        :value="item.id_update_stok"
+                        :value="item.idUpdateStok"
                         color="#0bd369"
                         small
                         dense
                         depressed
                         class="ma-2 white--text text--darken-2"
-                        :disabled="item.status_aktif == 0"
+                        :disabled="item.statusAktif == false"
                         @click="bukaDialogStok(item, 1)"
                       >
                         <v-icon small>edit</v-icon>	Ubah
                       </v-btn> 
                       <v-btn
-                        v-if="item.status_aktif == 0"
-                        :value="item.id_update_stok"
+                        v-if="item.statusAktif == false"
+                        :value="item.idUpdateStok"
                         color="#0bd369"
                         small
                         dense
@@ -747,8 +776,8 @@
                         <v-icon small>visibility</v-icon>	Active
                       </v-btn> 
                       <v-btn
-                        v-else-if="item.status_aktif == 1"
-                        :value="item.id_update_stok"
+                        v-else-if="item.statusAktif == true"
+                        :value="item.idUpdateStok"
                         color="#0bd369"
                         small
                         dense
@@ -759,13 +788,13 @@
                         <v-icon small>visibility_off</v-icon>	Non Active
                       </v-btn> 
                       <v-btn
-                        :value="item.id_update_stok"
+                        :value="item.idUpdateStok"
                         color="#bd3a07"
                         small
                         dense
                         depressed
                         class="ma-2 white--text text--darken-2"
-                        :disabled="item.status_aktif == 0"
+                        :disabled="item.statusAktif == false"
                         @click="HapusRecordStok(item)"
                       >
                         <v-icon small>delete</v-icon>	Hapus
@@ -987,15 +1016,16 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Kategori", value: "kategori", sortable: false },
-      { text: "Kode", value: "kode_produk", sortable: false },
-      { text: "Nama", value: "nama_produk", sortable: false },
-      { text: "Merek", value: "merek_produk", sortable: false },
+      { text: "Kode", value: "kodeProduk", sortable: false },
+      { text: "Nama", value: "namaProduk", sortable: false },
+      { text: "Merek", value: "merekProduk", sortable: false },
       { text: "Stok", value: "stok", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
 		kategoriOptions: [],
+		MeasurementOptions: [],
 		DialogProduk: false,
 		DialogViewLampiranProduk: false,
 		DialogUploadMultipleProduk: false,
@@ -1016,7 +1046,7 @@ export default {
       { text: "Tanggal", value: "tanggalstok", sortable: false },
       { text: "Stok Masuk", value: "tambah_stok", sortable: false },
       { text: "Stok Keluar", value: "kurang_stok", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     inputTemp: [],
 		menu: false,
@@ -1033,6 +1063,7 @@ export default {
 			UnixText: '',
 			id_produk: '',
 			id_kategori_produk: '',
+			id_measurement: '',
 			kode_produk: '',
 			nama_produk: '',
 			merek_produk: '',
@@ -1076,6 +1107,7 @@ export default {
 			deep: true,
 			handler(value) {
         if(value.id_kategori_produk == null){ this.inputProduk.id_kategori_produk = '' }
+        if(value.id_measurement == null){ this.inputProduk.id_measurement = '' }
         if(value.nama_produk == null){ this.inputProduk.nama_produk = '' }
         if(value.merek_produk == null){ this.inputProduk.merek_produk = '' }
         if(value.harga == null){ this.inputProduk.harga = '' }
@@ -1083,8 +1115,8 @@ export default {
         if(value.berat == null){ this.inputProduk.berat = '' }
 				if(value.deskripsi == null){ this.inputProduk.deskripsi = '' }
 
-				if(value.id_kategori_produk != '' && value.nama_produk != '' && value.merek_produk != '' && value.harga != '' && value.stok != '' && value.berat != '' && 
-				value.deskripsi != ''){
+				if(value.id_kategori_produk != '' && value.id_measurement != '' && value.nama_produk != '' && value.merek_produk != '' && value.harga != '' && value.stok != '' && 
+        value.berat != '' && value.deskripsi != ''){
 					this.kondisiTombol = false
 				}else{
 					this.kondisiTombol = true
@@ -1111,7 +1143,7 @@ export default {
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `moduleMain/getAllProduk`,
+				url: `ecommerce/getProduk`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1127,7 +1159,7 @@ export default {
 		getKategoriProduk() {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllKategoriProduk?status_aktif=1`,
+				url: `ecommerce/getKategoriProduk?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1138,10 +1170,24 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
+		getMeasurement() {
+			let payload = {
+				method: "get",
+				url: `settings/getMeasurement?status_aktif=1`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.MeasurementOptions = res.data.result;
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
 		getFotoProduk(id) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllFotoProduk/${id}`,
+				url: `ecommerce/getFotoProduk/${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1159,18 +1205,20 @@ export default {
 		bukaDialog(item, index){
       this.editedIndex = index
 			this.getKategoriProduk()
+			this.getMeasurement()
       if(index == 0){
         this.clearForm()
         this.inputProduk.kode_produk = `PRD-${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandomAngka(8)}` 
 			  this.inputProduk.UnixText = `Produk${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`
       }else{
-        if(index == 2){ this.getFotoProduk(item.id_produk) }
+        if(index == 2){ this.getFotoProduk(item.idProduk) }
         this.inputProduk.UnixText = item.UnixText ? item.UnixText : ''
-        this.inputProduk.id_kategori_produk = item.data_kategori.status_aktif == 1 ? item.id_kategori_produk ? item.id_kategori_produk : '' : ''
-        this.inputProduk.id_produk = item.id_produk ? item.id_produk : ''
-        this.inputProduk.kode_produk = item.kode_produk ? item.kode_produk : ''
-        this.inputProduk.nama_produk = item.nama_produk ? item.nama_produk : ''
-				this.inputProduk.merek_produk = item.merek_produk ? item.merek_produk : ''
+        this.inputProduk.id_kategori_produk = item.statuskategoriProduk == 1 ? item.idKategoriProduk ? item.idKategoriProduk : '' : ''
+        this.inputProduk.id_produk = item.idProduk ? item.idProduk : ''
+        this.inputProduk.id_measurement = item.idMeasurement ? item.idMeasurement : ''
+        this.inputProduk.kode_produk = item.kodeProduk ? item.kodeProduk : ''
+        this.inputProduk.nama_produk = item.namaProduk ? item.namaProduk : ''
+				this.inputProduk.merek_produk = item.merekProduk ? item.merekProduk : ''
 				this.inputProduk.harga = item.harga ? item.harga : ''
 				this.inputProduk.stok = item.stok ? item.stok : ''
 				this.inputProduk.berat = item.berat ? item.berat : ''
@@ -1189,6 +1237,7 @@ export default {
 				UnixText: this.inputProduk.UnixText,
 				id_produk: this.inputProduk.id_produk,
 				id_kategori_produk: this.inputProduk.id_kategori_produk,
+				id_measurement: this.inputProduk.id_measurement,
 				kode_produk: this.inputProduk.kode_produk,
 				nama_produk: this.inputProduk.nama_produk,
 				merek_produk: this.inputProduk.merek_produk,
@@ -1200,7 +1249,7 @@ export default {
 			}
 			let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
 			  body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1220,15 +1269,15 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_produk: item.id_produk,
-        id_kategori_produk: item.id_kategori_produk,
-        nama_produk: item.nama_produk,
-        kode_produk: item.kode_produk,
+        id_produk: item.idProduk,
+        id_kategori_produk: item.idKategoriProduk,
+        nama_produk: item.namaProduk,
+        kode_produk: item.kodeProduk,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1245,15 +1294,15 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_produk: item.id_produk,
-        id_kategori_produk: item.id_kategori_produk,
-        nama_produk: item.nama_produk,
-        kode_produk: item.kode_produk,
+        id_produk: item.idProduk,
+        id_kategori_produk: item.idKategoriProduk,
+        nama_produk: item.namaProduk,
+        kode_produk: item.kodeProduk,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1313,9 +1362,9 @@ export default {
 				};
 				try {
 					let response = await this.uploadFiles(bodyData);
-          status.push(response.data.kode)
+          status.push(response.data.status)
 				} catch (err) {
-          status.push(err.response.data.kode)
+          status.push(err.response.data.status)
 				}
         return status[0]
       }))
@@ -1331,12 +1380,12 @@ export default {
     getHistoryStok(id) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllHistoryStok/${id}`,
+				url: `ecommerce/getHistoryStock/${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataHistoryStok = res.data.result.data_stok;
+				this.DataHistoryStok = res.data.result.dataStok;
 				this.StokMasuk = res.data.result.stokMasuk;
 				this.StokKeluar = res.data.result.stokKeluar;
 			})
@@ -1346,9 +1395,9 @@ export default {
 		},
     bukaDialogHistoryStok(item) {
       this.DialogHistoryStok = true
-      this.getHistoryStok(item.id_produk)
-      this.inputProduk.id_produk = item.id_produk
-      this.inputProduk.nama_produk = item.nama_produk
+      this.getHistoryStok(item.idProduk)
+      this.inputProduk.id_produk = item.idProduk
+      this.inputProduk.nama_produk = item.namaProduk
     },
     SimpanFormStok(index) {
 			let bodyData = {
@@ -1362,7 +1411,7 @@ export default {
 			}
 			let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
 			  body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1387,23 +1436,23 @@ export default {
     HapusRecordStok(item) {
       let bodyData = {
         jenis: 'DELETESTOK',
-        id_update_stok: item.id_update_stok,
+        id_update_stok: item.idUpdateStok,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.getHistoryStok(item.id_produk)
+				this.getHistoryStok(item.idProduk)
         this.getProduk()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
-				this.getHistoryStok(item.id_produk)
+				this.getHistoryStok(item.idProduk)
 				this.getProduk()
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -1411,23 +1460,23 @@ export default {
     StatusRecordStok(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORDSTOK',
-        id_update_stok: item.id_update_stok,
+        id_update_stok: item.idUpdateStok,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.getHistoryStok(item.id_produk)
+				this.getHistoryStok(item.idProduk)
         this.getProduk()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
-				this.getHistoryStok(item.id_produk)
+				this.getHistoryStok(item.idProduk)
 				this.getProduk()
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -1436,26 +1485,26 @@ export default {
       let bodyData = {
         jenis: 'EDITSTOKONE',
         bagian: bagian,
-        id_update_stok: item.id_update_stok,
-        inputTemp: this.inputTemp[item.id_update_stok],
+        id_update_stok: item.idUpdateStok,
+        inputTemp: this.inputTemp[item.idUpdateStok],
         create_update_by: localStorage.getItem('idLogin'),
       }
       // console.log(bodyData)
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesProduk`,
+				url: `ecommerce/postProduk`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.getHistoryStok(item.id_produk)
+				this.getHistoryStok(item.idProduk)
         this.getProduk()
-        this.inputTemp[item.id_update_stok] = ''
+        this.inputTemp[item.idUpdateStok] = ''
         this.notifikasi("success", res.data.message, "1")
 			})
       .catch((err) => {
-				this.getHistoryStok(item.id_produk)
+				this.getHistoryStok(item.idProduk)
 				this.getProduk()
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -1470,9 +1519,9 @@ export default {
         this.inputHistory.kurang_stok = ''
         this.inputHistory.tanggal = ''
       }else{
-        this.inputHistory.id_update_stok = item.id_update_stok ? item.id_update_stok : ''
-        this.inputHistory.tambah_stok = item.tambah_stok ? item.tambah_stok : ''
-        this.inputHistory.kurang_stok = item.kurang_stok ? item.kurang_stok : ''
+        this.inputHistory.id_update_stok = item.idUpdateStok ? item.idUpdateStok : ''
+        this.inputHistory.tambah_stok = item.tambahStok ? item.tambahStok : ''
+        this.inputHistory.kurang_stok = item.kurangStok ? item.kurangStok : ''
         this.inputHistory.tanggal = item.tanggal ? item.tanggal : ''
       }
       this.DialogStok = true

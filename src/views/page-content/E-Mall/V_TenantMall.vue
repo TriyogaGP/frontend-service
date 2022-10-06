@@ -41,7 +41,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_tenant_mall"
+					item-key="idTenantMall"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -52,34 +52,34 @@
 						{{ DataTenantMall.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.kategori_tenant`]="{ item }">
-						<span v-html="item.data_kategori_tenant.kategori_tenant" /> 
+						<span v-html="item.kategoriTenant" /> 
 					</template>
 					<template #[`item.mall`]="{ item }">
-						<span v-html="item.data_mall.nama_mall" /> 
+						<span v-html="item.namaMall" /> 
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_tenant_mall"
+								:value="item.idTenantMall"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_tenant_mall"
+								v-if="item.statusAktif == false"
+								:value="item.idTenantMall"
 								color="#0bd369"
 								small
 								dense
@@ -90,8 +90,8 @@
 								<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_tenant_mall"
+								v-else-if="item.statusAktif == true"
+								:value="item.idTenantMall"
 								color="#0bd369"
 								small
 								dense
@@ -102,19 +102,19 @@
 								<v-icon small>visibility_off</v-icon>	Non Active
 							</v-btn> 
 							<v-btn
-								:value="item.id_tenant_mall"
+								:value="item.idTenantMall"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 								<v-icon small>delete</v-icon>	Hapus
 							</v-btn> 
 							<v-btn
-                :value="item.id_tenant_mall"
+                :value="item.idTenantMall"
                 color="#04f7f7"
                 small
                 dense
@@ -125,17 +125,17 @@
                 <v-icon small>info</v-icon>	Detail
               </v-btn>
 							<v-btn
-                :value="item.id_tenant_mall"
+                :value="item.idTenantMall"
                 color="#0bd369"
                 small
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                :disabled="item.status_aktif == 0"
+                :disabled="item.statusAktif == false"
                 @click="() => {
 									inputTenantMall.UnixText = item.UnixText; 
-                  inputTenantMall.id_tenant_mall = item.id_tenant_mall; 
-                  inputTenantMall.nama_tenant_mall = item.nama_tenant_mall;
+                  inputTenantMall.id_tenant_mall = item.idTenantMall; 
+                  inputTenantMall.nama_tenant_mall = item.namaTenantMall;
                   DialogUploadMultipleTenantMall = true; 
                 }"
               >
@@ -204,7 +204,7 @@
 										v-model="inputTenantMall.id_admin"
 										:items="AdminOptions"
 										item-text="nama"
-										item-value="id_admin"
+										item-value="idAdmin"
 										placeholder="Admin"
 										label="Admin"
 										outlined
@@ -231,8 +231,8 @@
 									<v-autocomplete
 										v-model="inputTenantMall.id_kategori_tenant"
 										:items="TenantOptions"
-										item-text="kategori_tenant"
-										item-value="id_kategori_tenant"
+										item-text="kategoriTenant"
+										item-value="idKategoriTenant"
 										placeholder="Tenant Kategori"
 										label="Tenant Kategori"
 										outlined
@@ -259,8 +259,8 @@
 									<v-autocomplete
 										v-model="inputTenantMall.id_mall"
 										:items="MallOptions"
-										item-text="nama_mall"
-										item-value="id_mall"
+										item-text="namaMall"
+										item-value="idMall"
 										placeholder="Mall"
 										label="Mall"
 										outlined
@@ -270,10 +270,10 @@
 										:readonly="editedIndex == 2"
 									>
 										<template v-slot:selection="{ item }">
-											{{item.nama_mall}} {{roleID == 1 ? ' | '+item.data_admin.nama : ''}} 
+											{{item.namaMall}} {{roleID == 1 ? ' | '+item.nama : ''}} 
 										</template>
 										<template v-slot:item="{ item }">
-											{{item.nama_mall}} {{roleID == 1 ? ' | '+item.data_admin.nama : ''}}
+											{{item.namaMall}} {{roleID == 1 ? ' | '+item.nama : ''}}
 										</template>
 									</v-autocomplete>
 								</v-col>
@@ -795,11 +795,11 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Mall", value: "mall", sortable: false },
-      { text: "Kategori Tenant", value: "kategori_tenant", sortable: false },
-      { text: "Nama Tenant Mall", value: "nama_tenant_mall", sortable: false },
+      { text: "Kategori Tenant", value: "kategoriTenant", sortable: false },
+      { text: "Nama Tenant Mall", value: "namaTenantMall", sortable: false },
       { text: "Kabupaten / Kota", value: "kota", sortable: false },
       { text: "Provinsi", value: "provinsi", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -896,7 +896,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllTenantMall`,
+				url: `emall/getTenantMall`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -918,7 +918,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllAdmin?level=3&status_aktif=1`,
+				url: `admin/getAdmin?level=3&status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -927,7 +927,7 @@ export default {
 				if (this.roleID == 1) {
 					this.AdminOptions = dataAdminOptions
 				}else{
-					this.AdminOptions = dataAdminOptions.filter(val => val.downline_tenant == this.idLogin)
+					this.AdminOptions = dataAdminOptions.filter(val => val.downlineTenant == this.idLogin)
 				}
 				this.isLoading = false
 			})
@@ -940,7 +940,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllKategoriTenantMall?status_aktif=1`,
+				url: `emall/getKategoriTenant?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -958,7 +958,7 @@ export default {
 			let link = this.roleID != 1 ? '?id_admin='+this.idLogin+'&status_aktif=1' : ''
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllMall${link}`,
+				url: `emall/getMall${link}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -974,7 +974,7 @@ export default {
 		getWilayah(jenis, id = null, kondisi = false, item = null) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getWilayah?KodeWilayah=${id}&bagian=${jenis}`,
+				url: `settings/getWilayah?bagian=${jenis}&KodeWilayah=${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -996,7 +996,7 @@ export default {
 		getFotoTenantMall(id) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllFotoTenantMall/${id}`,
+				url: `emall/getFotoTenantMall/${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1022,16 +1022,16 @@ export default {
 				this.clearForm()
 				this.inputTenantMall.UnixText = `TenantMall${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`
       }else{
-				if(index == 2){ this.getFotoTenantMall(item.id_tenant_mall) }
+				if(index == 2){ this.getFotoTenantMall(item.idTenantMall) }
 				this.inputTenantMall.UnixText = item.UnixText ? item.UnixText : ''
-				this.inputTenantMall.id_tenant_mall = item.id_tenant_mall ? item.id_tenant_mall : ''
-				this.inputTenantMall.id_admin = item.id_admin ? item.id_admin : ''
-				this.inputTenantMall.id_kategori_tenant = item.id_kategori_tenant ? item.id_kategori_tenant : ''
-				this.inputTenantMall.id_mall = item.id_mall ? item.id_mall : ''
-        this.inputTenantMall.nama_tenant_mall = item.nama_tenant_mall ? item.nama_tenant_mall : ''
+				this.inputTenantMall.id_tenant_mall = item.idTenantMall ? item.idTenantMall : ''
+				this.inputTenantMall.id_admin = item.idAdmin ? item.idAdmin : ''
+				this.inputTenantMall.id_kategori_tenant = item.idKategoriTenant ? item.idKategoriTenant : ''
+				this.inputTenantMall.id_mall = item.idMall ? item.idMall : ''
+        this.inputTenantMall.nama_tenant_mall = item.namaTenantMall ? item.namaTenantMall : ''
         this.inputTenantMall.deskripsi = item.deskripsi ? item.deskripsi : ''
         this.inputTenantMall.alamat = item.alamat ? item.alamat : ''
-        this.inputTenantMall.no_whatsapp = item.no_whatsapp ? item.no_whatsapp : ''
+        this.inputTenantMall.no_whatsapp = item.noWhatsapp ? item.noWhatsapp : ''
         this.inputTenantMall.filelogo = item.logo ? item.logo : ''
         this.getWilayah('provinsi', null, true, item)
         this.inputTenantMall.kota = item.kota ? item.kota : ''
@@ -1063,7 +1063,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesTenantMall`,
+				url: `emall/postTenantMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1071,7 +1071,7 @@ export default {
 			.then(async (res) => {
 				if(this.FileLOGO){
 					let uploadLOGO = await this.uploadLampiran(index, dataUpload)
-					if(uploadLOGO.data.kode == 200){
+					if(uploadLOGO.data.status == 200){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
 						this.notifikasi("error", 'Gagal proses data', "1")
@@ -1111,13 +1111,13 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_tenant_mall: item.id_tenant_mall,
-        nama_tenant_mall: item.nama_tenant_mall,
+        id_tenant_mall: item.idTenantMall,
+        nama_tenant_mall: item.namaTenantMall,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesTenantMall`,
+				url: `emall/postTenantMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1134,13 +1134,13 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_tenant_mall: item.id_tenant_mall,
-        nama_tenant_mall: item.nama_tenant_mall,
+        id_tenant_mall: item.idTenantMall,
+        nama_tenant_mall: item.namaTenantMall,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesTenantMall`,
+				url: `emall/postTenantMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -1241,9 +1241,9 @@ export default {
 				};
 				try {
 					let response = await this.uploadFiles(bodyData);
-          status.push(response.data.kode)
+          status.push(response.data.status)
 				} catch (err) {
-          status.push(err.response.data.kode)
+          status.push(err.response.data.status)
 				}
         return status[0]
       }))

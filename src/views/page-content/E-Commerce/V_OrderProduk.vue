@@ -18,18 +18,7 @@
 					<v-tab-item v-for="(item, i) in itemsTab" :key="i">
 						<v-card class="pa-3">
 							<v-row no-gutters class="pa-2">
-								<v-col cols="12" md="6">
-									<!-- <v-btn
-										color="light-blue darken-3"
-										small
-										dense
-										depressed
-										class="ma-2 white--text text--darken-2"
-										@click.stop="bukaDialog(null, 0)"
-									>
-										<v-icon small>add</v-icon>	Tambah
-									</v-btn> -->
-								</v-col>
+								<v-col cols="12" md="6"/>
 								<v-col cols="12" md="6">
 									<v-text-field
 										v-model="searchData"
@@ -55,8 +44,8 @@
 									:items="DataOrders"
 									:single-expand="singleExpand"
 									:expanded.sync="expanded"
-									show-expand
-									item-key="id_order"
+									:show-expand=false
+									item-key="idOrder"
 									hide-default-footer
 									class="elevation-1"
 									:page.sync="page"
@@ -66,70 +55,25 @@
 									<template #[`item.number`]="{ item }">
 										{{ DataOrders.indexOf(item) + 1 }}
 									</template>
-									<template #[`item.no_order`]="{ item }">
-										<strong><span v-html="item.no_order" /></strong>
+									<template #[`item.noOrder`]="{ item }">
+										<strong>
+											<span v-html="item.noOrder" />
+										</strong>
+										<v-icon medium color="#0277bd" @click="ListProduk(item)">info</v-icon>
 									</template>
-									<template #[`item.no_resi`]="{ item }">
-										<strong><span v-html="item.no_resi ? item.no_resi : '-'" /></strong>
-									</template>
-									<template #[`item.produk`]="{ item }">
-										<v-btn
-											:value="item.id_order"
-											color="#04f7f7"
-											small
-											dense
-											depressed
-											class="ma-2 white--text text--darken-2"
-											@click="ListProduk(item)"
-										>
-										<v-icon small>info</v-icon>	Detail
-										</v-btn>
+									<template #[`item.noResi`]="{ item }">
+										<strong><span v-html="item.dataShipping.noResi ? item.dataShipping.noResi : '-'" /></strong>
 									</template>
 									<template #[`item.pembeli`]="{ item }">
-										<strong><span v-html="item.data_peserta.nama" /></strong>
+										<strong><span v-html="item.dataBuyer.nama" /></strong>
 										<v-tooltip top>
 											<template v-slot:activator="{ on, attrs }">
 												<v-icon small v-bind="attrs" v-on="on">info</v-icon>
 											</template>
-											NIK : <strong><span v-html="item.data_peserta.nik" /></strong> <br>
-											Nama : <strong><span v-html="item.data_peserta.nama" /></strong> <br>
-											Email : <strong><span v-html="item.data_peserta.email" /></strong>
+											Nama : <strong><span v-html="item.dataBuyer.nama" /></strong> <br>
+											Email : <strong><span v-html="item.dataBuyer.email" /></strong> <br>
+											No HP : <strong><span v-html="item.dataBuyer.noHP" /></strong>
 										</v-tooltip>
-										<v-tooltip v-if="item.data_peserta.status_aktif == 0" bottom>
-											<template v-slot:activator="{ on, attrs }">
-												<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
-											</template>
-											<span>Harus Diubah Peserta tidak aktif</span>
-										</v-tooltip>
-									</template>
-									<template #expanded-item="{ headers, item }">
-										<td :colspan="headers.length" class="white">
-											<v-btn
-												:value="item.id_order"
-												color="#0bd369"
-												small
-												dense
-												depressed
-												class="ma-2 white--text text--darken-2"
-												:disabled="item.status_aktif == 0"
-												@click="bukaDialog(item, 1)"
-											>
-											<v-icon small>edit</v-icon>	Ubah
-											</v-btn>
-											<v-btn
-												:value="item.id_order"
-												color="#bd3a07"
-												small
-												dense
-												depressed
-												class="ma-2 white--text text--darken-2"
-												:disabled="item.status_aktif == 0"
-												@click="HapusRecord(item)"
-											>
-											<v-icon small>delete</v-icon>	Hapus
-											</v-btn> 
-											<v-divider />
-										</td>
 									</template>
 								</v-data-table>
 							</div>
@@ -253,7 +197,7 @@
     </v-dialog>
 		<v-dialog
       v-model="DialogProduk"
-      max-width="1000px"
+      max-width="1200px"
       persistent
       transition="dialog-bottom-transition"
     >
@@ -280,155 +224,335 @@
               <v-divider />
             </div>
 						<v-card-text>
-							<h3><u>DATA ORDER PRODUK</u></h3>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
+							<v-container>
+								<v-layout row wrap>
+									<v-flex sm6 xs12 md6 lg4>
+										<v-card class="pa-2 ma-2" height="140">
+											<h4><u>Order Produk</u></h4>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													No. Order
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.noOrder : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													No. resi
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataShipping.noResi ? detailProduk.dataShipping.noResi : '-' : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Order dibuat
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.orderCreate : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Status Terakhir
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.statusLatest : '' }}
+												</v-col>
+											</v-row>
+										</v-card>
+									</v-flex>
+									<v-flex sm6 xs12 md6 lg4>
+										<v-card class="pa-2 ma-2" height="140">
+											<h4><u>Pembeli Info</u></h4>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Nama Pembeli
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataBuyer.nama : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Email Pembeli
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataBuyer.email : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													No. Telp Pembeli
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataBuyer.noHP : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters class="mb-2">
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Alamat Pembeli
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataBuyer.alamat : '' }}
+												</v-col>
+											</v-row>
+										</v-card>
+									</v-flex>
+									<v-flex sm6 xs12 md6 lg4>
+										<v-card class="pa-2 ma-2" height="140">
+											<h4><u>Penerima Info</u></h4>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Nama Penerima
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataRecipient.namaPenerima : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters>
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													No. Telp Penerima
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataRecipient.telpPenerima : '' }}
+												</v-col>
+											</v-row>
+											<v-row no-gutters class="mb-2">
+												<v-col
+													cols="12"
+													md="4"
+													class="font-weight-bold caption"
+												>
+													Alamat Penerima
+												</v-col>
+												<v-col
+													cols="12"
+													md="8"
+													class="font-weight-bold caption"
+												>
+													: {{ detailProduk ? detailProduk.dataShipping.alamatPenerima+' ('+detailProduk.dataShipping.alamatDetail+')' : '' }}
+												</v-col>
+											</v-row>
+										</v-card>
+									</v-flex>
+								</v-layout>
+							</v-container>
+							<v-container>
+								<v-layout row wrap>
+									<v-flex sm6 xs12 md6 lg3>
+										<v-card class="pa-2 ma-2" height="80">
+											<div class="text-center">
+												<span class="font-weight-bold body-2">Total Quantity</span><br>
+												<span class="caption">{{detailProduk.berat}}</span><br>
+												<span class="font-weight-bold caption">{{detailProduk.items}} item(s)</span>
+											</div>
+										</v-card>
+									</v-flex>
+									<v-flex sm6 xs12 md6 lg3>
+										<v-card class="pa-2 ma-2" height="80">
+											<div class="text-center">
+												<span class="font-weight-bold body-2">Total Order Value</span><br>
+												<span class="caption">{{detailProduk.paymentProvider}} - {{detailProduk.paymentMethod}}</span><br>
+												<span class="font-weight-bold caption">Rp.{{ currencyDotFormatNumber(detailProduk.total+detailProduk.shippingPrice+detailProduk.adminFee) }}</span>
+											</div>
+										</v-card>
+									</v-flex>
+									<v-flex sm6 xs12 md6 lg3>
+										<v-card class="pa-2 ma-2" height="80">
+											<div class="text-center">
+												<span class="font-weight-bold body-2">Total Point Order</span><br>
+												<span class="caption">Pembeli: {{detailProduk ? detailProduk.dataBuyer.nama : ''}}</span><br>
+												<span class="font-weight-bold caption">{{detailProduk.pointBelanja}}</span>
+											</div>
+										</v-card>
+									</v-flex>
+									<v-flex sm6 xs12 md6 lg3>
+										<v-card class="pa-2 ma-2" height="80">
+											<div class="text-center">
+												<span class="font-weight-bold body-2">Total Point Keseluruhan</span><br>
+												<span class="caption">Pembeli: {{detailProduk ? detailProduk.dataBuyer.nama : ''}}</span><br>
+												<span class="font-weight-bold caption">isi point user</span>
+											</div>
+										</v-card>
+									</v-flex>
+								</v-layout>
+							</v-container>
+							<v-card class="pa-2 ma-2">
+								<h4><u>Payment Details</u></h4>
+								<v-data-table
+									loading-text="Sedang memuat... Harap tunggu"
+									no-data-text="Tidak ada data yang tersedia"
+									no-results-text="Tidak ada catatan yang cocok ditemukan"
+									:options.sync="query"
+									:headers="headersPayment"
+									:loading="isLoading"
+									:items="dataPaymentDetails"
+									item-key="idOrderPayment"
+									hide-default-footer
+									class="elevation-0"
 								>
-									No. Order
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
+									<template #[`item.number`]="{ item }">
+										{{ dataPaymentDetails.indexOf(item) + 1 }}
+									</template>
+									<template #[`item.payment`]="{ item }">
+										<span>{{item.paymentProvider}} - {{item.paymentMethod}} ({{item.paymentAccountNo}})</span>
+									</template>
+									<template #[`item.harga`]="{ item }">
+										Rp.<span v-html="currencyDotFormatNumber(item.harga)" />
+									</template>
+									<template #[`item.shippingFee`]="{ item }">
+										Rp.<span v-html="currencyDotFormatNumber(item.shippingFee)" />
+									</template>
+									<template #[`item.adminFee`]="{ item }">
+										Rp.<span v-html="currencyDotFormatNumber(item.adminFee)" />
+									</template>
+									<template #[`item.total`]="{ item }">
+										Rp.<span v-html="currencyDotFormatNumber(item.total)" />
+									</template>
+								</v-data-table>
+							</v-card>
+							<v-card class="pa-2 ma-2">
+								<h4><u>Tracking Status</u></h4>
+								<v-data-table
+									loading-text="Sedang memuat... Harap tunggu"
+									no-data-text="Tidak ada data yang tersedia"
+									no-results-text="Tidak ada catatan yang cocok ditemukan"
+									:options.sync="query"
+									:headers="headersStatus"
+									:loading="isLoading"
+									:items="dataOrderStatus"
+									item-key="idOrderMoves"
+									hide-default-footer
+									class="elevation-0"
 								>
-									: {{ detailProduk ? detailProduk.no_order : '' }}
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
+									<template #[`item.number`]="{ item }">
+										{{ dataOrderStatus.indexOf(item) + 1 }}
+									</template>
+								</v-data-table>
+							</v-card>
+							<v-card class="pa-2 ma-2">
+								<h4><u>Produk</u></h4>
+								<v-data-table
+									loading-text="Sedang memuat... Harap tunggu"
+									no-data-text="Tidak ada data yang tersedia"
+									no-results-text="Tidak ada catatan yang cocok ditemukan"
+									:options.sync="query"
+									:headers="headersProduk"
+									:loading="isLoading"
+									:items="dataProduk"
+									item-key="idProduk"
+									hide-default-footer
+									class="elevation-0"
 								>
-									No. resi
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
-								>
-									: {{ detailProduk ? detailProduk.no_resi ? detailProduk.no_resi : '-' : '' }}
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
-								>
-									Order dibuat
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
-								>
-									: {{ detailProduk ? detailProduk.order_dibuat : '' }}
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
-								>
-									Status Terakhir
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
-								>
-									: {{ detailProduk ? detailProduk.status_latest : '' }}
-								</v-col>
-							</v-row>
-							<h3><u>DATA PENERIMA</u></h3>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
-								>
-									Nama Penerima
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
-								>
-									: {{ detailProduk ? detailProduk.data_penerima.nama_penerima : '' }}
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
-								>
-									No. Telp Penerima
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
-								>
-									: {{ detailProduk ? detailProduk.data_penerima.telp_penerima : '' }}
-								</v-col>
-							</v-row>
-							<v-row no-gutters>
-								<v-col
-									cols="12"
-									md="2"
-									class="font-weight-bold"
-								>
-									Alamat Penerima
-								</v-col>
-								<v-col
-									cols="12"
-									md="10"
-									class="font-weight-bold"
-								>
-									: {{ detailProduk ? detailProduk.data_penerima.alamat_penerima : '' }}
-								</v-col>
-							</v-row>
-							<v-data-table
-								loading-text="Sedang memuat... Harap tunggu"
-								no-data-text="Tidak ada data yang tersedia"
-								no-results-text="Tidak ada catatan yang cocok ditemukan"
-								:options.sync="query"
-								:headers="headersProduk"
-								:loading="isLoading"
-								:items="dataProduk"
-								item-key="id_produk"
-								hide-default-footer
-								class="elevation-1"
-							>
-								<template #[`item.number`]="{ item }">
-									{{ dataProduk.indexOf(item) + 1 }}
-								</template>
-								<template #[`item.kode_produk`]="{ item }">
-									<span v-html="item.data_produk.kode_produk" />
-								</template>
-								<template #[`item.nama_produk`]="{ item }">
-									<span v-html="item.data_produk.nama_produk" />
-								</template>
-								<template #[`item.harga`]="{ item }">
-									Rp.<span v-html="currencyDotFormatNumber(item.harga)" />
-								</template>
-								<template #footer>
-									<v-divider />
-									<div
-										class="pa-2"
-										color="white"
-										flat
-									>	
-										<strong><span class="d-flex justify-end mr-15">Total Harga Rp.{{ currencyDotFormatNumber(detailProduk.total) }}</span></strong>
-									</div>
-								</template>
-							</v-data-table>
+									<template #[`item.number`]="{ item }">
+										{{ dataProduk.indexOf(item) + 1 }}
+									</template>
+									<template #[`item.kodeProduk`]="{ item }">
+										<span v-html="item.kodeProduk" />
+									</template>
+									<template #[`item.namaProduk`]="{ item }">
+										<span v-html="item.namaProduk" />
+									</template>
+									<template #[`item.harga`]="{ item }">
+										Rp.<span v-html="currencyDotFormatNumber(item.harga)" />
+									</template>
+									<template #[`item.subTotal`]="{ item }">
+										Rp.<span v-html="currencyDotFormatNumber(item.subTotal)" />
+									</template>
+									<template #footer>
+										<v-divider />
+										<div
+											class="pa-2"
+											color="white"
+											flat
+										>	
+											<strong><span class="d-flex justify-end mr-15">Total Harga Rp.{{ currencyDotFormatNumber(detailProduk.total) }}</span></strong>
+										</div>
+									</template>
+								</v-data-table>
+							</v-card>
 						</v-card-text>
 					</div>
 					<v-card-actions>
@@ -472,19 +596,34 @@ export default {
     },
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "No Order", value: "no_order", sortable: false },
-      { text: "No Resi", value: "no_resi", sortable: false },
-      { text: "Produk", value: "produk", sortable: false },
+      // { text: "", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "No Order", value: "noOrder", sortable: false },
+      { text: "No Resi", value: "noResi", sortable: false },
+      // { text: "Produk", value: "produk", sortable: false },
       { text: "Pembeli", value: "pembeli", sortable: false },
-      { text: "Status Terakhir", value: "status_latest", sortable: false },
+      { text: "Status Terakhir", value: "statusLatest", sortable: false },
     ],
 		headersProduk: [
       { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "Kode Produk", value: "kode_produk", sortable: false },
-      { text: "Produk", value: "nama_produk", sortable: false },
-      { text: "Qty", value: "jumlah_produk", sortable: false },
+      { text: "Kode Produk", value: "kodeProduk", sortable: false },
+      { text: "Produk", value: "namaProduk", sortable: false },
+      { text: "Qty", value: "jumlahProduk", sortable: false },
       { text: "Harga", value: "harga", sortable: false },
+      { text: "SubTotal", value: "subTotal", sortable: false },
+    ],
+		headersPayment: [
+      { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "Payment Method", value: "payment", sortable: false },
+      { text: "Date", value: "createdAt", sortable: false },
+      { text: "SubTotal", value: "harga", sortable: false },
+      { text: "Shipping Fee", value: "shippingFee", sortable: false },
+      { text: "Admin Fee", value: "adminFee", sortable: false },
+      { text: "Total", value: "total", sortable: false },
+    ],
+		headersStatus: [
+      { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "Date", value: "createdAt", sortable: false },
+      { text: "Status", value: "statusLatest", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -492,6 +631,8 @@ export default {
 		DialogProduk: false,
 		detailProduk: '',
 		dataProduk: [],
+		dataPaymentDetails: [],
+		dataOrderStatus: [],
 		editedIndex: 0,
     kondisiTombol: true,
 		itemsTab: [
@@ -550,7 +691,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllOrder?code_status=${code}`,
+				url: `ecommerce/getOrder?code_status=${code}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -568,8 +709,8 @@ export default {
 			if(index == 0){
 				this.clearForm()
       }else{
-				this.inputOrderProduk.id_order = item.id_order
-        this.inputOrderProduk.kategori_produk = item.kategori_produk
+				this.inputOrderProduk.id_order = item.idOrder
+        this.inputOrderProduk.kategori_produk = item.kategoriProduk
 			}
 			this.DialogOrderProduk = true
 		},
@@ -650,9 +791,11 @@ export default {
 			this.inputOrderProduk.kategori_produk = ''
 		},
 		ListProduk(item) {
-			console.log(item)
+			// console.log(item)
 			this.detailProduk = item
-			this.dataProduk = item.data_order_detail
+			this.dataProduk = item.dataProduk
+			this.dataPaymentDetails = item.dataPaymentDetails
+			this.dataOrderStatus = item.dataOrderStatus
 			this.DialogProduk = true
 		},
 		notifikasi(kode, text, proses){

@@ -41,7 +41,7 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
-					item-key="id_mall"
+					item-key="idMall"
 					hide-default-footer
 					class="elevation-1"
 					:page.sync="page"
@@ -52,7 +52,7 @@
 						{{ DataMall.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.admin`]="{ item }">
-						<span v-html="item.data_admin.nama" /> 
+						<span v-html="item.nama" /> 
 					</template>
 					<template #[`item.provinsi`]="{ item }">
 						<span v-html="uppercaseLetterFirst(item.provinsi)" /> 
@@ -60,29 +60,29 @@
 					<template #[`item.kota`]="{ item }">
 						<span v-html="uppercaseLetterFirst(item.kota)" /> 
 					</template>
-					<template #[`item.status_aktif`]="{ item }">
-						<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+					<template #[`item.statusAktif`]="{ item }">
+						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
 					<template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
-								:value="item.id_mall"
+								:value="item.idMall"
 								color="#0bd369"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="bukaDialog(item, 1)"
 							>
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn> 
 							<v-btn
-								v-if="item.status_aktif == 0"
-								:value="item.id_mall"
+								v-if="item.statusAktif == false"
+								:value="item.idMall"
 								color="#0bd369"
 								small
 								dense
@@ -93,8 +93,8 @@
 								<v-icon small>visibility</v-icon>	Active
 							</v-btn> 
 							<v-btn
-								v-else-if="item.status_aktif == 1"
-								:value="item.id_mall"
+								v-else-if="item.statusAktif == true"
+								:value="item.idMall"
 								color="#0bd369"
 								small
 								dense
@@ -105,19 +105,19 @@
 								<v-icon small>visibility_off</v-icon>	Non Active
 							</v-btn> 
 							<v-btn
-								:value="item.id_mall"
+								:value="item.idMall"
 								color="#bd3a07"
 								small
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="item.status_aktif == 0"
+								:disabled="item.statusAktif == false"
 								@click="HapusRecord(item)"
 							>
 								<v-icon small>delete</v-icon>	Hapus
 							</v-btn> 
 							<v-btn
-                :value="item.id_mall"
+                :value="item.idMall"
                 color="#04f7f7"
                 small
                 dense
@@ -190,7 +190,7 @@
 										v-model="inputMall.id_admin"
 										:items="AdminOptions"
 										item-text="nama"
-										item-value="id_admin"
+										item-value="idAdmin"
 										placeholder="Admin"
 										label="Admin"
 										outlined
@@ -594,10 +594,10 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Admin", value: "admin", sortable: false },
-      { text: "Nama Mall", value: "nama_mall", sortable: false },
+      { text: "Nama Mall", value: "namaMall", sortable: false },
       { text: "Kabupaten / Kota", value: "kota", sortable: false },
       { text: "Provinsi", value: "provinsi", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -687,7 +687,7 @@ export default {
 			let link = this.roleID != 1 ? '?id_admin='+this.idLogin+'&status_aktif=1' : ''
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllMall${link}`,
+				url: `emall/getMall${link}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -704,7 +704,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllAdmin?level=2&status_aktif=1`,
+				url: `admin/getAdmin?level=2&status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -713,7 +713,7 @@ export default {
 				if (this.roleID == 1) {
 					this.AdminOptions = dataAdminOptions
 				}else{
-					this.AdminOptions = dataAdminOptions.filter(val => val.id_admin == this.idLogin)
+					this.AdminOptions = dataAdminOptions.filter(val => val.idAdmin == this.idLogin)
 				}
 				this.isLoading = false
 			})
@@ -725,7 +725,7 @@ export default {
 		getWilayah(jenis, id = null, kondisi = false, item = null) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getWilayah?KodeWilayah=${id}&bagian=${jenis}`,
+				url: `settings/getWilayah?bagian=${jenis}&KodeWilayah=${id}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -753,12 +753,12 @@ export default {
 				this.inputMall.UnixText = `Mall${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`
       }else{
 				this.inputMall.UnixText = item.UnixText ? item.UnixText : ''
-				this.inputMall.id_mall = item.id_mall ? item.id_mall : ''
-				this.inputMall.id_admin = item.id_admin ? item.id_admin : ''
-        this.inputMall.nama_mall = item.nama_mall ? item.nama_mall : ''
+				this.inputMall.id_mall = item.idMall ? item.idMall : ''
+				this.inputMall.id_admin = item.idAdmin ? item.idAdmin : ''
+        this.inputMall.nama_mall = item.namaMall ? item.namaMall : ''
         this.inputMall.deskripsi = item.deskripsi ? item.deskripsi : ''
         this.inputMall.alamat = item.alamat ? item.alamat : ''
-        this.inputMall.no_whatsapp = item.no_whatsapp ? item.no_whatsapp : ''
+        this.inputMall.no_whatsapp = item.noWhatsapp ? item.noWhatsapp : ''
         this.inputMall.filelogo = item.logo ? item.logo : ''
 				this.getWilayah('provinsi', null, true, item)
 				this.inputMall.kota = item.kota ? item.kota : ''
@@ -788,7 +788,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesMall`,
+				url: `emall/postMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -796,7 +796,7 @@ export default {
 			.then(async (res) => {
 				if(this.FileLOGO){
 					let uploadLOGO = await this.uploadLampiran(index, dataUpload)
-					if(uploadLOGO.data.kode == 200){
+					if(uploadLOGO.data.status == 200){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
 						this.notifikasi("error", 'Gagal proses data', "1")
@@ -836,13 +836,13 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_mall: item.id_mall,
-        nama_mall: item.nama_mall,
+        id_mall: item.idMall,
+        nama_mall: item.namaMall,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesMall`,
+				url: `emall/postMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -859,13 +859,13 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_mall: item.id_mall,
-        nama_mall: item.nama_mall,
+        id_mall: item.idMall,
+        nama_mall: item.namaMall,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesMall`,
+				url: `emall/postMall`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};

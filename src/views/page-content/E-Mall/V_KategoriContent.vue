@@ -40,7 +40,7 @@
 				:single-expand="singleExpand"
 				:expanded.sync="expanded"
 				show-expand
-				item-key="id_kategori_content"
+				item-key="idKategoriContent"
 				hide-default-footer
 				class="elevation-1"
 				:page.sync="page"
@@ -50,29 +50,29 @@
 				<template #[`item.number`]="{ item }">
 					{{ DataKategoriContent.indexOf(item) + 1 }}
 				</template>
-				<template #[`item.status_aktif`]="{ item }">
-					<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-					<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+				<template #[`item.statusAktif`]="{ item }">
+					<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+					<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 					<br>
-					<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+					<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 				</template>
 				<template #expanded-item="{ headers, item }">
 					<td :colspan="headers.length" class="white">
 						<v-btn
-							:value="item.id_kategori_content"
+							:value="item.idKategoriContent"
 							color="#0bd369"
 							small
 							dense
 							depressed
 							class="ma-2 white--text text--darken-2"
-							:disabled="item.status_aktif == 0"
+							:disabled="item.statusAktif == false"
 							@click="bukaDialog(item, 1)"
 						>
 						<v-icon small>edit</v-icon>	Ubah
 						</v-btn> 
 						<v-btn
-							v-if="item.status_aktif == 0"
-							:value="item.id_kategori_content"
+							v-if="item.statusAktif == false"
+							:value="item.idKategoriContent"
 							color="#0bd369"
 							small
 							dense
@@ -83,8 +83,8 @@
 						<v-icon small>visibility</v-icon>	Active
 						</v-btn> 
 						<v-btn
-							v-else-if="item.status_aktif == 1"
-							:value="item.id_kategori_content"
+							v-else-if="item.statusAktif == true"
+							:value="item.idKategoriContent"
 							color="#0bd369"
 							small
 							dense
@@ -95,13 +95,13 @@
 						<v-icon small>visibility_off</v-icon>	Non Active
 						</v-btn> 
 						<v-btn
-							:value="item.id_kategori_content"
+							:value="item.idKategoriContent"
 							color="#bd3a07"
 							small
 							dense
 							depressed
 							class="ma-2 white--text text--darken-2"
-							:disabled="item.status_aktif == 0"
+							:disabled="item.statusAktif == false"
 							@click="HapusRecord(item)"
 						>
 						<v-icon small>delete</v-icon>	Hapus
@@ -252,8 +252,8 @@ export default {
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Kategori", value: "kategori_content", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Kategori", value: "kategoriContent", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -302,7 +302,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllKategoriContent`,
+				url: `emall/getKategoriContent`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -320,8 +320,8 @@ export default {
 			if(index == 0){
 				this.clearForm()
       }else{
-				this.inputKategoriContent.id_kategori_content = item.id_kategori_content
-        this.inputKategoriContent.kategori_content = item.kategori_content
+				this.inputKategoriContent.id_kategori_content = item.idKategoriContent
+        this.inputKategoriContent.kategori_content = item.kategoriContent
 			}
 			this.DialogKategoriContent = true
 		},
@@ -338,7 +338,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesKategoriContent`,
+				url: `emall/postKategoriContent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -355,13 +355,13 @@ export default {
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
-        id_kategori_content: item.id_kategori_content,
-        kategori_content: item.kategori_content,
+        id_kategori_content: item.idKategoriContent,
+        kategori_content: item.kategoriContent,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesKategoriContent`,
+				url: `emall/postKategoriContent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -378,13 +378,13 @@ export default {
     StatusRecord(item, status_aktif) {
       let bodyData = {
         jenis: 'STATUSRECORD',
-        id_kategori_content: item.id_kategori_content,
-        kategori_content: item.kategori_content,
+        id_kategori_content: item.idKategoriContent,
+        kategori_content: item.kategoriContent,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesKategoriContent`,
+				url: `emall/postKategoriContent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
