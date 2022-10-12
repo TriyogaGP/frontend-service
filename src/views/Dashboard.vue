@@ -189,10 +189,10 @@
 							<v-list-item-content>
                 <img :src="item.gambar ? `${API_URL}image/event/${item.gambar}` : `${API_URL}No_Image_Available.jpg`" width="200" height="150"/>
 								<div class="mt-1"><v-divider /></div>
-								<div class="overline text-right"><strong>{{ item.nama_event }}</strong></div>
-								<div class="text-right">{{ item.kode_event }}</div>
-								<div class="text-right">{{ item.tanggalevent }} {{ item.waktu_event }}</div>
-								<div class="text-right">kata sandi : {{ item.katasandi_event }}</div>
+								<div class="overline text-right"><strong>{{ item.namaEvent }}</strong></div>
+								<div class="text-right">{{ item.kodeEvent }}</div>
+								<div class="text-right">{{ item.tanggalEvent }}</div>
+								<div class="text-right">kata sandi : {{ item.kataSandiEvent }}</div>
                 <v-text-field
                   v-model="dataPass[i].katasandi"
                   placeholder="Kata Sandi Event"
@@ -216,7 +216,7 @@
                 </v-text-field>
                 <v-autocomplete
                   v-model="dataPass[i].no_npl"
-                  :items="DataNPL.filter((el) => el.id_event == item.id_event)"
+                  :items="DataNPL.filter((el) => el.id_event == item.idEvent)"
                   item-text="no_npl"
                   item-value="no_npl"
                   placeholder="No. NPL"
@@ -225,6 +225,7 @@
                   outlined
                   dense
                   hide-details
+                  no-data-text="Tidak ada data yang tersedia"
                   clearable
                 />
 							</v-list-item-content>
@@ -255,7 +256,7 @@
               <h4 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h4>
               <div class="kotakBid">
                 <h4 class="text-center"><u>HARGA AWAL</u></h4>
-                Rp. {{ currencyDotFormat(dataRoom.harga_awal) }}
+                Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
               </div>
               <div class="kotakBid">
                 <h4 class="text-center"><u>HARGA SEKARANG</u></h4>
@@ -303,7 +304,7 @@
               <h4><u>Kelengkapan Barang Lelang</u></h4>
               <v-row no-gutters>
                 <v-col cols="12" class="text-center">
-                  <img :src="data_barang_lelang.ktp_pemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktp_pemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
+                  <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
                   <img :src="data_barang_lelang.stnk ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.stnk}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS STNK" width="120" height="90" class="ma-2"/>
                   <img :src="data_barang_lelang.bpkb ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.bpkb}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS BPKB" width="120" height="90" class="ma-2"/>
                   <img :src="data_barang_lelang.faktur ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.faktur}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS FAKTUR" width="120" height="90" class="ma-2"/>
@@ -312,7 +313,7 @@
               </v-row>
               <v-row no-gutters class="font-weight-bold">
                 <v-col cols="3">Nama Barang Lelang<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.nama_barang_lelang }}</v-col>
+                <v-col cols="8">&nbsp;{{ data_barang_lelang.namaBarangLelang }}</v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
                 <v-col cols="3">Tahun<span style="float: right;">:</span></v-col>
@@ -320,7 +321,7 @@
               </v-row>
               <v-row no-gutters class="font-weight-bold">
                 <v-col cols="3">Lokasi<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.lokasi_barang }}</v-col>
+                <v-col cols="8">&nbsp;{{ data_barang_lelang.lokasiBarang }}</v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
                 <v-col cols="3">Grade Barang<span style="float: right;">:</span></v-col>
@@ -464,7 +465,7 @@ export default {
     this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
     this.roleID = localStorage.getItem('roleID')
 		this.siteLogin = localStorage.getItem('siteLogin')
-    this.roleID == 1 ? this.getDataDashboard() : this.getBidLelang();
+    this.siteLogin == 'Admin' ? this.getDataDashboard() : this.getBidLelang();
 	},
 	methods: {
 		...mapActions(["fetchData"]),
@@ -486,7 +487,7 @@ export default {
       this.DataEventActive = []
 			let payload = {
 				method: "get",
-				url: `moduleMain/getBidLelang?id_peserta=${localStorage.getItem('idLogin')}`,
+				url: `lelang/getBidLelang?id_peserta=${localStorage.getItem('idLogin')}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -494,19 +495,19 @@ export default {
 				this.DataPembelianNPL = res.data.result;
         this.dataPass = []
         this.DataPembelianNPL.map((val) => {
-          this.DataEventActive.push(val.data_event)
-          val.data_npl.map((valNPL) => {
+          this.DataEventActive.push(val.Event)
+          val.NPL.map((valNPL) => {
             this.DataNPL.push({ 
-              id_event: valNPL.id_event,
-              no_npl: valNPL.no_npl,
+              id_event: valNPL.idEvent,
+              no_npl: valNPL.noNpl,
               npl: valNPL.npl,
-              status_npl: valNPL.status_npl,
+              status_npl: valNPL.statusNPL,
             })
           })
         })
         this.DataEventActive.map((val) => {
           const emit = {
-            id_event: val.id_event,
+            id_event: val.idEvent,
             no_npl: '',
             katasandi: '',
             passType: '',
@@ -524,7 +525,7 @@ export default {
       this.fotoArray = []
 			let payload = {
 				method: "get",
-				url: `moduleMain/getRoomEvent?no_lot=${nolot}`,
+				url: `lelang/getRoomEvent?no_lot=${nolot}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -532,19 +533,19 @@ export default {
         this.noLOT.splice(0, 1);
         this.currentLOT = nolot
 				this.dataRoom = res.data.result;
-				this.dataEvent = this.dataRoom.data_event
-				this.data_barang_lelang = this.dataRoom.data_barang_lelang
-        this.data_barang_lelang.data_foto_barang_lelang.map((el) => {
+				this.dataEvent = this.dataRoom.Event
+				this.data_barang_lelang = this.dataRoom.BarangLelang
+        this.dataRoom.dataFotoBarangLelang.map((el) => {
           this.fotoArray.push(el.gambar)
         })
-        // console.log(res.data.result)
+        // console.log(this.fotoArray)
 			})
 			.catch((err) => {
         console.log(err)
 			});
 		},
     enterRoom(item) {
-      let data = this.dataPass.filter((val) => val.id_event == item.id_event)
+      let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
       const dataNPL = this.DataNPL.filter((val) => val.no_npl == data[0].no_npl)
 
       if(!data[0].katasandi){
@@ -562,21 +563,21 @@ export default {
         data[0].no_npl = ''
         data[0].panel = false
         return this.notifikasi("warning", "No. NPL anda sudah digunakan !", "1")
-      }else if(data[0].katasandi == item.katasandi_event){
-        if(!item.data_lot){
+      }else if(data[0].katasandi == item.kataSandiEvent){
+        if(!item.LOT.length){
           data[0].katasandi = ''
           data[0].no_npl = ''
           data[0].panel = false
           return this.notifikasi("warning", "Event ini Belum siap !", "1")
         }else{
-          item.data_lot.map((el) => {
-            this.noLOT.push(el.no_lot)
+          item.LOT.map((el) => {
+            this.noLOT.push(el.noLot)
           })
           data[0].katasandi = ''
           this.currentNPL = data[0].no_npl
           data[0].no_npl = ''
           data[0].panel = true
-          this.getEvent(item.data_lot[0].no_lot)
+          this.getEvent(item.LOT[0].noLot)
         }
       }else{
         data[0].katasandi = ''
@@ -587,9 +588,9 @@ export default {
     },
     JoinBidding() {
       this.DataPembelianNPL.map((val) => {
-        val.data_npl.map((valNPL) => {
-          if(valNPL.no_npl == this.currentNPL){
-            this.currentIDNPL = valNPL.id_npl
+        val.NPL.map((valNPL) => {
+          if(valNPL.noNpl == this.currentNPL){
+            this.currentIDNPL = valNPL.idNpl
           }  
         })
       })
@@ -598,11 +599,11 @@ export default {
       this.tombolJoin = true
       const socket = io(this.API_URL);
       socket.emit("join-bidding", { 
-        room: this.currentLOT + "_" + this.dataEvent.nama_event, 
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_peserta: localStorage.getItem('idLogin'), 
-        id_event: this.dataEvent.id_event, 
+        id_event: this.dataEvent.idEvent, 
         id_npl: this.currentIDNPL, 
-        id_lot: this.dataRoom.id_lot, 
+        id_lot: this.dataRoom.idLot, 
         device: "laptop", 
         is_admin: 0
       });
@@ -638,15 +639,15 @@ export default {
       this.tombolBid = true
       const socket = io(this.API_URL);
       socket.emit("bid", { 
-        room: this.currentLOT + "_" + this.dataEvent.nama_event, 
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_npl: this.currentIDNPL, 
-        id_lot: this.dataRoom.id_lot, 
-        harga_bidding: this.dataEvent.kelipatan_bid, 
+        id_lot: this.dataRoom.idLot, 
+        harga_bidding: this.dataEvent.kelipatanBid, 
         is_admin: 0
       });
     },
     sendMessage(item) {
-      let data = this.dataPass.filter((val) => val.id_event == item.id_event)
+      let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
       const dataNPL = this.DataNPL.filter((val) => val.no_npl == data[0].no_npl)
 
       if(!data[0].katasandi){
@@ -661,8 +662,8 @@ export default {
         data[0].katasandi = ''
         data[0].no_npl = ''
         return this.notifikasi("warning", "No. NPL anda tidak bisa digunakan !", "1")
-      }else if(data[0].katasandi == item.katasandi_event){
-        if(!item.data_lot){
+      }else if(data[0].katasandi == item.kataSandiEvent){
+        if(!item.LOT.length){
           data[0].katasandi = ''
           data[0].no_npl = ''
           return this.notifikasi("warning", "Event ini Belum siap !", "1")

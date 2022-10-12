@@ -151,7 +151,7 @@ export default {
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Kode Bank", value: "kode_bank", sortable: false },
+      { text: "Kode Bank", value: "kodeBank", sortable: false },
       { text: "Nama Bank Display", value: "namaDisplay", sortable: false },
       { text: "Kode Bank Product", value: "kodeBankProduct", sortable: false },
       { text: "Kategori", value: "kategori", sortable: false },

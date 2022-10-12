@@ -357,7 +357,7 @@ export default {
 				if(this.roleID == 1) {
 					this.DataFasilitasMall = dataFasilitasMall
 				}else{
-					this.DataFasilitasMall = dataFasilitasMall.filter(val => val.data_mall.id_admin == this.idLogin)
+					this.DataFasilitasMall = dataFasilitasMall.filter(val => val.idAdmin == this.idLogin)
 				}
 				this.isLoading = false
 			})

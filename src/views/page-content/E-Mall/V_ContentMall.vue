@@ -271,7 +271,8 @@
 										label="Judul Content"
 										color="light-blue darken-3"
 										hide-details
-										clearable
+										:clearable="editedIndex != 2"
+										:readonly="editedIndex == 2"
 									/>
 								</v-col>
 							</v-row>

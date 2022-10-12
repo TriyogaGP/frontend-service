@@ -10,10 +10,10 @@
                 <v-list-item-content>
                   <img :src="item.gambar ? `${API_URL}image/event/${item.gambar}` : `${API_URL}No_Image_Available.jpg`" width="200" height="150"/>
                   <div class="mt-1"><v-divider /></div>
-                  <div class="overline text-right"><strong>{{ item.nama_event }}</strong></div>
-                  <div class="text-right">{{ item.kode_event }}</div>
-                  <div class="text-right">{{ item.tanggalevent }} {{ item.waktu_event }}</div>
-                  <div class="text-right">kata sandi : {{ item.katasandi_event }}</div>
+                  <div class="overline text-right"><strong>{{ item.namaEvent }}</strong></div>
+                  <div class="text-right">{{ item.kodeEvent }}</div>
+                  <div class="text-right">{{ item.startEvent }}</div>
+                  <div class="text-right">kata sandi : {{ item.kataSandiEvent }}</div>
                   <v-text-field
                     v-model="dataPass[i].katasandi"
                     placeholder="Kata Sandi Event"
@@ -62,7 +62,7 @@
                 <h4 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h4>
                 <div class="kotakBid">
                   <h4 class="text-center"><u>HARGA AWAL</u></h4>
-                  Rp. {{ currencyDotFormat(dataRoom.harga_awal) }}
+                  Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
                 </div>
                 <div class="kotakBid">
                   <h4 class="text-center"><u>HARGA SEKARANG</u></h4>
@@ -110,7 +110,7 @@
                 <h4><u>Kelengkapan Barang Lelang</u></h4>
                 <v-row no-gutters>
                   <v-col cols="12" class="text-center">
-                    <img :src="data_barang_lelang.ktp_pemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktp_pemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
+                    <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
                     <img :src="data_barang_lelang.stnk ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.stnk}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS STNK" width="120" height="90" class="ma-2"/>
                     <img :src="data_barang_lelang.bpkb ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.bpkb}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS BPKB" width="120" height="90" class="ma-2"/>
                     <img :src="data_barang_lelang.faktur ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.faktur}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS FAKTUR" width="120" height="90" class="ma-2"/>
@@ -119,7 +119,7 @@
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
                   <v-col cols="3">Nama Barang Lelang<span style="float: right;">:</span></v-col>
-                  <v-col cols="8">&nbsp;{{ data_barang_lelang.nama_barang_lelang }}</v-col>
+                  <v-col cols="8">&nbsp;{{ data_barang_lelang.namaBarangLelang }}</v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
                   <v-col cols="3">Tahun<span style="float: right;">:</span></v-col>
@@ -127,7 +127,7 @@
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
                   <v-col cols="3">Lokasi<span style="float: right;">:</span></v-col>
-                  <v-col cols="8">&nbsp;{{ data_barang_lelang.lokasi_barang }}</v-col>
+                  <v-col cols="8">&nbsp;{{ data_barang_lelang.lokasiBarang }}</v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
                   <v-col cols="3">Grade Barang<span style="float: right;">:</span></v-col>
@@ -266,7 +266,7 @@ export default {
       this.DataEventActive = []
 			let payload = {
 				method: "get",
-				url: `moduleMain/getEventActive`,
+				url: `lelang/getEventActive`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -275,7 +275,7 @@ export default {
         this.dataPass = []
         this.DataEventActive.map((val) => {
           const emit = {
-            id_event: val.id_event,
+            id_event: val.idEvent,
             katasandi: '',
             passType: '',
             panel: false,
@@ -291,7 +291,7 @@ export default {
       this.fotoArray = []
 			let payload = {
 				method: "get",
-				url: `moduleMain/getRoomEvent?no_lot=${nolot}`,
+				url: `lelang/getRoomEvent?no_lot=${nolot}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -299,9 +299,9 @@ export default {
         this.noLOT.splice(0, 1);
         this.currentLOT = nolot
 				this.dataRoom = res.data.result;
-				this.dataEvent = this.dataRoom.data_event
-				this.data_barang_lelang = this.dataRoom.data_barang_lelang
-        this.data_barang_lelang.data_foto_barang_lelang.map((el) => {
+				this.dataEvent = this.dataRoom.Event
+				this.data_barang_lelang = this.dataRoom.BarangLelang
+        this.dataRoom.dataFotoBarangLelang.map((el) => {
           this.fotoArray.push(el.gambar)
         })
         // console.log(this.fotoArray)
@@ -327,23 +327,23 @@ export default {
       }
     },
     enterRoom(item) {
-      let data = this.dataPass.filter((val) => val.id_event == item.id_event)
+      let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
       if(!data[0].katasandi){
         data[0].katasandi = ''
         data[0].panel = false
         return this.notifikasi("warning", "Masukan Kata Sandi Event !", "1")
-      }else if(data[0].katasandi == item.katasandi_event){
-        if(!item.data_lot){
+      }else if(data[0].katasandi == item.kataSandiEvent){
+        if(!item.LOT.length){
           data[0].katasandi = ''
           data[0].panel = false
           return this.notifikasi("warning", "Event ini Belum siap !", "1")
-        }else if(item.data_lot){
-          item.data_lot.map((el) => {
-            this.noLOT.push(el.no_lot)
+        }else if(item.LOT.length){
+          item.LOT.map((el) => {
+            this.noLOT.push(el.noLot)
           })
           data[0].katasandi = ''
           data[0].panel = true
-          this.getEvent(item.data_lot[0].no_lot)
+          this.getEvent(item.LOT[0].noLot)
         }
       }else{
         data[0].katasandi = ''
@@ -357,11 +357,11 @@ export default {
       this.tombolStop = false
       const socket = io(this.API_URL);
       socket.emit("join-bidding", { 
-        room: this.currentLOT + "_" + this.dataEvent.nama_event, 
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_peserta: localStorage.getItem('idLogin'), 
-        id_event: this.dataEvent.id_event, 
+        id_event: this.dataEvent.idEvent, 
         id_npl: 0, 
-        id_lot: this.dataRoom.id_lot, 
+        id_lot: this.dataRoom.idLot, 
         device: "laptop", 
         is_admin: 1 
       });
@@ -375,14 +375,15 @@ export default {
 				}, 5000);
 			});
 			socket.on("bid", ({ dataBid }) => {
+        console.log(dataBid);
         if(dataBid.totalUserBid > 0) {
           this.dataBidding = {
-            harga: parseInt(dataBid.nilaiAkhir) + parseInt(this.dataRoom.harga_awal),
+            harga: parseInt(dataBid.nilaiAkhir) + parseInt(this.dataRoom.hargaAwal),
             nama: dataBid.dataBidding.nama,
             no_npl: dataBid.dataBidding.no_npl,
-            id_bidding: dataBid.dataBidding.id_bidding,
+            id_bidding: dataBid.dataBidding.idBidding,
           }
-          if(this.dataBidding.nama != localStorage.getItem('nama') && this.dataRoom.id_lot == dataBid.dataBidding.id_lot) return this.tombolBid = false
+          if(this.dataBidding.nama != localStorage.getItem('nama') && this.dataRoom.idLot == dataBid.dataBidding.idLot) return this.tombolBid = false
           this.tombolBid = true
         }else{
           this.dataBidding = {
@@ -421,10 +422,10 @@ export default {
       this.tombolBid = true
       const socket = io(this.API_URL);
       socket.emit("bid", { 
-        room: this.currentLOT + "_" + this.dataEvent.nama_event, 
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_npl: localStorage.getItem('idLogin'), 
-        id_lot: this.dataRoom.id_lot, 
-        harga_bidding: this.dataEvent.kelipatan_bid, 
+        id_lot: this.dataRoom.idLot, 
+        harga_bidding: this.dataEvent.kelipatanBid, 
         is_admin: 1 
       });
     },

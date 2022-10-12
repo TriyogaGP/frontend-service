@@ -56,7 +56,7 @@
 									:single-expand="singleExpand"
 									:expanded.sync="expanded"
 									show-expand
-									item-key="id_content_tenant_mall"
+									item-key="idContentTenantMall"
 									hide-default-footer
 									class="elevation-1"
 									:page.sync="page"
@@ -67,13 +67,13 @@
 										{{ DataContent.indexOf(item) + 1 }}
 									</template>
 									<template #[`item.tenant_mall`]="{ item }">
-										<span v-html="item.data_MT.nama_tenant_mall" />
+										<span v-html="item.namaTenantMall" />
 									</template>
-									<template #[`item.status_aktif`]="{ item }">
-										<v-icon small v-if="item.status_aktif == 1" color="green">check</v-icon>
-										<v-icon small v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
+									<template #[`item.statusAktif`]="{ item }">
+										<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+										<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 										<br>
-										<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
+										<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 									</template>
 									<!-- <template #[`item.kategori`]="{ item }">
 										<span v-html="item.data_kategori_content.kategori_content" />
@@ -81,20 +81,20 @@
 									<template #expanded-item="{ headers, item }">
 										<td :colspan="headers.length" class="white">
 											<v-btn
-												:value="item.id_content_tenant_mall"
+												:value="item.idContentTenantMall"
 												color="#0bd369"
 												small
 												dense
 												depressed
 												class="ma-2 white--text text--darken-2"
-												:disabled="item.status_aktif == 0"
+												:disabled="item.statusAktif == false"
 												@click="bukaDialog(item, 1)"
 											>
 											<v-icon small>edit</v-icon>	Ubah
 											</v-btn>
 											<v-btn
-												v-if="item.status_aktif == 0"
-												:value="item.id_content_tenant_mall"
+												v-if="item.statusAktif == false"
+												:value="item.idContentTenantMall"
 												color="#0bd369"
 												small
 												dense
@@ -105,8 +105,8 @@
 												<v-icon small>visibility</v-icon>	Active
 											</v-btn> 
 											<v-btn
-												v-else-if="item.status_aktif == 1"
-												:value="item.id_content_tenant_mall"
+												v-else-if="item.statusAktif == true"
+												:value="item.idContentTenantMall"
 												color="#0bd369"
 												small
 												dense
@@ -117,19 +117,19 @@
 												<v-icon small>visibility_off</v-icon>	Non Active
 											</v-btn>
 											<v-btn
-												:value="item.id_content_tenant_mall"
+												:value="item.idContentTenantMall"
 												color="#bd3a07"
 												small
 												dense
 												depressed
 												class="ma-2 white--text text--darken-2"
-												:disabled="item.status_aktif == 0"
+												:disabled="item.statusAktif == false"
 												@click="HapusRecord(item)"
 											>
 											<v-icon small>delete</v-icon>	Hapus
 											</v-btn> 
 											<v-btn
-												:value="item.id_content_tenant_mall"
+												:value="item.idContentTenantMall"
 												color="#04f7f7"
 												small
 												dense
@@ -204,8 +204,8 @@
 									<v-autocomplete
 										v-model="inputContent.id_tenant_mall"
 										:items="TenantMallOptions"
-										item-text="nama_tenant_mall"
-										item-value="id_tenant_mall"
+										item-text="namaTenantMall"
+										item-value="idTenantMall"
 										placeholder="Tenant Mall"
 										label="Tenant Mall"
 										outlined
@@ -215,10 +215,10 @@
 										:readonly="editedIndex == 2"
 									>
 										<template v-slot:selection="{ item }">
-											{{item.nama_tenant_mall}} | {{item.data_mall.nama_mall}} 
+											{{item.namaTenantMall}} | {{item.namaMall}} 
 										</template>
 										<template v-slot:item="{ item }">
-											{{item.nama_tenant_mall}} | {{item.data_mall.nama_mall}}
+											{{item.namaTenantMall}} | {{item.namaMall}}
 										</template>
 									</v-autocomplete>
 								</v-col>
@@ -271,7 +271,8 @@
 										label="Judul Content"
 										color="light-blue darken-3"
 										hide-details
-										clearable
+										:clearable="editedIndex != 2"
+										:readonly="editedIndex == 2"
 									/>
 								</v-col>
 							</v-row>
@@ -557,8 +558,8 @@ export default {
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Tenant Mall", value: "tenant_mall", sortable: false },
       // { text: "Kategori Content", value: "kategori", sortable: false },
-      { text: "Judul Content", value: "judul_content", sortable: false },
-      { text: "Status", value: "status_aktif", sortable: false },
+      { text: "Judul Content", value: "judulContent", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -580,13 +581,13 @@ export default {
 		},
 		itemsTab: [
 			{code: '1', text: 'Promosi'},
-			{code: '2', text: 'Voucher'},
-			{code: '3', text: 'Rewards'},
+			{code: '2', text: 'Rewards'},
+			{code: '3', text: 'Voucher'},
 		],
 		KategoriContentOptions: [
 			{value: 1, text: 'Promosi'},
-			{value: 2, text: 'Voucher'},
-			{value: 3, text: 'Rewards'},
+			{value: 2, text: 'Rewards'},
+			{value: 3, text: 'Voucher'},
 		],
 		tab: '',
 		codeActive: '',
@@ -658,7 +659,7 @@ export default {
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllContent?table=ContentTenantMall&id_kategori_content=${code}`,
+				url: `emall/getContent?kategori=tenantmall&id_kategori_content=${code}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -667,7 +668,7 @@ export default {
 				if(this.roleID == 1) {
 					this.DataContent = dataContent
 				}else{
-					this.DataContent = dataContent.filter(val => val.data_MT.id_admin == this.idLogin)
+					this.DataContent = dataContent.filter(val => val.idAdmin == this.idLogin)
 				}
 				this.isLoading = false
 			})
@@ -681,7 +682,7 @@ export default {
 			let link = this.roleID != 1 ? '?id_admin='+this.idLogin+'&status_aktif=1' : ''
 			let payload = {
 				method: "get",
-				url: `moduleMain/getAllTenantMall${link}`,
+				url: `emall/getTenantMall${link}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -691,7 +692,7 @@ export default {
 					this.TenantMallOptions = dataKumpul
 				}else{
 					dataKumpul.map(val => {
-						if(val.id_tenant_mall == value) {
+						if(val.idTenantMall == value) {
 							this.inputContent.UnixText = val.UnixText
 						}
 					})
@@ -710,11 +711,11 @@ export default {
 				this.clearForm()
 				this.inputContent.id_kategori_content = this.codeActive
       }else{
-				this.inputContent.UnixText = item.data_MT ? item.data_MT.UnixText : ''
-				this.inputContent.id_content_tenant_mall = item.id_content_tenant_mall ? item.id_content_tenant_mall : ''
-				this.inputContent.id_tenant_mall = item.id_tenant_mall ? item.id_tenant_mall : ''
-				this.inputContent.id_kategori_content = item.id_kategori_content ? item.id_kategori_content : ''
-        this.inputContent.judul_content = item.judul_content ? item.judul_content : ''
+				this.inputContent.UnixText = item ? item.UnixText : ''
+				this.inputContent.id_content_tenant_mall = item.idContentTenantMall ? item.idContentTenantMall : ''
+				this.inputContent.id_tenant_mall = item.idTenantMall ? item.idTenantMall : ''
+				this.inputContent.id_kategori_content = item.idKategoriContent ? item.idKategoriContent : ''
+        this.inputContent.judul_content = item.judulContent ? item.judulContent : ''
         this.inputContent.link = item.link ? item.link : ''
         this.inputContent.deskripsi = item.deskripsi ? item.deskripsi : ''
         this.inputContent.filefoto = item.foto ? item.foto : ''
@@ -740,7 +741,7 @@ export default {
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesContent`,
+				url: `emall/postContent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -748,7 +749,7 @@ export default {
 			.then(async (res) => {
 				if(this.FileFOTO){
 					let uploadFOTO = await this.uploadLampiran(index, dataUpload)
-					if(uploadFOTO.data.kode == 200){
+					if(uploadFOTO.data.status == 200){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
 						this.notifikasi("error", 'Gagal proses data', "1")
@@ -789,13 +790,13 @@ export default {
       let bodyData = {
         jenis: 'DELETE',
 				content: 'TenantMall',
-        id_content_tenant_mall: item.id_content_tenant_mall,
-        judul_content: item.judul_content,
+        id_content_tenant_mall: item.idContentTenantMall,
+        judul_content: item.judulContent,
         delete_by: localStorage.getItem('idLogin'),
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesContent`,
+				url: `emall/postContent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};
@@ -813,12 +814,12 @@ export default {
       let bodyData = {
         jenis: 'STATUSRECORD',
 				content: 'TenantMall',
-        id_content_tenant_mall: item.id_content_tenant_mall,
+        id_content_tenant_mall: item.idContentTenantMall,
         status_aktif: status_aktif,
       }
       let payload = {
 				method: "post",
-				url: `moduleMain/prosesContent`,
+				url: `emall/postContent`,
         body: bodyData,
 				authToken: localStorage.getItem('user_token')
 			};

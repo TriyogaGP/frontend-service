@@ -27,7 +27,8 @@
 					>
 						{{nama}}
 						<v-avatar size="35">
-							<v-img src="../../public/avatar.png"></v-img>
+							<v-img v-if="siteLogin == 'Peserta'" :src="dataProfile.fotoPeserta ? `${API_URL}image/berkas/${dataProfile.fotoPeserta}` : `${API_URL}No_Image_Available.jpg`"></v-img>
+							<v-img v-else src="../../public/avatar.png"></v-img>
 						</v-avatar>
 					</span>
 				</template>
@@ -67,7 +68,8 @@
 					</v-toolbar-title>
 					<div class="d-flex flex-column justify-space-between align-center">
 						<v-avatar size="100">
-							<v-img src="../../public/avatar.png"></v-img>
+							<v-img v-if="siteLogin == 'Peserta'" :src="dataProfile.fotoPeserta ? `${API_URL}image/berkas/${dataProfile.fotoPeserta}` : `${API_URL}No_Image_Available.jpg`"></v-img>
+							<v-img v-else src="../../public/avatar.png"></v-img>
 						</v-avatar>
 					</div>
 					<p class="white--text subheading mt-1 text-center">{{nama}}</p>
@@ -144,6 +146,10 @@ export default {
 		roleID: '',
 		nama: '',
 		Token: '',
+		siteLogin: '',
+		dataProfile: {
+      fotoPeserta: '',
+    },
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -156,7 +162,10 @@ export default {
 		this.nama = localStorage.getItem('nama')
 		this.roleID = localStorage.getItem('roleID')
 		this.Token = localStorage.getItem('user_token')
+		this.siteLogin = localStorage.getItem("siteLogin")
+    this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
 		this.getMenu(this.roleID)
+		this.getProfile(localStorage.getItem("idLogin"), localStorage.getItem("siteLogin"))
 		// this.$getLocation({
     //   enableHighAccuracy: false, //defaults to false
     //   timeout: Infinity, //defaults to Infinity
@@ -181,6 +190,23 @@ export default {
 			.catch((err) => {
 				this.notifikasi("warning", err.response.data.message, "2")
 				// console.log(err);
+			});
+		},
+		getProfile(id, by) {
+			let payload = {
+				method: "get",
+				url: `auth/getProfile?id_login=${id}&by=${by}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				let data = res.data.result;
+        this.dataProfile = {
+          fotoPeserta: data.fotoPeserta,
+        }
+			})
+			.catch((err) => {
+				console.log(err)
 			});
 		},
 		keluar() {

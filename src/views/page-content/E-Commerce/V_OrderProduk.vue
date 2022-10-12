@@ -59,7 +59,7 @@
 										<strong>
 											<span v-html="item.noOrder" />
 										</strong>
-										<v-icon medium color="#0277bd" @click="ListProduk(item)">info</v-icon>
+										<v-icon medium color="#0277bd" @click="DetailsOrderProduk(item)">info</v-icon>
 									</template>
 									<template #[`item.noResi`]="{ item }">
 										<strong><span v-html="item.dataShipping.noResi ? item.dataShipping.noResi : '-'" /></strong>
@@ -93,96 +93,6 @@
 			</v-card>
 		</v-card>
 		<v-dialog
-      v-model="DialogOrderProduk"
-      max-width="800px"
-      persistent
-      transition="dialog-bottom-transition"
-    >
-      <v-card>
-        <v-toolbar
-          dark
-          color="light-blue darken-3"
-        >
-          <v-toolbar-title>{{editedIndex == 0 ? 'Tambah' : 'Ubah'}} Data Kategori Produk</v-toolbar-title>
-          <v-spacer />
-          <v-toolbar-items>
-            <v-btn
-              icon
-              dark
-              @click="tutupDialog"
-            >
-              <v-icon>close</v-icon>
-            </v-btn>
-          </v-toolbar-items>
-        </v-toolbar>
-        <v-card>
-					<v-card-text>
-						<v-row no-gutters>
-							<v-col
-								cols="12"
-								md="4"
-								class="pt-2 d-flex align-center"
-							>
-								Kategori Produk
-							</v-col>
-							<v-col
-								cols="12"
-								md="8"
-								class="pt-3"
-							>
-								<v-text-field
-									v-model="inputOrderProduk.kategori_produk"
-									placeholder="Kategori Produk"
-									outlined
-									dense
-									label="Kategori Produk"
-									color="light-blue darken-3"
-									hide-details
-									clearable
-								/>
-							</v-col>
-						</v-row>
-					</v-card-text>
-					<v-card-actions>
-						<v-row 
-							no-gutters
-							class="mt-1 mr-3"
-						>
-							<v-col
-								class="text-end"
-								cols="12"
-							>
-								<v-btn
-									v-if="editedIndex == 0"
-									color="light-blue darken-3"
-									class="white--text text--darken-2"
-									small
-									dense
-									depressed
-									:disabled="kondisiTombol"
-									@click="SimpanForm(0)"
-								>
-									Simpan Data
-								</v-btn> 
-								<v-btn
-									v-else-if="editedIndex == 1"
-									color="light-blue darken-3"
-									class="white--text text--darken-2"
-									small
-									dense
-									depressed
-									:disabled="kondisiTombol"
-									@click="SimpanForm(1)"
-								>
-									Ubah Data
-								</v-btn>
-							</v-col>
-						</v-row>
-					</v-card-actions>
-				</v-card>
-			</v-card>
-		</v-dialog>
-		<v-dialog
       v-model="dialogNotifikasi"
       transition="dialog-bottom-transition"
       persistent
@@ -196,7 +106,7 @@
       />
     </v-dialog>
 		<v-dialog
-      v-model="DialogProduk"
+      v-model="DialogOrderProduk"
       max-width="1200px"
       persistent
       transition="dialog-bottom-transition"
@@ -206,13 +116,13 @@
           dark
           color="light-blue darken-3"
         >
-          <v-toolbar-title>Detail Produk</v-toolbar-title>
+          <v-toolbar-title>Detail Order Produk</v-toolbar-title>
           <v-spacer />
           <v-toolbar-items>
             <v-btn
               icon
               dark
-              @click="() => { DialogProduk = false; detailProduk = ''; dataProduk = []; }"
+              @click="() => { DialogOrderProduk = false; detailProduk = ''; dataProduk = []; }"
             >
               <v-icon>close</v-icon>
             </v-btn>
@@ -628,7 +538,6 @@ export default {
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
 		DialogOrderProduk: false,
-		DialogProduk: false,
 		detailProduk: '',
 		dataProduk: [],
 		dataPaymentDetails: [],
@@ -644,10 +553,6 @@ export default {
 			{code: '6', text: 'Transaksi batal'}
 		],
 		tab: '',
-		inputOrderProduk: {
-			id_order: '',
-			kategori_produk: '',
-		},
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -663,18 +568,6 @@ export default {
 		},
 	},
 	watch:{
-		inputOrderProduk: {
-			deep: true,
-			handler(value){
-				if(value.kategori_produk == null){ this.inputProduk.kategori_produk = '' }
-
-				if(value.kategori_produk != ''){
-					this.kondisiTombol = false
-				}else{
-					this.kondisiTombol = true	
-				}
-			}
-		},
 		tab:{
 			handler(value){
 				this.getOrders(value)
@@ -704,99 +597,13 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
-		bukaDialog(item, index){
-			this.editedIndex = index
-			if(index == 0){
-				this.clearForm()
-      }else{
-				this.inputOrderProduk.id_order = item.idOrder
-        this.inputOrderProduk.kategori_produk = item.kategoriProduk
-			}
-			this.DialogOrderProduk = true
-		},
-		tutupDialog() {
-      this.clearForm()
-      this.DialogOrderProduk = false
-    },
-		SimpanForm(index) {
-      let bodyData = {
-        jenis: index == 0 ? 'ADD' : 'EDIT',
-        id_order: index == 0 ? '' : this.inputOrderProduk.id_order,
-        kategori_produk: this.inputOrderProduk.kategori_produk,
-        create_update_by: localStorage.getItem('idLogin'),
-      }
-      let payload = {
-				method: "post",
-				url: `moduleMain/prosesOrderProduk`,
-        body: bodyData,
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-        this.DialogOrderProduk = false
-        this.getOrders()
-        this.notifikasi("success", res.data.message, "1")
-			})
-			.catch((err) => {
-				this.notifikasi("error", err.response.data.message, "1")
-			});
-    },
-    HapusRecord(item) {
-      let bodyData = {
-        jenis: 'DELETE',
-        id_order: item.id_order,
-        kategori_produk: item.kategori_produk,
-        delete_by: localStorage.getItem('idLogin'),
-      }
-      let payload = {
-				method: "post",
-				url: `moduleMain/prosesOrderProduk`,
-        body: bodyData,
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-        this.DialogOrderProduk = false
-        this.getOrders()
-        this.notifikasi("success", res.data.message, "1")
-			})
-			.catch((err) => {
-				this.notifikasi("error", err.response.data.message, "1")
-			});
-    },
-    StatusRecord(item, status_aktif) {
-      let bodyData = {
-        jenis: 'STATUSRECORD',
-        id_order: item.id_order,
-        kategori_produk: item.kategori_produk,
-        status_aktif: status_aktif,
-      }
-      let payload = {
-				method: "post",
-				url: `moduleMain/prosesOrderProduk`,
-        body: bodyData,
-				authToken: localStorage.getItem('user_token')
-			};
-			this.fetchData(payload)
-			.then((res) => {
-        this.DialogOrderProduk = false
-        this.getOrders()
-        this.notifikasi("success", res.data.message, "1")
-			})
-			.catch((err) => {
-				this.notifikasi("error", err.response.data.message, "1")
-			});
-    },
-		clearForm() {
-			this.inputOrderProduk.kategori_produk = ''
-		},
-		ListProduk(item) {
+		DetailsOrderProduk(item) {
 			// console.log(item)
 			this.detailProduk = item
 			this.dataProduk = item.dataProduk
 			this.dataPaymentDetails = item.dataPaymentDetails
 			this.dataOrderStatus = item.dataOrderStatus
-			this.DialogProduk = true
+			this.DialogOrderProduk = true
 		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true

@@ -905,7 +905,7 @@ export default {
 				if(this.roleID == 1) {
 					this.DataTenantMall = dataTenantMall
 				}else{
-					this.DataTenantMall = dataTenantMall.filter(val => val.data_mall.id_admin == this.idLogin)
+					this.DataTenantMall = dataTenantMall.filter(val => val.idAdmin == this.idLogin)
 				}
 				this.isLoading = false
 			})
