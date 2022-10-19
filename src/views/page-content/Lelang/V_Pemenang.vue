@@ -41,7 +41,7 @@
 						{{ DataAllPemenang.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.nama_pemenang`]="{ item }">
-						<span v-html="item.details.nama" /> 
+						<span v-html="item.data_bidding_terakhir.isAdmin == true ? `${item.details.nama} <b>(Admin Lelang)</b>` : item.details.nama" /> 
 					</template>
 					<template #[`item.nominal`]="{ item }">
 						Rp.<span v-html="currencyDotFormat(item.nominal)" /> 
@@ -612,6 +612,7 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
       { text: "Nama Pemenang", value: "nama_pemenang", sortable: false },
+      // { text: "Nama Pemilik", value: "namaPemilik", sortable: false },
       { text: "Nominal", value: "nominal", sortable: false },
       { text: "Type Pelunasan", value: "tipe_pelunasan", sortable: false },
       { text: "Status Pembayaran", value: "status_pembayaran", sortable: false },

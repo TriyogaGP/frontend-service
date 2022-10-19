@@ -662,7 +662,7 @@ export default {
 		bukaDialogBuktiRefund(dataNPL, dataPeserta) {
 			this.inputRefund.id_npl = dataNPL.idNpl
 			this.inputRefund.UnixText = dataPeserta.UnixText
-			console.log(this.inputRefund);
+			// console.log(this.inputRefund);
 			this.DialogBuktiRefund = true
 		},
 		tutupDialogBuktiRefund() {

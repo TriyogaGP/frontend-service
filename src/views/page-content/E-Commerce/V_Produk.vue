@@ -1510,7 +1510,7 @@ export default {
 			});
     },
     bukaDialogStok(item, index){
-      console.log(item)
+      // console.log(item)
       this.editedIndex = index
       this.getProduk()
       if(index == 0){

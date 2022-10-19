@@ -247,31 +247,51 @@
       </v-layout>
     </v-container>
     <div v-for="(item, i) in DataEventActive" :key="i">
-      <div v-if="dataPass[i].panel">    
+      <div v-if="dataPass[i].panel && EventPanel == true">    
         <v-divider style="border: 1px solid #000" />
         <h1 class="subheading grey--text">Panel Bidding</h1>
         <v-card class="ma-3 pa-1" style="border: 5px solid #000; border-radius: 5px;">
           <v-row class="ma-1">
             <v-col cols="3" class="light-blue darken-3 kotakleft">
-              <h4 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h4>
+              <h5 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h5>
               <div class="kotakBid">
-                <h4 class="text-center"><u>HARGA AWAL</u></h4>
+                <h5 class="text-center"><u>HARGA AWAL</u></h5>
                 Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
               </div>
               <div class="kotakBid">
-                <h4 class="text-center"><u>HARGA SEKARANG</u></h4>
+                <h5 class="text-center"><u>HARGA SEKARANG</u></h5>
                 Rp. {{ currencyDotFormat(dataBidding.harga.toString()) }}
               </div>
-              <h4 class="text-center white--text text--darken-2"><u>NAMA</u></h4>
+              <h5 class="text-center white--text text--darken-2"><u>NAMA</u></h5>
               <div class="kotakBid">
                 <h6 class="text-center" style="font-size: 8pt">{{ dataBidding.nama }} ({{ dataBidding.no_npl }})</h6>
               </div>
-              <h4 class="text-center white--text text--darken-2"><u>PEMENANG</u></h4>
+              <h5 class="text-center white--text text--darken-2"><u>PEMENANG</u></h5>
               <div class="kotakBid">
-                <h4 class="text-center"><u>PEMENANG</u></h4>
+                <h5 class="text-center"><u>PEMENANG</u></h5>
                 <h6 class="text-center" style="font-size: 8pt">{{ dataPemenang.nama }} ({{ dataPemenang.no_npl }})</h6>
                 Rp. {{ currencyDotFormat(dataPemenang.harga.toString()) }}
               </div>
+              <h5 class="text-center white--text text--darken-2"><u>Waktu Lelang</u></h5>
+                <div class="timer">
+                  <Countdown 
+                    :starttime="starttime" 
+                    :endtime="endtime"
+                    :kondisi="timerKondisi" 
+                    trans='{  
+                    "day":"Hari",
+                    "hours":"Jam",
+                    "minutes":"Menit",
+                    "seconds":"Detik",
+                    "expired":"Event has been expired.",
+                    "running":"Till the end of event.",
+                    "upcoming":"Till start of event.",
+                    "status": {
+                      "expired":"Expired",
+                      "running":"Running",
+                      "upcoming":"Future"
+                    }}'/>
+                </div>
               <div class="d-flex justify-center mt-5">
                 <v-btn
                   color="lime accent-3"
@@ -301,7 +321,7 @@
                 </v-carousel>
                 <img v-else :src="`${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
               </div>
-              <h4><u>Kelengkapan Barang Lelang</u></h4>
+              <h5><u>Kelengkapan Barang Lelang</u></h5>
               <v-row no-gutters>
                 <v-col cols="12" class="text-center">
                   <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
@@ -312,24 +332,24 @@
                 </v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3">Nama Barang Lelang<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.namaBarangLelang }}</v-col>
+                <v-col cols="3"><h5>Nama Barang Lelang<span style="float: right;">:</span></h5></v-col>
+                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.namaBarangLelang }}</h5></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3">Tahun<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.tahun }}</v-col>
+                <v-col cols="3"><h5>Tahun<span style="float: right;">:</span></h5></v-col>
+                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.tahun }}</h5></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3">Lokasi<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.lokasiBarang }}</v-col>
+                <v-col cols="3"><h5>Lokasi<span style="float: right;">:</span></h5></v-col>
+                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.lokasiBarang }}</h5></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3">Grade Barang<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.grade }}</v-col>
+                <v-col cols="3"><h5>Grade Barang<span style="float: right;">:</span></h5></v-col>
+                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.grade }}</h5></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3">Deskripsi<span style="float: right;">:</span></v-col>
-                <v-col cols="8">&nbsp;{{ data_barang_lelang.deskripsi }}</v-col>
+                <v-col cols="3"><h5>Deskripsi<span style="float: right;">:</span></h5></v-col>
+                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.deskripsi }}</h5></v-col>
               </v-row>
               <v-row>
                 <v-col cols="6">
@@ -347,19 +367,17 @@
                   </v-btn>
                 </v-col>
                 <v-col cols="6">
-                  <!-- <v-btn
-                    v-if="noLOT.length"
+                  <v-btn
                     style="float: right;"
                     color="light-blue darken-3"
                     small
                     dense
                     depressed
                     class="mt-2 white--text text--darken-2"
-                    :disabled="tombolLanjut"
-                    @click="nextRoom(noLOT[0])"
+                    @click="() => { EventPanel = false }"
                   >
-                    <v-icon small>arrow_forward</v-icon> Lanjut Bid
-                  </v-btn> -->
+                    <v-icon small>exit_to_app</v-icon> Keluar Panel
+                  </v-btn>
                 </v-col>
               </v-row>
             </v-col>
@@ -387,10 +405,11 @@
 <script>
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "./Layout/PopUpNotifikasi.vue";
+import Countdown from './Layout/CountDown.vue';
 import io from 'socket.io-client'
 export default {
   name: 'Dashboard',
-  components: { PopUpNotifikasiVue },
+  components: { PopUpNotifikasiVue, Countdown },
   data: () => ({
     API_URL: '',
     roleID: '',
@@ -405,6 +424,7 @@ export default {
     tombolJoin: true,
     tombolStop: true,
     tombolLanjut: true,
+    kondisiTimer: true,
     dataPass: [{
       id_event: '',
       katasandi: '', 
@@ -431,6 +451,10 @@ export default {
     dataEvent: '',
     data_barang_lelang: '',
 
+    starttime: new Date(), 
+    endtime: "",
+    EventPanel: false,
+
     //notifikasi
     dialogNotifikasi: false,
     notifikasiKode: '',
@@ -444,6 +468,11 @@ export default {
 			amp: true,
 		},
 	},
+  computed:{
+    timerKondisi() {
+      return this.kondisiTimer
+    },
+  },
   created() {
     this.siteLogin = localStorage.getItem('siteLogin')
     if(this.siteLogin == 'Peserta') {
@@ -455,6 +484,8 @@ export default {
       socket.on("done-bidding", (pesan) => {
         this.tombolBid = true
         this.tombolJoin = true
+        this.DataEventActive = []
+        this.DataNPL = []
         this.getBidLelang()
         this.notifikasi("success", pesan, "1")
       });
@@ -485,6 +516,7 @@ export default {
 		},
 		getBidLelang() {
       this.DataEventActive = []
+      this.DataNPL = []
 			let payload = {
 				method: "get",
 				url: `lelang/getBidLelang?id_peserta=${localStorage.getItem('idLogin')}`,
@@ -494,6 +526,8 @@ export default {
 			.then((res) => {
 				this.DataPembelianNPL = res.data.result;
         this.dataPass = []
+        this.DataEventActive = []
+        this.DataNPL = []
         this.DataPembelianNPL.map((val) => {
           this.DataEventActive.push(val.Event)
           val.NPL.map((valNPL) => {
@@ -546,28 +580,32 @@ export default {
 		},
     enterRoom(item) {
       let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
-      const dataNPL = this.DataNPL.filter((val) => val.no_npl == data[0].no_npl)
+      const dataNPL = this.DataNPL.filter((val) => val.no_npl == data[0].no_npl && val.id_event == data[0].id_event)
 
       if(!data[0].katasandi){
         data[0].katasandi = ''
         data[0].no_npl = ''
         data[0].panel = false
+        this.EventPanel = false
         return this.notifikasi("warning", "Masukan Kata Sandi Event !", "1")
       }else if(!data[0].no_npl){
         data[0].katasandi = ''
         data[0].no_npl = ''
         data[0].panel = false
+        this.EventPanel = false
         return this.notifikasi("warning", "Pilih No. NPL anda !", "1")
       }else if(dataNPL[0].status_npl != 0){
         data[0].katasandi = ''
         data[0].no_npl = ''
         data[0].panel = false
+        this.EventPanel = false
         return this.notifikasi("warning", "No. NPL anda sudah digunakan !", "1")
       }else if(data[0].katasandi == item.kataSandiEvent){
         if(!item.LOT.length){
           data[0].katasandi = ''
           data[0].no_npl = ''
           data[0].panel = false
+          this.EventPanel = false
           return this.notifikasi("warning", "Event ini Belum siap !", "1")
         }else{
           item.LOT.map((el) => {
@@ -577,19 +615,21 @@ export default {
           this.currentNPL = data[0].no_npl
           data[0].no_npl = ''
           data[0].panel = true
+          this.EventPanel = true
           this.getEvent(item.LOT[0].noLot)
         }
       }else{
         data[0].katasandi = ''
         data[0].no_npl = ''
         data[0].panel = false
+        this.EventPanel = false
         return this.notifikasi("warning", "Kata Sandi Event tidak cocok !", "1")
       }
     },
     JoinBidding() {
       this.DataPembelianNPL.map((val) => {
         val.NPL.map((valNPL) => {
-          if(valNPL.noNpl == this.currentNPL){
+          if(valNPL.noNpl == this.currentNPL && val.idEvent == this.dataEvent.idEvent){
             this.currentIDNPL = valNPL.idNpl
           }  
         })
@@ -607,6 +647,10 @@ export default {
         device: "laptop", 
         is_admin: 0
       });
+      socket.on("lot-data", (data) => {
+        this.kondisiTimer = false
+        this.endtime = data.expiredAt
+			});
 			socket.on("join-message", (pesan) => {
         this.joinPesan = pesan;
 				this.hiddenLog = false
@@ -709,7 +753,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 img {
 	border-style: solid !important;
 	border-radius: 10px !important;
@@ -831,5 +875,58 @@ img {
 	background: #FFF;
 	color: #000;
 	margin: 5px;
+}
+.timer {
+  font-size: 20px;
+  color: #fff;
+  text-align:center;
+  margin-top: 5px;
+
+  .day, .hour, .min, .sec {
+    font-size: 15px;
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+    margin: 0 2px;
+    .format {
+      font-weight: 300;
+      font-size: 12px;
+      //@include margin-start(5);
+      //display: inline-block;
+      opacity: 0.8;
+      width: 60px;
+    }
+  }
+  .number{
+    background: rgba(51, 51, 51, 0.53);
+    padding: 0 5px;
+    border-radius: 5px;
+    display: inline-block;
+    width: 30px;
+    text-align: center;
+  }
+  .message {
+    font-size: 14px;
+    font-weight: 400;
+    margin-top: 5px;
+  }
+  .status-tag{
+    width: 270px;
+    margin: 10px auto;
+    padding: 8px 0;
+    font-weight: 500;
+    color: #000;
+    text-align: center;
+    border-radius: 15px;
+    &.upcoming{
+      background-color: lightGreen;
+    }
+    &.running{
+      background-color: gold;
+    }
+    &.expired{
+      background-color: silver;
+    }
+  }
 }
 </style>

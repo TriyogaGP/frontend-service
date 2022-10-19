@@ -61,9 +61,15 @@
             </v-tooltip>
           </template>
           <template #[`item.no_kelengkapan`]="{ item }">
-            No. Polisi : <span v-html="item.noPolisi" /> <br> 
-            No. Rangka : <span v-html="item.noRangka" /> <br>
-            No. Mesin : <span v-html="item.noMesin" /> 
+            <div v-if="item.namaKategori == 'Mobil' || item.namaKategori == 'Motor'">
+              No. Polisi : <span v-html="item.noPolisi" /> <br> 
+              No. Rangka : <span v-html="item.noRangka" /> <br>
+              No. Mesin : <span v-html="item.noMesin" /> 
+            </div>
+            <div v-else>
+              Spesifikasi : <br>
+              <span v-html="item.deskripsi" /> 
+            </div>
           </template>
           <template #[`item.statusAktif`]="{ item }">
             <v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
@@ -357,7 +363,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -383,7 +389,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -415,7 +421,7 @@
                   md="4"
                   class="pt-2 d-flex align-center"
                 >
-                  Tipe Mobil
+                  Tipe Model
                 </v-col>
                 <v-col
                   cols="12"
@@ -424,10 +430,10 @@
                 >
                   <v-text-field
                     v-model="inputBarangLelang.tipe_model"
-                    placeholder="Tipe Mobil"
+                    placeholder="Tipe Model"
                     outlined
                     dense
-                    label="Tipe Mobil"
+                    label="Tipe Model"
                     color="light-blue darken-3"
                     hide-details
                     :clearable="editedIndex != 2"
@@ -435,7 +441,7 @@
                   />
                 </v-col>
               </v-row>
-              <v-row no-gutters>
+              <v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -463,7 +469,7 @@
                   />
                 </v-col>
               </v-row>
-              <v-row no-gutters>
+              <v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -491,7 +497,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -544,7 +550,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -570,7 +576,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -596,7 +602,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -622,7 +628,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -648,7 +654,7 @@
                   />
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -690,7 +696,7 @@
 									</v-menu>
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -704,19 +710,34 @@
                   class="pt-3"
                 >
                   <v-text-field
-                    v-model="inputBarangLelang.sph"
-                    placeholder="SPH"
-                    outlined
-                    dense
-                    label="SPH"
-                    color="light-blue darken-3"
-                    hide-details
-                    :clearable="editedIndex != 2"
-                    :readonly="editedIndex == 2"
-                  />
+										v-model="inputBarangLelang.sph"
+										placeholder="Upload"
+										outlined
+										dense
+                  	style="display: none"
+									/>
+									<input 
+										ref="inputSPHFile"
+										:key="componentKey"
+										type="file"
+										accept="application/pdf"
+										style="display: none"
+										@change="uploadFile($event, 'sph')"
+									>
+									<v-btn v-if="editedIndex != 2" depressed small color="light-blue darken-3" dark @click="pilihFile('sph')">
+										<v-icon small left>{{editedIndex == 0 ? 'add' : 'edit'}}</v-icon> {{editedIndex == 0 ? 'Tambah' : 'Ubah'}} Lampiran
+									</v-btn>
+									<v-btn v-else-if="editedIndex == 2" depressed small color="light-blue darken-3" dark @click="lookPDF('sph')">
+										<v-icon small left>pageview</v-icon> Lihat Lampiran
+									</v-btn>
+                  <br>
+                  <span v-if="this.inputBarangLelang.sph != ''">
+										<strong>nama file :</strong> <i>{{this.inputBarangLelang.sph}}</i> {{editedIndex == 0 ? '('+(this.FileSPH.size / (1024*1024)).toFixed(2)+' MB)' : ''}}
+										<v-icon small v-if="editedIndex != 2" color="red" @click="hapusFile('sph')">delete</v-icon>
+									</span>
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -730,19 +751,34 @@
                   class="pt-3"
                 >
                   <v-text-field
-                    v-model="inputBarangLelang.kir"
-                    placeholder="KIR"
-                    outlined
-                    dense
-                    label="KIR"
-                    color="light-blue darken-3"
-                    hide-details
-                    :clearable="editedIndex != 2"
-                    :readonly="editedIndex == 2"
-                  />
+										v-model="inputBarangLelang.kir"
+										placeholder="Upload"
+										outlined
+										dense
+                  	style="display: none"
+									/>
+									<input 
+										ref="inputKIRFile"
+										:key="componentKey"
+										type="file"
+										accept="application/pdf"
+										style="display: none"
+										@change="uploadFile($event, 'kir')"
+									>
+									<v-btn v-if="editedIndex != 2" depressed small color="light-blue darken-3" dark @click="pilihFile('kir')">
+										<v-icon small left>{{editedIndex == 0 ? 'add' : 'edit'}}</v-icon> {{editedIndex == 0 ? 'Tambah' : 'Ubah'}} Lampiran
+									</v-btn>
+									<v-btn v-else-if="editedIndex == 2" depressed small color="light-blue darken-3" dark @click="lookPDF('kir')">
+										<v-icon small left>pageview</v-icon> Lihat Lampiran
+									</v-btn>
+                  <br>
+                  <span v-if="this.inputBarangLelang.kir != ''">
+										<strong>nama file :</strong> <i>{{this.inputBarangLelang.kir}}</i> {{editedIndex == 0 ? '('+(this.FileKIR.size / (1024*1024)).toFixed(2)+' MB)' : ''}}
+										<v-icon small v-if="editedIndex != 2" color="red" @click="hapusFile('kir')">delete</v-icon>
+									</span>
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -800,11 +836,11 @@
               <div class="mt-3 mb-3">
                 <v-divider />
               </div>
-							<h2>Kelengkapan Barang Lelang</h2>
-              <div class="mt-3 mb-3">
+							<h2 v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'">Kelengkapan Barang Lelang</h2>
+              <div v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" class="mt-3 mb-3">
                 <v-divider />
               </div>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -845,7 +881,7 @@
 									</span>
                 </v-col>
               </v-row>
-							<v-row no-gutters>
+							<v-row v-if="namaKategori == 'Mobil' || namaKategori == 'Motor'" no-gutters>
                 <v-col
                   cols="12"
                   md="4"
@@ -1081,6 +1117,17 @@
         @cancel="dialogNotifikasi = false"
       />
     </v-dialog>
+    <v-dialog
+      v-model="dialogViewer"
+      transition="dialog-bottom-transition"
+      persistent
+      width="800px"
+    >
+      <PDFViewer
+        :url-sk.sync="urlPDF"
+        @cancel="dialogViewer = false"
+      />
+    </v-dialog>
 		<v-dialog
       v-model="DialogViewLampiranBarangLelang"
       width="600px"
@@ -1267,6 +1314,7 @@
 <script>
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../../Layout/PopUpNotifikasi.vue";
+import PDFViewer from "../../Layout/PDFViewer.vue";
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css';
 
@@ -1294,7 +1342,7 @@ function getMimeType(file, fallback = null) {
 
 export default {
   name: 'BarangLelang',
-	components: { PopUpNotifikasiVue, Cropper },
+	components: { PopUpNotifikasiVue, PDFViewer, Cropper },
 	data: () => ({
 		isLoading: false,
     roleID: '',
@@ -1334,8 +1382,10 @@ export default {
 		DialogViewLampiranBarangLelang: false,
 		DialogUploadMultipleBarangLelang: false,
 		DialogCropBarangLelang: false,
+		dialogViewer: false,
 		editedIndex: 3,
     kondisiTombol: true,
+    namaKategori: '',
 		inputBarangLelang: {
 			UnixText: '',
 			id_barang_lelang: '',
@@ -1382,6 +1432,8 @@ export default {
 		FileFAKTUR: '',
 		FileKTP: '',
 		FileKWITANSI: '',
+		FileSPH: '',
+		FileKIR: '',
 		urlView: '',
 		KumpulFile: {
 			fileSTNK: '',
@@ -1390,6 +1442,7 @@ export default {
 			fileKTP: '',
 			fileKWITANSI: '',
 		},
+    urlPDF: window.location.href,
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -1447,6 +1500,16 @@ export default {
 				this.FileKWITANSI = ''
 			}	
 		},
+    FileSPH(){
+			if(this.FileSPH == undefined){
+				this.FileSPH = ''
+			}	
+		},
+    FileKIR(){
+			if(this.FileKIR == undefined){
+				this.FileKIR = ''
+			}	
+		},
 		inputBarangLelang: {
 			deep: true,
 			handler(value) {
@@ -1470,20 +1533,35 @@ export default {
 				if(value.grade_mesin == null){ this.inputBarangLelang.grade_mesin = '' }
 				if(value.no_polisi == null){ this.inputBarangLelang.no_polisi = '' }
         value.no_polisi = this.UpperCaseLetter(value.no_polisi)
-				if(value.sph == null){ this.inputBarangLelang.sph = '' }
-				if(value.kir == null){ this.inputBarangLelang.kir = '' }
+				// if(value.sph == null){ this.inputBarangLelang.sph = '' }
+				// if(value.kir == null){ this.inputBarangLelang.kir = '' }
 				if(value.kapasitas_kendaraan == null){ this.inputBarangLelang.kapasitas_kendaraan = '' }
 				if(value.deskripsi == null){ this.inputBarangLelang.deskripsi = '' }
 
-				if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.brand != '' && value.warna != '' && value.tahun != '' && value.lokasi_barang != '' && 
-				value.no_rangka != '' && value.no_mesin != '' && value.tipe_model != '' && value.transmisi != '' && value.bahan_bakar != '' && value.odometer != '' && 
-        value.grade != '' && value.grade_interior != '' && value.grade_eksterior != '' && value.grade_mesin != '' && value.no_polisi != '' && value.sph != '' && 
-        value.kir != '' && value.kapasitas_kendaraan != '' && value.deskripsi != '' && value.filestnk != '' && value.filebpkb != '' && value.filefaktur != '' && 
-        value.filektp != '' && value.filekwitansi != ''){
-					this.kondisiTombol = false
-				}else{
-					this.kondisiTombol = true
-				}
+        this.kategoriOptions.filter(val => { 
+          if (val.idKategori == value.id_kategori) {
+            this.namaKategori = val.kategori ? val.kategori : '' 
+          }
+        })
+        if(this.namaKategori == 'Mobil' || this.namaKategori == 'Motor'){
+          if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.brand != '' && value.warna != '' && value.tahun != '' && value.lokasi_barang != '' && 
+            value.no_rangka != '' && value.no_mesin != '' && value.tipe_model != '' && value.transmisi != '' && value.bahan_bakar != '' && value.odometer != '' && 
+            value.grade != '' && value.grade_interior != '' && value.grade_eksterior != '' && value.grade_mesin != '' && value.no_polisi != '' && value.sph != '' && 
+            value.kir != '' && value.kapasitas_kendaraan != '' && value.deskripsi != '' && value.filestnk != '' && value.filebpkb != '' && value.filefaktur != '' && 
+            value.filektp != '' && value.filekwitansi != ''){
+            this.kondisiTombol = false
+          }else{
+            this.kondisiTombol = true
+          }
+        }else{
+          if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.brand != '' && value.warna != '' && value.tahun != '' && value.lokasi_barang != '' && 
+            value.tipe_model != '' && value.grade != '' && value.deskripsi != '' && value.filefaktur != '' && value.filektp != '' && value.filekwitansi != ''){
+            this.kondisiTombol = false
+          }else{
+            this.kondisiTombol = true
+          }
+        }
+
 			}
 		}
 	},
@@ -1498,6 +1576,7 @@ export default {
 		...mapActions({
       fetchData: "fetchData",
       uploadFiles: "upload/uploadFiles",
+      uploadBerkas: "upload/uploadBerkas",
     }),
 		getBarangLelang() {
       this.isLoading = true
@@ -1553,9 +1632,11 @@ export default {
 			this.getKategoriBarangLelang()
       if(index == 0){
         this.clearForm()
+        this.namaKategori = ''
         this.inputBarangLelang.UnixText = `BarangLelang${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`
       }else{
         if(index == 2){ this.getFotoBarangLelang(item.idBarangLelang) }
+        this.namaKategori = item.namaKategori ? item.namaKategori : ''
         this.inputBarangLelang.UnixText = item.UnixText ? item.UnixText : ''
         this.inputBarangLelang.id_kategori = item.statusKategoriLelang == true ? item.idKategori ? item.idKategori : '' : ''
         this.inputBarangLelang.id_barang_lelang = item.idBarangLelang ? item.idBarangLelang : ''
@@ -1604,29 +1685,30 @@ export default {
 				warna: this.inputBarangLelang.warna,
 				tahun: this.inputBarangLelang.tahun,
 				lokasi_barang: this.inputBarangLelang.lokasi_barang,
-				no_rangka: this.inputBarangLelang.no_rangka,
-				no_mesin: this.inputBarangLelang.no_mesin,
+				no_rangka: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.no_rangka : null,
+				no_mesin: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.no_mesin : null,
 				tipe_model: this.inputBarangLelang.tipe_model,
-				transmisi: this.inputBarangLelang.transmisi,
-				bahan_bakar: this.inputBarangLelang.bahan_bakar,
-				odometer: this.inputBarangLelang.odometer,
+				transmisi: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.transmisi : null,
+				bahan_bakar: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.bahan_bakar : null,
+				odometer: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.odometer : null,
 				grade: this.inputBarangLelang.grade,
-				grade_interior: this.inputBarangLelang.grade_interior,
-				grade_eksterior: this.inputBarangLelang.grade_eksterior,
-				grade_mesin: this.inputBarangLelang.grade_mesin,
-				no_polisi: this.inputBarangLelang.no_polisi,
-				valid_stnk: this.inputBarangLelang.valid_stnk,
-				sph: this.inputBarangLelang.sph,
-				kir: this.inputBarangLelang.kir,
-				kapasitas_kendaraan: this.inputBarangLelang.kapasitas_kendaraan,
+				grade_interior: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.grade_interior : null,
+				grade_eksterior: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.grade_eksterior : null,
+				grade_mesin: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.grade_mesin : null,
+				no_polisi: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.no_polisi : null,
+				valid_stnk: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.valid_stnk : null,
+				sph: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.sph : null,
+				kir: this.namaKategori == 'Mobil' ? this.inputBarangLelang.kir : null,
+				kapasitas_kendaraan: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.kapasitas_kendaraan : null,
 				deskripsi: this.inputBarangLelang.deskripsi,
-				filestnk: this.inputBarangLelang.filestnk,
-				filebpkb: this.inputBarangLelang.filebpkb,
+				filestnk: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.filestnk : null,
+				filebpkb: this.namaKategori == 'Mobil' || this.namaKategori == 'Motor' ? this.inputBarangLelang.filebpkb : null,
 				filefaktur: this.inputBarangLelang.filefaktur,
 				filektp: this.inputBarangLelang.filektp,
 				filekwitansi: this.inputBarangLelang.filekwitansi,
 				create_update_by: localStorage.getItem('idLogin'),
 			}
+      // return console.log(bodyData, dataUpload);
 			let payload = {
 				method: "post",
 				url: `lelang/postBarangLelang`,
@@ -1635,18 +1717,23 @@ export default {
 			};
 			this.fetchData(payload)
 			.then(async (res) => {
-				if(this.FileSTNK || this.FileBPKB || this.FileFAKTUR || this.FileKTP || this.FileKWITANSI){
+				if(this.FileSTNK || this.FileBPKB || this.FileFAKTUR || this.FileKTP || this.FileKWITANSI || this.FileSPH || this.FileKIR){
 					let uploadSTNK = await this.uploadLampiran(index, dataUpload.fileSTNK, 'stnk')
 					let uploadBPKB = await this.uploadLampiran(index, dataUpload.fileBPKB, 'bpkb')
 					let uploadFAKTUR = await this.uploadLampiran(index, dataUpload.fileFAKTUR, 'faktur')
 					let uploadKTP = await this.uploadLampiran(index, dataUpload.fileKTP, 'ktp')
 					let uploadKWITANSI = await this.uploadLampiran(index, dataUpload.fileKWITANSI, 'kwitansi')
+					let uploadSPH = await this.uploadLampiranBerkas(index, this.FileSPH, 'sph')
+					let uploadKIR = await this.uploadLampiranBerkas(index, this.FileKIR, 'kir')
+          // console.log(uploadSPH, uploadKIR);
           let aksi = []
           if(uploadSTNK != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
           if(uploadBPKB != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
           if(uploadFAKTUR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
           if(uploadKTP != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
           if(uploadKWITANSI != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+          if(uploadSPH != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+          if(uploadKIR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
 					if(aksi.filter(el => el == 'sukses').length){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
@@ -1681,6 +1768,28 @@ export default {
 				};
 				try {
 					let response = await this.uploadFiles(bodyData);
+					return response
+				} catch (err) {
+					this.notifikasi("error", err.response.data.message, "1")
+				}
+			}
+		},
+		async uploadLampiranBerkas(index, dataUpload, part) {
+			if(dataUpload){
+				const bodyData = {
+					proses: index == 0 ? 'ADD' : 'EDIT',
+					id: index == 0 ? null : this.inputBarangLelang.id_barang_lelang,
+					nama_barang_lelang: this.inputBarangLelang.nama_barang_lelang,
+          nama_folder: this.inputBarangLelang.UnixText,
+					nama_file: `BarangLelang-${part}-${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`,
+					jenis: "images",
+					bagian: "barang_lelang",
+					table: "m_barang_lelang",
+					files: dataUpload,
+				};
+				try {
+					let response = await this.uploadBerkas(bodyData);
+          // console.log(response);
 					return response
 				} catch (err) {
 					this.notifikasi("error", err.response.data.message, "1")
@@ -1774,6 +1883,8 @@ export default {
       this.FileFAKTUR = ''
       this.FileKTP = ''
       this.FileKWITANSI = ''
+      this.FileSPH = ''
+      this.FileKIR = ''
 			this.KumpulFile = {
 				fileSTNK: '',
 				fileBPKB: '',
@@ -1783,6 +1894,7 @@ export default {
 			}
       this.MultilpeBarangLelang = []
       this.imageMultiple = []
+      this.namaKategori = ''
     },
 		pilihFile(jenis) {
 			if(jenis == 'stnk'){ this.$refs.inputSTNKFile.click() }
@@ -1790,6 +1902,8 @@ export default {
 			else if(jenis == 'faktur'){ this.$refs.inputFAKTURFile.click(); }
 			else if(jenis == 'ktp'){ this.$refs.inputKTPFile.click(); }
 			else if(jenis == 'kwitansi'){ this.$refs.inputKWITANSIFile.click(); }
+			else if(jenis == 'sph'){ this.$refs.inputSPHFile.click(); }
+			else if(jenis == 'kir'){ this.$refs.inputKIRFile.click(); }
     },
 		async uploadFile(e, jenis) {
 			if(jenis == 'stnk'){ 
@@ -1812,7 +1926,36 @@ export default {
         this.FileKWITANSI = await e.target.files[0];
 				this.inputBarangLelang.filekwitansi = this.FileKWITANSI.name;
         this.loadImage(this.FileKWITANSI, jenis)
+			}else if(jenis == 'sph'){ 
+        this.FileSPH = await e.target.files[0];
+				this.inputBarangLelang.sph = this.FileSPH.name;
+			}else if(jenis == 'kir'){ 
+        this.FileKIR = await e.target.files[0];
+				this.inputBarangLelang.kir = this.FileKIR.name;
+        // console.log(this.FileKIR);
 			}
+    },
+    lookPDF(jenis) {
+      this.urlPDF = "";
+      const API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
+      let Link = "";
+      if(jenis == 'sph'){
+        Link = this.inputBarangLelang.sph
+      }else if(jenis == 'kir'){
+        Link = this.inputBarangLelang.kir
+      }
+      fetch(`${API_URL}pdf/kelengkapan-barang-lelang/${Link}`, {
+        method: 'GET',
+        dataType: "xml",
+      })
+      .then(response => response.arrayBuffer())
+      .then(async response => {
+        let blob = new Blob([response], { type: 'application/pdf' })
+        this.urlPDF = window.URL.createObjectURL(blob)
+      })
+      setTimeout(() => {
+        this.dialogViewer = true;
+      }, 1500);
     },
     loadImage(files, jenis) {
       this.DialogCropBarangLelang = true
@@ -1900,6 +2043,12 @@ export default {
 				this.FileKWITANSI = '' 
 				this.inputBarangLelang.filekwitansi = '';
 				this.KumpulFile.fileKWITANSI = ''
+			}else if(jenis == 'sph'){ 
+				this.FileSPH = '' 
+				this.inputBarangLelang.sph = '';
+			}else if(jenis == 'kir'){ 
+				this.FileKIR = '' 
+				this.inputBarangLelang.kir = '';
 			}
 		},
     tutupDialogCrop(jenis){
