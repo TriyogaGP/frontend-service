@@ -1049,14 +1049,31 @@
                 <div class="mt-3 mb-3">
                   <v-divider />
                 </div>
-                <v-row v-if="MultilpeBarangLelang.length > 0" no-gutters>
-                  <v-col
+                <div v-if="MultilpeBarangLelangUtama.length > 0">
+                  <h4 class="text-center">Gambar Utama Barang Lelang</h4>
+                  <v-row no-gutters>
+                    <v-col
                     class="ma-1 d-flex flex-column justify-space-between align-center"
-                    v-for="(file,f) in MultilpeBarangLelang" :key="f"
-                  >
-                    <img :ref="'file'" :src="imageMultiple[f].url" :title="file.gambar" width="300" />
-                  </v-col>
-                </v-row>
+                    v-for="(file,f) in MultilpeBarangLelangUtama" :key="f"
+                    >
+                      <img class="gambar" :ref="'file'" :src="imageMultipleUtama[f].url" :title="file.gambar" width="150" />
+                      <p>{{ imageMultipleUtama[f].title }}</p>
+                    </v-col>
+                  </v-row>
+                  <div class="mt-3 mb-3">
+                    <v-divider />
+                  </div>
+                  <h4 class="text-center">Gambar Kondisi Barang Lelang</h4>
+                  <v-row no-gutters>
+                    <v-col
+                    class="ma-1 d-flex flex-column justify-space-between align-center"
+                    v-for="(file,f) in MultilpeBarangLelangKondisi" :key="f"
+                    >
+                      <img class="gambar" :ref="'file'" :src="imageMultipleKondisi[f].url" :title="file.gambar" width="150" />
+                      <p>{{ imageMultipleKondisi[f].title }}</p>
+                    </v-col>
+                  </v-row>
+                </div>
                 <v-row v-else no-gutters>
                   <v-col class="ma-1 d-flex flex-column justify-space-between align-center">
                     <strong>Foto Barang Lelang tidak tersedia</strong>
@@ -1154,7 +1171,7 @@
         <v-card tile>
           <div class="scrollTextGBR">
             <v-card-text class="d-flex flex-column justify-space-between align-center">
-              <img :src="this.urlView" width="400"/>
+              <img class="gambar" :src="this.urlView" width="400"/>
             </v-card-text>
           </div>
         </v-card>
@@ -1221,7 +1238,7 @@
             <v-btn
               icon
               dark
-              @click="() => { imageMultiple = []; MultilpeBarangLelang = []; inputBarangLelang.UnixText = ''; DialogUploadMultipleBarangLelang = false; }"
+              @click="() => { imageMultipleUtama = []; MultilpeBarangLelangUtama = []; inputBarangLelang.UnixText = ''; DialogUploadMultipleBarangLelang = false; }"
             >
               <v-icon>close</v-icon>
             </v-btn>
@@ -1238,7 +1255,7 @@
                       class="pt-2 d-flex align-center"
                     >
                       <v-text-field
-                        v-model="MultilpeBarangLelang"
+                        v-model="MultilpeBarangLelangUtama"
                         placeholder="Upload"
                         outlined
                         dense
@@ -1261,10 +1278,37 @@
                   <v-row>
                     <v-col
                       class="ma-1 d-flex flex-column justify-space-between align-center"
-                      v-for="(file,f) in MultilpeBarangLelang" :key="f"
-                    >
-                      <img :ref="'file'" :src="imageMultiple[f].url" :title="file.name" width="200" />
-                      <v-icon small color="red" @click="HapusMultiple(f)">delete</v-icon>
+                      v-for="(file,f) in MultilpeBarangLelangUtama" :key="f"
+                      >
+                      <div>
+                        <div class="kotakGambar">
+                          <img :ref="'file'" :src="imageMultipleUtama[f].url" :title="file.name" width="250"/>
+                          <v-icon small color="red" @click="HapusMultiple(f)">delete</v-icon>
+                        </div>
+                        <v-autocomplete
+                          v-model="imageMultipleUtama[f].kategori"
+                          :items="KategoriFotoOptions"
+                          item-text="text"
+                          item-value="value"
+                          placeholder="Kategori Foto"
+                          label="Kategori Foto"
+                          class="mt-1"
+                          outlined
+                          dense
+                          hide-details
+                        />
+                        <v-text-field
+                          v-model="imageMultipleUtama[f].title"
+                          placeholder="Title"
+                          outlined
+                          dense
+                          label="Title"
+                          color="light-blue darken-3"
+                          class="mt-1"
+                          hide-details
+                          clearable
+                        />
+                      </div>
                     </v-col>
                   </v-row>
                 </v-card>
@@ -1284,8 +1328,8 @@
                       small
                       dense
                       depressed
-                      :disabled="imageMultiple.length && MultilpeBarangLelang.length ? false : true"
-                      @click="() => { imageMultiple = []; MultilpeBarangLelang = []; }"
+                      :disabled="imageMultipleUtama.length && MultilpeBarangLelangUtama.length ? false : true"
+                      @click="() => { imageMultipleUtama = []; MultilpeBarangLelangUtama = []; }"
                     >
                       Batal
                     </v-btn>
@@ -1295,7 +1339,7 @@
                       small
                       dense
                       depressed
-                      :disabled="imageMultiple.length && MultilpeBarangLelang.length ? false : true"
+                      :disabled="imageMultipleUtama.length && MultilpeBarangLelangUtama.length ? false : true"
                       @click="SimpanFotoMultiple()"
                     >
                       Simpan Data Foto
@@ -1378,6 +1422,10 @@ export default {
 			{value: 'Bensin', text: 'Bensin'},
 			{value: 'Solar', text: 'Solar'},
 		],
+		KategoriFotoOptions: [
+			{value: 'Utama', text: 'Foto Utama'},
+			{value: 'Kondisi', text: 'Foto Kondisi'},
+		],
 		DialogBarangLelang: false,
 		DialogViewLampiranBarangLelang: false,
 		DialogUploadMultipleBarangLelang: false,
@@ -1422,9 +1470,10 @@ export default {
       type: null,
       jenis: null,
     },
-    imageMultiple: [],
-    MultilpeBarangLelang: [],
-    readers: [],
+    imageMultipleUtama: [],
+    imageMultipleKondisi: [],
+    MultilpeBarangLelangUtama: [],
+    MultilpeBarangLelangKondisi: [],
 		menu: false,
 		componentKey: 0,
 		FileSTNK: '',
@@ -1617,10 +1666,22 @@ export default {
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.MultilpeBarangLelang = res.data.result;
+				this.MultilpeBarangLelangUtama = res.data.result.dataFotoBarangLelang.FotoMobil;
+				this.MultilpeBarangLelangKondisi = res.data.result.dataFotoBarangLelang.FotoKondisiMobil;
 			  const API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
-        this.MultilpeBarangLelang.forEach((element) => {
-          this.imageMultiple.push({ url: `${API_URL}image/kelengkapan-barang-lelang/${element.gambar}` })
+        this.MultilpeBarangLelangUtama.forEach((element) => {
+          this.imageMultipleUtama.push({ 
+            title: element.title,
+            kategori: element.kategori,
+            url: `${API_URL}image/kelengkapan-barang-lelang/${element.gambar}`,
+          })
+        })
+        this.MultilpeBarangLelangKondisi.forEach((element) => {
+          this.imageMultipleKondisi.push({ 
+            title: element.title,
+            kategori: element.kategori,
+            url: `${API_URL}image/kelengkapan-barang-lelang/${element.gambar}`,
+          })
         })
 			})
 			.catch((err) => {
@@ -1892,8 +1953,8 @@ export default {
 				fileKTP: '',
 				fileKWITANSI: '',
 			}
-      this.MultilpeBarangLelang = []
-      this.imageMultiple = []
+      this.MultilpeBarangLelangUtama = []
+      this.imageMultipleUtama = []
       this.namaKategori = ''
     },
 		pilihFile(jenis) {
@@ -2080,31 +2141,48 @@ export default {
     addFiles(e) {
       let jml_files = e.target.files.length
       for(let i=0;i<jml_files;i++) {
-        this.MultilpeBarangLelang.push(e.target.files[i])
-      }      
-      this.MultilpeBarangLelang.forEach((file, f) => {
-        this.imageMultiple.push({ url: URL.createObjectURL(file) })
+        this.MultilpeBarangLelangUtama.push(e.target.files[i])
+      } 
+      this.imageMultipleUtama = []     
+      this.MultilpeBarangLelangUtama.forEach((file, f) => {
+        this.imageMultipleUtama.push(
+          { 
+            title: '',
+            kategori: '',
+            url: URL.createObjectURL(file),
+            files: file
+          }
+        )
       })
     },
     HapusMultiple(index) {
-      this.imageMultiple = []
-      this.MultilpeBarangLelang.splice(index, 1)
-      this.MultilpeBarangLelang.forEach((file, f) => {
-        this.imageMultiple.push({ url: URL.createObjectURL(file) })
-      })
+      // this.imageMultipleUtama = []
+      this.MultilpeBarangLelangUtama.splice(index, 1)
+      this.imageMultipleUtama.splice(index, 1)
+      // this.MultilpeBarangLelangUtama.forEach((file, f) => {
+      //   this.imageMultipleUtama.push(
+      //     { 
+      //       title: '',
+      //       kategori: 'Utama',
+      //       url: URL.createObjectURL(file) 
+      //     }
+      //   )
+      // })
     },
     async SimpanFotoMultiple() {
-      let kirim = await Promise.all(this.MultilpeBarangLelang.map(async (file, f) => {
+      let kirim = await Promise.all(this.imageMultipleUtama.map(async (value) => {
         let status = []
         const bodyData = {
           id: this.inputBarangLelang.id_barang_lelang,
+					title: value.title,
+					kategori: value.kategori,
 					nama_barang_lelang: this.inputBarangLelang.nama_barang_lelang,
 					nama_folder: this.inputBarangLelang.UnixText,
 					nama_file: `FotoBarangLelang-${this.convertDate(new Date().toISOString().slice(0,10))}_${this.makeRandom(8)}`,
 					jenis: "images",
 					bagian: "foto_barang_lelang",
 					table: "m_foto_barang_lelang",
-					files: file,
+					files: value.files,
 				};
 				try {
 					let response = await this.uploadFiles(bodyData);
@@ -2154,10 +2232,23 @@ export default {
   max-height: 450px !important;
   overflow-y: auto !important;
 }
-img {
+.kotakGambar {
+	border-radius: 10px !important;
+	padding: 2px !important;
+}
+.gambar {
 	border-style: solid !important;
 	border-radius: 10px !important;
 	padding: 2px !important;
+}
+.inner {
+  background-color: #ff1414;
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 .tombol-tutup{
   height: 30px !important;

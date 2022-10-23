@@ -16,6 +16,10 @@ const actions = {
         fData.append('nama_event', data.nama_event); //nama
       }else if(data.bagian == 'barang_lelang'){
         fData.append('nama_barang_lelang', data.nama_barang_lelang); //nama
+      }else if(data.bagian == 'foto_barang_lelang'){
+        fData.append('nama_barang_lelang', data.nama_barang_lelang); //nama
+        fData.append('title', data.title); //nama
+        fData.append('kategori', data.kategori); //nama
       }else if(data.bagian == 'mall'){
         fData.append('nama_tenant_kategori', data.nama_tenant_kategori || null); //nama
         fData.append('nama_tenant_mall', data.nama_tenant_mall || null); //nama
