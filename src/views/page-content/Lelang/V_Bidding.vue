@@ -124,8 +124,9 @@
                       :key="i"
                     >
                       <v-row class="ma-1" align="center" justify="center">
-                        <img :src="pic ? `${API_URL}image/kelengkapan-barang-lelang/${pic}` : `${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
+                        <img :src="pic ? `${API_URL}image/kelengkapan-barang-lelang/${pic.gambar}` : `${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
                       </v-row>
+                      <h4>{{ pic.title }}</h4>
                     </v-carousel-item>
                   </v-carousel>
                   <img v-else :src="`${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
@@ -348,8 +349,13 @@ export default {
 				this.dataRoom = res.data.result;
 				this.dataEvent = this.dataRoom.Event
 				this.data_barang_lelang = this.dataRoom.BarangLelang
-        this.dataRoom.dataFotoBarangLelang.map((el) => {
-          this.fotoArray.push(el.gambar)
+        let FotoUtama = this.dataRoom.dataFotoBarangLelang.FotoMobil
+        let FotoKondisi = this.dataRoom.dataFotoBarangLelang.FotoKondisiMobil
+        FotoUtama.map((el) => {
+          this.fotoArray.push({
+            title: el.title,
+            gambar: el.gambar,
+          })
         })
         // console.log(this.fotoArray)
 			})
