@@ -1235,7 +1235,7 @@ export default {
 			let bodyData = {
 				jenis: index == 0 ? 'ADD' : 'EDIT',
 				UnixText: this.inputProduk.UnixText,
-				id_produk: this.inputProduk.id_produk,
+				id_produk: index == 0 ? '' : this.inputProduk.id_produk,
 				id_kategori_produk: this.inputProduk.id_kategori_produk,
 				id_measurement: this.inputProduk.id_measurement,
 				kode_produk: this.inputProduk.kode_produk,

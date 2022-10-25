@@ -261,6 +261,32 @@
                   md="4"
                   class="pt-2 d-flex align-center"
                 >
+                  Nama Pemilik Barang Lelang
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-text-field
+                    v-model="inputBarangLelang.nama_pemilik"
+                    placeholder="Nama Pemilik Barang Lelang"
+                    outlined
+                    dense
+                    label="Nama Pemilik Barang Lelang"
+                    color="light-blue darken-3"
+                    hide-details
+                    :clearable="editedIndex != 2"
+                    :readonly="editedIndex == 2"
+                  />
+                </v-col>
+              </v-row>
+							<v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center"
+                >
                   Brand
                 </v-col>
                 <v-col
@@ -1439,6 +1465,7 @@ export default {
 			id_barang_lelang: '',
 			id_kategori: '',
 			nama_barang_lelang: '',
+			nama_pemilik: '',
 			brand: '',
 			warna: '',
 			tahun: '',
@@ -1564,6 +1591,7 @@ export default {
 			handler(value) {
         if(value.id_kategori == null){ this.inputBarangLelang.id_kategori = '' }
         if(value.nama_barang_lelang == null){ this.inputBarangLelang.nama_barang_lelang = '' }
+        if(value.nama_pemilik == null){ this.inputBarangLelang.nama_pemilik = '' }
         if(value.brand == null){ this.inputBarangLelang.brand = '' }
         if(value.warna == null){ this.inputBarangLelang.warna = '' }
 				if(value.tahun == null){ this.inputBarangLelang.tahun = '' }
@@ -1593,18 +1621,19 @@ export default {
           }
         })
         if(this.namaKategori == 'Mobil' || this.namaKategori == 'Motor'){
-          if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.brand != '' && value.warna != '' && value.tahun != '' && value.lokasi_barang != '' && 
-            value.no_rangka != '' && value.no_mesin != '' && value.tipe_model != '' && value.transmisi != '' && value.bahan_bakar != '' && value.odometer != '' && 
-            value.grade != '' && value.grade_interior != '' && value.grade_eksterior != '' && value.grade_mesin != '' && value.no_polisi != '' && value.sph != '' && 
-            value.kir != '' && value.kapasitas_kendaraan != '' && value.deskripsi != '' && value.filestnk != '' && value.filebpkb != '' && value.filefaktur != '' && 
-            value.filektp != '' && value.filekwitansi != ''){
+          if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.nama_pemilik != '' && value.brand != '' && value.warna != '' && value.tahun != '' &&
+            value.lokasi_barang != '' && value.no_rangka != '' && value.no_mesin != '' && value.tipe_model != '' && value.transmisi != '' && value.bahan_bakar != '' &&
+            value.odometer != '' && value.grade != '' && value.grade_interior != '' && value.grade_eksterior != '' && value.grade_mesin != '' && value.no_polisi != '' &&
+            value.sph != '' && value.kir != '' && value.kapasitas_kendaraan != '' && value.deskripsi != '' && value.filestnk != '' && value.filebpkb != '' &&
+            value.filefaktur != '' && value.filektp != '' && value.filekwitansi != ''){
             this.kondisiTombol = false
           }else{
             this.kondisiTombol = true
           }
         }else{
-          if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.brand != '' && value.warna != '' && value.tahun != '' && value.lokasi_barang != '' && 
-            value.tipe_model != '' && value.grade != '' && value.deskripsi != '' && value.filefaktur != '' && value.filektp != '' && value.filekwitansi != ''){
+          if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.nama_pemilik != '' && value.brand != '' && value.warna != '' && value.tahun != '' && 
+            value.lokasi_barang != '' && value.tipe_model != '' && value.grade != '' && value.deskripsi != '' && value.filefaktur != '' && value.filektp != '' &&
+            value.filekwitansi != ''){
             this.kondisiTombol = false
           }else{
             this.kondisiTombol = true
@@ -1702,6 +1731,7 @@ export default {
         this.inputBarangLelang.id_kategori = item.statusKategoriLelang == true ? item.idKategori ? item.idKategori : '' : ''
         this.inputBarangLelang.id_barang_lelang = item.idBarangLelang ? item.idBarangLelang : ''
         this.inputBarangLelang.nama_barang_lelang = item.namaBarangLelang ? item.namaBarangLelang : ''
+        this.inputBarangLelang.nama_pemilik = item.namaPemilik ? item.namaPemilik : ''
 				this.inputBarangLelang.brand = item.brand ? item.brand : ''
 				this.inputBarangLelang.warna = item.warna ? item.warna : ''
 				this.inputBarangLelang.tahun = item.tahun ? item.tahun : ''
@@ -1742,6 +1772,7 @@ export default {
         id_barang_lelang: index == 0 ? '' : this.inputBarangLelang.id_barang_lelang,
 				id_kategori: this.inputBarangLelang.id_kategori,
 				nama_barang_lelang: this.inputBarangLelang.nama_barang_lelang,
+				nama_pemilik: this.inputBarangLelang.nama_pemilik,
 				brand: this.inputBarangLelang.brand,
 				warna: this.inputBarangLelang.warna,
 				tahun: this.inputBarangLelang.tahun,
