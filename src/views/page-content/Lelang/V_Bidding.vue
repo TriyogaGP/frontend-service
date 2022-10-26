@@ -45,7 +45,7 @@
                   class="ma-2 white--text text--darken-2"
                   @click="enterRoom(item)"
                 >
-                  <v-icon small>exit_to_app</v-icon> Masuk Room
+                  <v-icon small left>exit_to_app</v-icon> Masuk Room
                 </v-btn>
               </div>
             </v-card>
@@ -111,7 +111,7 @@
                     :disabled="tombolBid"
                     @click="BidLelang()"
                   >
-                    <v-icon small>fas fa-bullhorn</v-icon> Bid Lelang
+                    <v-icon small left>fas fa-bullhorn</v-icon> Bid Lelang
                   </v-btn>
                 </div>
               </v-col>
@@ -173,7 +173,7 @@
                       :disabled="tombolStart"
                       @click="MulaiBidding()"
                     >
-                      <v-icon small>play_arrow</v-icon> Start Lelang
+                      <v-icon small left>play_arrow</v-icon> Start Lelang
                     </v-btn>
                     <v-btn
                       style="float: left;"
@@ -185,7 +185,7 @@
                       :disabled="tombolStop"
                       @click="SelesaiBidding(true)"
                       >
-                      <v-icon small>block</v-icon> Stop Lelang
+                      <v-icon small left>block</v-icon> Stop Lelang
                     </v-btn>
                   </v-col>
                   <v-col cols="6">
@@ -200,7 +200,7 @@
                       :disabled="tombolLanjut"
                       @click="nextRoom(noLOT[0])"
                     >
-                      <v-icon small>arrow_forward</v-icon> Lanjut Bid
+                      <v-icon small left>arrow_forward</v-icon> Lanjut Bid
                     </v-btn>
                     <v-btn
                       style="float: right; margin-right: 5px;"
@@ -211,7 +211,7 @@
                       class="mt-2 white--text text--darken-2"
                       @click="() => { EventPanel = false }"
                     >
-                      <v-icon small>exit_to_app</v-icon> Keluar Panel
+                      <v-icon small left>exit_to_app</v-icon> Keluar Panel
                     </v-btn>
                   </v-col>
                 </v-row>

@@ -2119,28 +2119,35 @@ export default {
 				this.FileSTNK = ''
 				this.inputBarangLelang.filestnk = '';
 				this.KumpulFile.fileSTNK = ''
+        this.$refs.inputSTNKFile.value = null
 			}else if(jenis == 'bpkb'){ 
-				this.FileBPKB = ''
+        this.FileBPKB = ''
 				this.inputBarangLelang.filebpkb = '';
 				this.KumpulFile.fileBPKB = ''
+        this.$refs.inputBPKBFile.value = null
 			}else if(jenis == 'faktur'){ 
-				this.FileFAKTUR = ''
+        this.FileFAKTUR = ''
 				this.inputBarangLelang.filefaktur = '';
 				this.KumpulFile.fileFAKTUR = ''
+        this.$refs.inputFAKTURFile.value = null
 			}else if(jenis == 'ktp'){ 
-				this.FileKTP = ''
+        this.FileKTP = ''
 				this.inputBarangLelang.filektp = '';
 				this.KumpulFile.fileKTP = ''
+        this.$refs.inputKTPFile.value = null
 			}else if(jenis == 'kwitansi'){ 
-				this.FileKWITANSI = '' 
+        this.FileKWITANSI = '' 
 				this.inputBarangLelang.filekwitansi = '';
 				this.KumpulFile.fileKWITANSI = ''
+        this.$refs.inputKWITANSIFile.value = null
 			}else if(jenis == 'sph'){ 
-				this.FileSPH = '' 
+        this.FileSPH = '' 
 				this.inputBarangLelang.sph = '';
+        this.$refs.inputSPHFile.value = null
 			}else if(jenis == 'kir'){ 
-				this.FileKIR = '' 
+        this.FileKIR = '' 
 				this.inputBarangLelang.kir = '';
+        this.$refs.inputKIRFile.value = null
 			}
 		},
     tutupDialogCrop(jenis){

@@ -12,21 +12,23 @@ const actions = {
       if(data.bagian == 'berkas'){
         fData.append('nik', data.nik); //nik
       }else if(data.bagian == 'event'){
-        fData.append('kode_event', data.kode_event); //nama
-        fData.append('nama_event', data.nama_event); //nama
+        fData.append('kode_event', data.kode_event); //kode_event
+        fData.append('nama_event', data.nama_event); //nama_event
       }else if(data.bagian == 'barang_lelang'){
-        fData.append('nama_barang_lelang', data.nama_barang_lelang); //nama
+        fData.append('nama_barang_lelang', data.nama_barang_lelang); //nama_barang_lelang
+      }else if(data.bagian == 'produk'){
+        fData.append('kode_produk', data.kode_produk); //kode_produk
       }else if(data.bagian == 'foto_barang_lelang'){
-        fData.append('nama_barang_lelang', data.nama_barang_lelang); //nama
-        fData.append('title', data.title); //nama
-        fData.append('kategori', data.kategori); //nama
+        fData.append('nama_barang_lelang', data.nama_barang_lelang); //nama_barang_lelang
+        fData.append('title', data.title); //title
+        fData.append('kategori', data.kategori); //kategori
       }else if(data.bagian == 'mall'){
-        fData.append('nama_tenant_kategori', data.nama_tenant_kategori || null); //nama
-        fData.append('nama_tenant_mall', data.nama_tenant_mall || null); //nama
-        fData.append('judul_content', data.judul_content || null); //nama
+        fData.append('nama_tenant_kategori', data.nama_tenant_kategori || null); //nama_tenant_kategori
+        fData.append('nama_tenant_mall', data.nama_tenant_mall || null); //nama_tenant_mall
+        fData.append('judul_content', data.judul_content || null); //judul_content
       }else if(data.bagian == 'bukti_pemenang'){
-        fData.append('no_rek', data.no_rek); //nama
-        fData.append('nama_pemilik', data.nama_pemilik); //nama
+        fData.append('no_rek', data.no_rek); //no_rek
+        fData.append('nama_pemilik', data.nama_pemilik); //nama_pemilik
       }
       fData.append('nama_folder', data.nama_folder); //nama_folder
       fData.append('nama_file', data.nama_file); //nama_file

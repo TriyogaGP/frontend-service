@@ -111,6 +111,16 @@
 					</v-list-item-title>
 					<v-icon right>settings</v-icon>
 				</v-list-item>
+				<v-list-item
+					router to="/Testing"
+					class="SelectedTile"
+					active-class="SelectedTile-active"
+				>
+					<v-list-item-title>
+						<span>Testing</span>
+					</v-list-item-title>
+					<v-icon right>settings</v-icon>
+				</v-list-item>
 			</v-list>
 		</v-navigation-drawer>
 		<v-dialog

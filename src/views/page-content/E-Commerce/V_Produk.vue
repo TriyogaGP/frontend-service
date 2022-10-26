@@ -422,6 +422,47 @@
                   />
                 </v-col>
               </v-row>
+              <v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center"
+                >
+                  Cover Image Produk
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-text-field
+										v-model="inputProduk.filecover"
+										placeholder="Upload"
+										outlined
+										dense
+                  	style="display: none"
+                  />
+									<input 
+										ref="inputCOVERIMAGEFile"
+										:key="componentKey"
+										type="file"
+										accept="image/x-png,image/jpg,image/jpeg"
+										style="display: none"
+										@change="uploadFile($event)"
+                  >
+									<v-btn v-if="editedIndex != 2" depressed small color="light-blue darken-3" dark @click="$refs.inputCOVERIMAGEFile.click()">
+										<v-icon small left>{{editedIndex == 0 ? 'add' : 'edit'}}</v-icon> {{editedIndex == 0 ? 'Tambah' : 'Ubah'}} Gambar
+									</v-btn>
+									<v-btn v-else-if="editedIndex == 2" depressed small color="light-blue darken-3" dark @click="viewLampiran()">
+										<v-icon small left>pageview</v-icon> Lihat Gambar
+									</v-btn>
+									<br>
+									<span v-if="this.inputProduk.filecover != ''">
+										<strong>nama file :</strong> <i>{{this.inputProduk.filecover}}</i> {{editedIndex == 0 ? '('+(this.FileCOVERIMAGE.size / (1024*1024)).toFixed(2)+' MB)' : ''}}
+										<v-icon small v-if="editedIndex != 2" color="red" @click="hapusFile()">delete</v-icon>
+									</span>
+                </v-col>
+              </v-row>
 							<div v-if="editedIndex == 2">
 								<div class="mt-3 mb-3">
 									<v-divider />
@@ -459,7 +500,7 @@
                   dense
                   depressed
                   :disabled="kondisiTombol"
-                  @click="SimpanForm(0)"
+                  @click="SimpanForm(0, FileCOVERIMAGE)"
                 >
                   Simpan Data
                 </v-btn> 
@@ -471,7 +512,7 @@
                   dense
                   depressed
                   :disabled="kondisiTombol"
-                  @click="SimpanForm(1)"
+                  @click="SimpanForm(1, FileCOVERIMAGE)"
                 >
                   Ubah Data
                 </v-btn>
@@ -524,6 +565,50 @@
             </v-card-text>
           </div>
         </v-card>
+      </v-card>
+		</v-dialog>
+    <v-dialog
+      v-model="DialogCropProduk"
+      width="700px"
+      height="700px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card tile>
+        <div class="scrollTextGBR">
+          <v-card-text>
+            <cropper
+              ref="cropper"
+              class="upload-example-cropper"
+              :src="image.src"
+            />
+              <!-- :stencil-size="{
+                width: 300,
+                height: 300
+              }"
+              :stencil-props="{
+                handlers: {},
+                movable: false,
+                resizable: false,
+                aspectRatio: 1,
+              }"
+              image-restriction="stencil" -->
+          </v-card-text>
+        </div>
+        <v-btn
+          color="#e6e7e8"
+          class="elevation-0 tombol-tutup ma-3"
+          @click="tutupDialogCrop()"
+        >
+          Tutup
+        </v-btn>
+        <v-btn
+          color="#e6e7e8"
+          class="elevation-0 tombol-tutup ma-3"
+          @click="crop"
+        >
+          Crop Lampiran
+        </v-btn>
       </v-card>
 		</v-dialog>
     <v-dialog
@@ -992,10 +1077,34 @@
 <script>
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../../Layout/PopUpNotifikasi.vue";
+import { Cropper } from 'vue-advanced-cropper'
+import 'vue-advanced-cropper/dist/style.css';
+
+function getMimeType(file, fallback = null) {
+	const byteArray = (new Uint8Array(file)).subarray(0, 4);
+  let header = '';
+  for (let i = 0; i < byteArray.length; i++) {
+      header += byteArray[i].toString(16);
+  }
+	switch (header) {
+    case "89504e47":
+      return "image/png";
+    case "47494638":
+      return "image/gif";
+    case "ffd8ffe0":
+    case "ffd8ffe1":
+    case "ffd8ffe2":
+    case "ffd8ffe3":
+    case "ffd8ffe8":
+      return "image/jpeg";
+    default:
+      return fallback;
+  }
+}
 
 export default {
   name: 'Produk',
-	components: { PopUpNotifikasiVue },
+	components: { PopUpNotifikasiVue, Cropper },
 	data: () => ({
 		isLoading: false,
     roleID: '',
@@ -1028,6 +1137,7 @@ export default {
 		MeasurementOptions: [],
 		DialogProduk: false,
 		DialogViewLampiranProduk: false,
+		DialogCropProduk: false,
 		DialogUploadMultipleProduk: false,
 		DialogHistoryStok: false,
     DialogStok: false,
@@ -1071,6 +1181,7 @@ export default {
 			stok: '',
 			berat: '',
 			deskripsi: '',
+			filecover: '',
 		},
     inputHistory: {
       id_update_stok: '',
@@ -1087,6 +1198,7 @@ export default {
     MultilpeProduk: [],
     readers: [],
 		componentKey: 0,
+		FileCOVERIMAGE: '',
 		urlView: '',
 
 		//notifikasi
@@ -1103,6 +1215,11 @@ export default {
 		},
 	},
 	watch: {
+    FileCOVERIMAGE(){
+			if(this.FileCOVERIMAGE == undefined){
+				this.FileCOVERIMAGE = ''
+			}	
+		},
 		inputProduk: {
 			deep: true,
 			handler(value) {
@@ -1116,7 +1233,7 @@ export default {
 				if(value.deskripsi == null){ this.inputProduk.deskripsi = '' }
 
 				if(value.id_kategori_produk != '' && value.id_measurement != '' && value.nama_produk != '' && value.merek_produk != '' && value.harga != '' && value.stok != '' && 
-        value.berat != '' && value.deskripsi != ''){
+        value.berat != '' && value.deskripsi != '' && value.filecover != ''){
 					this.kondisiTombol = false
 				}else{
 					this.kondisiTombol = true
@@ -1223,6 +1340,7 @@ export default {
 				this.inputProduk.stok = item.stok ? item.stok : ''
 				this.inputProduk.berat = item.berat ? item.berat : ''
 				this.inputProduk.deskripsi = item.deskripsi ? item.deskripsi : ''
+				this.inputProduk.filecover = item.coverImage ? item.coverImage : ''
       }
       this.DialogProduk = true
     },
@@ -1231,7 +1349,7 @@ export default {
       this.editedIndex = 3
       this.DialogProduk = false
     },
-		SimpanForm(index) {
+		SimpanForm(index, dataUpload) {
 			let bodyData = {
 				jenis: index == 0 ? 'ADD' : 'EDIT',
 				UnixText: this.inputProduk.UnixText,
@@ -1245,6 +1363,7 @@ export default {
 				stok: this.inputProduk.stok,
 				berat: this.inputProduk.berat,
 				deskripsi: this.inputProduk.deskripsi,
+				cover_image: this.inputProduk.filecover,
 				create_update_by: localStorage.getItem('idLogin'),
 			}
 			let payload = {
@@ -1255,10 +1374,20 @@ export default {
 			};
 			this.fetchData(payload)
 			.then(async (res) => {
-				this.notifikasi("success", res.data.message, "1")
-        this.clearForm()
+        if(this.FileCOVERIMAGE){
+					let uploadGAMBAR = await this.uploadLampiran(index, dataUpload)
+					if(uploadGAMBAR.data.status == 200){
+						this.notifikasi("success", res.data.message, "1")
+					}else{
+						this.notifikasi("error", 'Gagal proses data', "1")
+					}
+				}else{
+					this.notifikasi("success", res.data.message, "1")
+				}
 				this.DialogProduk = false
 				this.getProduk()
+        this.clearForm()
+				this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.DialogProduk = false
@@ -1266,6 +1395,27 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
+    async uploadLampiran(index, dataUpload) {
+			if(dataUpload){
+				const bodyData = {
+					proses: index == 0 ? 'ADD' : 'EDIT',
+					id: index == 0 ? null : this.inputProduk.id_produk,
+					kode_produk: this.inputProduk.kode_produk,
+					nama_folder: this.inputProduk.UnixText,
+					nama_file: `CoverProduk-${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}`,
+					jenis: "images",
+					bagian: "produk",
+					table: "m_produk",
+					files: dataUpload,
+				};
+				try {
+					let response = await this.uploadFiles(bodyData);
+					return response
+				} catch (err) {
+					this.notifikasi("error", err.response.data.message, "1")
+				}
+			}
+		},
     HapusRecord(item) {
       let bodyData = {
         jenis: 'DELETE',
@@ -1327,9 +1477,52 @@ export default {
 			this.inputProduk.stok = ''
 			this.inputProduk.berat = ''
 			this.inputProduk.deskripsi = ''
+      this.inputProduk.filecover = ''
+			this.FileCOVERIMAGE = ''
       this.MultilpeProduk = []
       this.imageMultiple = []
     },
+    async uploadFile(e) {
+			this.FileCOVERIMAGE = await e.target.files[0];
+			this.inputProduk.filecover = this.FileCOVERIMAGE.name;
+			this.loadImage(this.FileCOVERIMAGE)
+    },
+		loadImage(files) {
+      this.DialogCropProduk = true
+      const blob = URL.createObjectURL(files);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.image = {
+          src: blob,
+          type: getMimeType(e.target.result, files.type),
+        }
+      }
+      reader.readAsArrayBuffer(files);
+    },
+    crop() {
+			const { canvas } = this.$refs.cropper.getResult();
+			canvas.toBlob((blob) => {
+				this.FileCOVERIMAGE = blob
+			}, this.image.type);
+      this.DialogCropProduk = false
+		},
+		hapusFile(){
+			this.FileCOVERIMAGE = ''
+			this.inputProduk.filecover = '';
+      this.$refs.inputCOVERIMAGEFile.value = null
+		},
+		tutupDialogCrop(){
+      this.hapusFile()
+			this.editedIndex = 3
+      this.DialogCropProduk = false
+    },
+		viewLampiran() {
+			this.DialogViewLampiranProduk = true
+			const API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
+			const no_image = `${API_URL}No_Image_Available.jpg`
+			this.urlView = this.inputProduk.filecover ? `${API_URL}image/produk/${this.inputProduk.filecover}` : no_image
+			// this.urlView = this.inputProduk.filecover ? `${API_URL}${this.inputProduk.filecover}` : no_image
+		},
     addFiles(e) {
       let jml_files = e.target.files.length
       for(let i=0;i<jml_files;i++) {

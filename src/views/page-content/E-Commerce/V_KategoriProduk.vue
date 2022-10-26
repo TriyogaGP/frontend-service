@@ -402,6 +402,7 @@ export default {
 			});
     },
 		clearForm() {
+			this.inputKategoriProduk.id_kategori_produk = ''
 			this.inputKategoriProduk.kategori_produk = ''
 		},
 		notifikasi(kode, text, proses){

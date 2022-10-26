@@ -822,7 +822,7 @@ export default {
 			this.inputPromosiProduk.id_produk = ''
 			this.inputPromosiProduk.deskripsi = ''
 			this.inputPromosiProduk.gambar = ''
-			this.FileGAMBAR
+			this.FileGAMBAR = ''
 		},
 		async uploadFile(e) {
 			this.FileGAMBAR = await e.target.files[0];
@@ -851,6 +851,7 @@ export default {
 		hapusFile(){
 			this.FileGAMBAR = ''
 			this.inputPromosiProduk.gambar = '';
+			this.$refs.inputGAMBARFile.value = null
 		},
 		tutupDialogCrop(){
       this.hapusFile()

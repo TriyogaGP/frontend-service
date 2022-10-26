@@ -439,6 +439,9 @@
 									<template #[`item.number`]="{ item }">
 										{{ dataProduk.indexOf(item) + 1 }}
 									</template>
+									<template #[`item.cover`]="{ item }">
+										<img :src="item.coverImage ? `${API_URL}image/produk/${item.coverImage}` : `${API_URL}No_Image_Available.jpg`" width="65"/>
+									</template>
 									<template #[`item.kodeProduk`]="{ item }">
 										<span v-html="item.kodeProduk" />
 									</template>
@@ -491,6 +494,7 @@ export default {
 	data: () => ({
 		isLoading: false,
 		roleID: '',
+		API_URL: '',
 		DataOrders: [],
 		page: 1,
     pageCount: 0,
@@ -515,6 +519,7 @@ export default {
     ],
 		headersProduk: [
       { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "", value: "cover", sortable: false, width: "5%" },
       { text: "Kode Produk", value: "kodeProduk", sortable: false },
       { text: "Produk", value: "namaProduk", sortable: false },
       { text: "Qty", value: "jumlahProduk", sortable: false },
@@ -575,6 +580,7 @@ export default {
 		}
 	},
 	mounted() {
+		this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
 		this.roleID = localStorage.getItem("roleID")
 		// this.getOrders('0')
 	},
@@ -632,5 +638,10 @@ export default {
 .v-tab {
 	font-size: 8pt !important;
 	font-weight: bold !important;
+}
+img {
+	border-style: solid !important;
+	border-radius: 10px !important;
+	padding: 2px !important;
 }
 </style>

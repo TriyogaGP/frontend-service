@@ -1,9 +1,9 @@
 <template>
   <div>
     <h1 class="subheading grey--text">Dashboard</h1>
-    <v-container v-if="roleID == 1">
+    <v-container>
       <v-layout row wrap>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -25,7 +25,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -47,7 +47,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1 || roleID == 5">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -69,7 +69,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1 || roleID == 5">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -91,7 +91,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1 || roleID == 5">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -113,7 +113,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1 || roleID == 5">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -135,7 +135,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">
@@ -157,7 +157,7 @@
             </v-card-actions> -->
           </v-card>
         </v-flex>
-        <v-flex sm6 xs12 md6 lg3>
+        <v-flex sm6 xs12 md6 lg3 v-if="roleID == 1">
           <v-card class="ma-3">
             <v-list-item>
               <v-list-item-avatar tile class="mt-n15">

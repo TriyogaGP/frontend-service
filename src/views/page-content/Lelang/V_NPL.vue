@@ -648,6 +648,7 @@ export default {
 		hapusFile(){
 			this.FileBUKTI = ''
 			this.inputRefund.bukti = '';
+			this.$refs.inputBUKTIFile.value = null
 		},
 		tutupDialogCrop(){
       this.hapusFile()

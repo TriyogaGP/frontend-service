@@ -48,6 +48,13 @@ export default [
         name: 'DataEMall',
         component: () => import('@/views/page-content/E-Mall/V_EMall.vue')
       },
+
+      //Testing
+      {
+        path: '/Testing',
+        name: 'Testing',
+        component: () => import('@/views/Testing.vue')
+      },
       
       //data untuk admin lelang
       {
@@ -84,6 +91,11 @@ export default [
         path: '/dataNPL',
         name: 'DataNPL',
         component: () => import('@/views/page-content/Lelang/V_NPL.vue')
+      },
+      {
+        path: '/dataBidding',
+        name: 'DataBidding',
+        component: () => import('@/views/page-content/Lelang/V_Bidding.vue')
       },
 
       //data untuk admin belanja

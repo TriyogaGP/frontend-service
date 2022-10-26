@@ -46,10 +46,10 @@
 					<img :src="item.image ? `${item.image}` : `${API_URL}No_Image_Available.jpg`" width="100" height="auto"/>
 				</template>
 				<template #[`item.status`]="{ item }">
-					<v-icon small v-if="item.statusAdktif == true" color="green">check</v-icon>
-					<v-icon small v-else-if="item.statusAdktif == false" color="red">clear</v-icon>
+					<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
+					<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 					<br>
-					<span v-html="item.statusAdktif == true ? 'Active' : 'Non Active'" />
+					<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" />
 				</template>
 				<template #expanded-item="{ headers, item }">
 					<td :colspan="headers.length" class="white">

@@ -1421,14 +1421,17 @@ export default {
 				this.FileKTP = ''
 				this.inputDataPeserta.filektp = '';
 				this.KumpulFile.fileKTP = ''
+        this.$refs.inputKTPFile.value = null
 			}else if(jenis == 'npwp'){ 
-				this.FileNPWP = '' 
+        this.FileNPWP = '' 
 				this.inputDataPeserta.filenpwp = '';
 				this.KumpulFile.fileNPWP = ''
+        this.$refs.inputNPWPFile.value = null
 			}else if(jenis == 'foto_peserta'){ 
-				this.FileFOTO = '' 
+        this.FileFOTO = '' 
 				this.inputDataPeserta.foto_peserta = '';
 				this.KumpulFile.fileFOTO = ''
+        this.$refs.inputFOTOFile.value = null
 			}
 		},
     tutupDialogCrop(jenis){

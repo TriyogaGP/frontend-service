@@ -401,6 +401,7 @@ export default {
 			});
     },
 		clearForm() {
+			this.inputKategoriBarang.id_kategori = ''
 			this.inputKategoriBarang.kategori = ''
 		},
 		notifikasi(kode, text, proses){

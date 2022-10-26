@@ -986,6 +986,7 @@ export default {
 		hapusFile(){
 			this.FileEVENT = ''
 			this.inputEvent.fileevent = '';
+			this.$refs.inputEVENTFile.value = null
 		},
 		tutupDialogCrop(){
       this.hapusFile()

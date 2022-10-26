@@ -886,6 +886,7 @@ export default {
 				src: null,
 				type: null,
 			}
+			this.$refs.inputBUKTIFile.value = null
 		},
 		tutupDialogCrop(){
       this.hapusFile()
