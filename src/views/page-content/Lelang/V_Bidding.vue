@@ -24,6 +24,7 @@
                     color="light-blue darken-3"
                     hide-details
                     clearable
+                    @keyup.enter="enterRoom(item)"
                   >
                     <template v-slot:append>
                       <v-icon
@@ -45,6 +46,7 @@
                   class="ma-2 white--text text--darken-2"
                   @click="enterRoom(item)"
                 >
+                  <!-- @click="sendMessage(item)" -->
                   <v-icon small left>exit_to_app</v-icon> Masuk Room
                 </v-btn>
               </div>
@@ -59,32 +61,33 @@
           <v-card class="ma-3 pa-1" style="border: 5px solid #000; border-radius: 5px;">
             <v-row class="ma-1">
               <v-col cols="3" class="light-blue darken-3 kotakleft">
-                <h5 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h5>
+                <h6 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h6>
                 <div class="kotakBid">
-                  <h5 class="text-center"><u>HARGA AWAL</u></h5>
+                  <h6 class="text-center"><u>HARGA AWAL</u></h6>
                   Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
                 </div>
                 <div class="kotakBid">
-                  <h5 class="text-center"><u>HARGA SEKARANG</u></h5>
+                  <h6 class="text-center"><u>HARGA SEKARANG</u></h6>
                   Rp. {{ currencyDotFormat(dataBidding.harga.toString()) }}
                 </div>
-                <h5 class="text-center white--text text--darken-2"><u>NAMA</u></h5>
+                <h6 class="text-center white--text text--darken-2"><u>NAMA</u></h6>
                 <div class="kotakBid">
                   <h6 class="text-center" style="font-size: 8pt">{{ dataBidding.nama }} ({{ dataBidding.no_npl }})</h6>
                 </div>
-                <h5 class="text-center white--text text--darken-2"><u>PEMENANG</u></h5>
+                <h6 class="text-center white--text text--darken-2"><u>PEMENANG</u></h6>
                 <div class="kotakBid">
-                  <h5 class="text-center"><u>PEMENANG</u></h5>
+                  <h6 class="text-center"><u>PEMENANG</u></h6>
                   <h6 class="text-center" style="font-size: 8pt">{{ dataPemenang.nama }} ({{ dataPemenang.no_npl }})</h6>
                   Rp. {{ currencyDotFormat(dataPemenang.harga.toString()) }}
                 </div>
-                <h5 class="text-center white--text text--darken-2"><u>Waktu Lelang</u></h5>
+                <h6 class="text-center white--text text--darken-2"><u>Waktu Lelang</u></h6>
                 <div class="timer">
                   <Countdown 
                     :starttime="starttime" 
                     :endtime="endtime"
                     :kondisi="timerKondisi" 
                     :selesaitombol="selesaiBid" 
+                    :updateWaktu="updateTimer" 
                     trans='{  
                     "day":"Hari",
                     "hours":"Jam",
@@ -99,12 +102,60 @@
                       "upcoming":"Future"
                     }}'
                     @selesaiwaktu="valuesData"
-                    @selesaitrig="valuesData2"/>
-                </div>
-                <div class="d-flex justify-center mt-5">
+                    @selesaitrig="valuesData2"
+                    @updateTime="valuesData3"
+                  />
                   <v-btn
                     color="lime accent-3"
-                    large
+                    small
+                    dense
+                    depressed
+                    class="black--text text--darken-2"
+                    :disabled="tombolHitungMundur"
+                    @click="HitungMundur()"
+                  >
+                    <v-icon small left>av_timer</v-icon> Hitung Mundur
+                  </v-btn>
+                </div>
+                <div class="d-flex justify-center mt-3">
+                  <v-btn
+                    color="lime accent-3"
+                    small
+                    dense
+                    depressed
+                    class="mr-1 black--text text--darken-2"
+                    :disabled="tombolBid"
+                    @click="() => { NominalBid += parseInt('500000') }"
+                  >
+                    Rp. 500.000
+                  </v-btn>
+                  <v-btn
+                    color="lime accent-3"
+                    small
+                    dense
+                    depressed
+                    class="ml-1 black--text text--darken-2"
+                    :disabled="tombolBid"
+                    @click="() => { NominalBid += parseInt('1000000') }"
+                  >
+                    Rp. 1.000.000
+                  </v-btn>
+                </div>
+                <div class="d-flex justify-center mt-2">
+                  <vuetify-money
+                    v-model="NominalBid"
+                    outlined
+                    dense
+                    :options="optionsUang"
+                    hide-details
+                    clearable
+                    :disabled="tombolBid"
+                  />
+                </div>
+                <div class="d-flex justify-center mt-2">
+                  <v-btn
+                    color="lime accent-3"
+                    small
                     dense
                     depressed
                     class="black--text text--darken-2"
@@ -131,35 +182,41 @@
                   </v-carousel>
                   <img v-else :src="`${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
                 </div>
-                <h5><u>Kelengkapan Barang Lelang</u></h5>
-                <v-row no-gutters>
-                  <v-col cols="12" class="text-center">
-                    <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
-                    <img :src="data_barang_lelang.stnk ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.stnk}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS STNK" width="120" height="90" class="ma-2"/>
-                    <img :src="data_barang_lelang.bpkb ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.bpkb}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS BPKB" width="120" height="90" class="ma-2"/>
-                    <img :src="data_barang_lelang.faktur ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.faktur}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS FAKTUR" width="120" height="90" class="ma-2"/>
-                    <img :src="data_barang_lelang.kwitansi ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.kwitansi}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KWITANSI" width="120" height="90" class="ma-2"/>
-                  </v-col>
+                <div v-if="data_barang_lelang.namaKategori == 'Mobil' || data_barang_lelang.namaKategori == 'Motor'">
+                  <h6><u>Kelengkapan Barang Lelang</u></h6>
+                  <v-row no-gutters>
+                    <v-col cols="12" class="text-center">
+                      <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
+                      <img :src="data_barang_lelang.stnk ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.stnk}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS STNK" width="120" height="90" class="ma-2"/>
+                      <img :src="data_barang_lelang.bpkb ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.bpkb}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS BPKB" width="120" height="90" class="ma-2"/>
+                      <img :src="data_barang_lelang.faktur ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.faktur}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS FAKTUR" width="120" height="90" class="ma-2"/>
+                      <img :src="data_barang_lelang.kwitansi ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.kwitansi}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KWITANSI" width="120" height="90" class="ma-2"/>
+                    </v-col>
+                  </v-row>
+                </div>
+                <v-row no-gutters class="font-weight-bold">
+                  <v-col cols="3"><h6>Kategori Barang Lelang<span style="float: right;">:</span></h6></v-col>
+                  <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.namaKategori }}</h6></v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
-                  <v-col cols="3"><h5>Nama Barang Lelang<span style="float: right;">:</span></h5></v-col>
-                  <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.namaBarangLelang }}</h5></v-col>
+                  <v-col cols="3"><h6>Nama Barang Lelang<span style="float: right;">:</span></h6></v-col>
+                  <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.namaBarangLelang }}</h6></v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
-                  <v-col cols="3"><h5>Tahun<span style="float: right;">:</span></h5></v-col>
-                  <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.tahun }}</h5></v-col>
+                  <v-col cols="3"><h6>Tahun<span style="float: right;">:</span></h6></v-col>
+                  <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.tahun }}</h6></v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
-                  <v-col cols="3"><h5>Lokasi<span style="float: right;">:</span></h5></v-col>
-                  <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.lokasiBarang }}</h5></v-col>
+                  <v-col cols="3"><h6>Lokasi<span style="float: right;">:</span></h6></v-col>
+                  <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.lokasiBarang }}</h6></v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
-                  <v-col cols="3"><h5>Grade Barang<span style="float: right;">:</span></h5></v-col>
-                  <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.grade }}</h5></v-col>
+                  <v-col cols="3"><h6>Grade Barang<span style="float: right;">:</span></h6></v-col>
+                  <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.grade }}</h6></v-col>
                 </v-row>
                 <v-row no-gutters class="font-weight-bold">
-                  <v-col cols="3"><h5>Deskripsi<span style="float: right;">:</span></h5></v-col>
-                  <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.deskripsi }}</h5></v-col>
+                  <v-col cols="3"><h6>Deskripsi<span style="float: right;">:</span></h6></v-col>
+                  <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.deskripsi }}</h6></v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="6">
@@ -209,7 +266,7 @@
                       dense
                       depressed
                       class="mt-2 white--text text--darken-2"
-                      @click="() => { EventPanel = false }"
+                      @click="() => { EventPanel = false; kondisiTimer = true; getEventActive();  }"
                     >
                       <v-icon small left>exit_to_app</v-icon> Keluar Panel
                     </v-btn>
@@ -258,11 +315,13 @@ export default {
       joinPesan: '',
       hiddenLog: true,
       tombolBid: true,
+      tombolHitungMundur: true,
       tombolStart: false,
       tombolStop: true,
       tombolLanjut: true,
       kondisiTimer: true,
       selesaiBid: false,
+      updateWaktu: false,
       dataPass: [{
         id_event: '',
         katasandi: '', 
@@ -286,9 +345,17 @@ export default {
       fotoArray: [],
       dataEvent: '',
 		  data_barang_lelang: '',
+      NominalBid: 0,
+      optionsUang: {
+        locale: "pt-BR",
+        prefix: "Rp.",
+        suffix: "",
+        length: 15,
+        precision: 0
+      },
 
-      starttime: new Date(), 
-      endtime: "",
+      starttime: '', 
+      endtime: '',
       EventPanel: false,
 
       //notifikasi
@@ -298,9 +365,27 @@ export default {
       notifikasiButton: '',
     };  
   },
+  metaInfo: {
+		title: "Lelang (Penawaran (Bidding)) - WIN.ID",
+		htmlAttrs: {
+			lang: "id",
+			amp: true,
+		},
+	},
+  watch: {
+    NominalBid: {
+      deep: true,
+      handler(value){
+        if(value == '') { this.NominalBid = 0 }
+      }
+    } 
+  },
   computed:{
     timerKondisi() {
       return this.kondisiTimer
+    },
+    updateTimer() {
+      return this.updateWaktu
     },
   },
   mounted() {
@@ -365,6 +450,8 @@ export default {
 		},
     nextRoom(nolot) {
       // console.log(nolot)
+      const socket = io(this.API_URL);
+      socket.emit("LanjutRoomBid", nolot);
       this.tombolStart = false
       this.getEvent(nolot)
       this.dataBidding = {
@@ -380,6 +467,11 @@ export default {
       }
     },
     enterRoom(item) {
+      let filterdata = this.dataPass.filter((val) => val.panel == true)
+      if(filterdata.length) {
+        filterdata[0].panel = false
+        this.EventPanel = false
+      }
       let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
       if(!data[0].katasandi){
         data[0].katasandi = ''
@@ -409,13 +501,14 @@ export default {
       }
     },
     MulaiBidding() {
+      this.tombolHitungMundur = false
       this.tombolBid = false
       this.tombolStart = true
       this.tombolStop = false
       this.selesaiBid = false
       const socket = io(this.API_URL);
       socket.emit("join-bidding", { 
-        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent,
         id_peserta: localStorage.getItem('idLogin'), 
         id_event: this.dataEvent.idEvent, 
         id_npl: 0, 
@@ -432,8 +525,9 @@ export default {
           this.hiddenLog = true
 				}, 5000);
 			});
-			socket.on("lot-data", (data) => {
+			socket.on("hitung-mundur", (data) => {
         this.kondisiTimer = false
+        this.starttime = new Date()
         this.endtime = data.expiredAt
 			});
 			socket.on("bid", ({ dataBid }) => {
@@ -467,24 +561,40 @@ export default {
     SelesaiBidding(done = false) {
       const socket = io(this.API_URL);
       socket.emit("tombolBid", true);
-      socket.emit("done-bidding", `Lot dengan no ${this.currentLOT} telah berakhir, silahkan pindah ke Lot selanjutnya terimakasih !`);
+      socket.emit("done-bidding", `Lot dengan no ${this.currentLOT} telah berakhir,pemenang lelang adalah ${this.dataBidding.nama}(${this.dataBidding.no_npl}) dengan nominal Rp.${this.currencyDotFormat(this.dataBidding.harga.toString())} dan silahkan pindah ke Lot selanjutnya terimakasih !`);
       this.tombolLanjut = false
       this.tombolBid = true
+      this.tombolHitungMundur = true
       this.tombolStart = true
       this.tombolStop = true
       this.kondisiTimer = true
+      this.updateWaktu = false
       this.selesaiBid = done
     },
     BidLelang() {
       this.tombolBid = true
       const socket = io(this.API_URL);
+      if(this.kondisiTimer == false) {
+        this.updateWaktu = true
+        socket.emit("hitung-mundur", {
+          room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
+          id_lot: this.dataRoom.idLot, 
+        });
+        socket.on("hitung-mundur", (data) => {
+          // console.log(data);
+          this.kondisiTimer = false
+          this.starttime = new Date()
+          this.endtime = data.expiredAt
+        });
+      }
       socket.emit("bid", { 
         room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_npl: localStorage.getItem('idLogin'), 
         id_lot: this.dataRoom.idLot, 
-        harga_bidding: this.dataEvent.kelipatanBid, 
+        harga_bidding: this.NominalBid == 0 ? this.dataEvent.kelipatanBid : this.NominalBid, 
         is_admin: 1 
       });
+      this.NominalBid = 0
     },
     sendPemenang() {
       const socket = io(this.API_URL);
@@ -496,32 +606,51 @@ export default {
         no_npl: this.dataBidding.no_npl,
       });
     },
+    HitungMundur() {
+      const socket = io(this.API_URL);
+      socket.emit("hitung-mundur", {
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
+        id_lot: this.dataRoom.idLot, 
+      });
+      this.tombolHitungMundur = true
+
+      // this.kondisiTimer = false
+      // this.endtime = this.getDayJS(10, 'minute')
+    },
     valuesData(val) {
       if (val) {
         this.kondisiTimer = val
-        this.SelesaiBidding(false)
         this.sendPemenang()
+        this.SelesaiBidding(false)
       }
     },
     valuesData2(val) {
       if (val) {
         this.kondisiTimer = val
-        this.SelesaiBidding(true)
         this.sendPemenang()
+        this.SelesaiBidding(true)
+      }
+    },
+    valuesData3(val) {
+      if (val) {
+        this.updateWaktu = val
       }
     },
     sendMessage(item) {
-      let data = this.dataPass.filter((val) => val.id_event == item.id_event)
+      let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
       if(!data[0].katasandi){
         data[0].katasandi = ''
         return this.notifikasi("warning", "Masukan Kata Sandi Event !", "1")
-      }else if(data[0].katasandi == item.katasandi_event){
-        if(!item.data_lot){
+      }else if(data[0].katasandi == item.kataSandiEvent){
+        if(!item.LOT.length){
           data[0].katasandi = ''
           return this.notifikasi("warning", "Event ini Belum siap !", "1")
-        }else if(item.data_lot){
+        }else if(item.LOT.length){
+          item.LOT.map((el) => {
+            this.noLOT.push(el.noLot)
+          })
           data[0].katasandi = ''
-          let routeData = this.$router.resolve({name: 'Bidding', params: { no_lot: item.data_lot.no_lot, nama_event: item.nama_event, nama: localStorage.getItem('nama') }});
+          let routeData = this.$router.resolve({name: 'Bidding', params: { no_lot: item.LOT[0].noLot, nama_event: item.namaEvent, nama: localStorage.getItem('nama') }});
           window.open(routeData.href, '_blank');
         }
       }else{
@@ -668,6 +797,7 @@ img {
 	background: #FFF;
 	color: #000;
 	margin: 5px;
+  font-size: 14px;
 }
 .timer {
   font-size: 20px;
@@ -687,12 +817,12 @@ img {
       //@include margin-start(5);
       //display: inline-block;
       opacity: 0.8;
-      width: 60px;
+      width: 10px;
     }
   }
   .number{
     background: rgba(51, 51, 51, 0.53);
-    padding: 0 5px;
+    padding: 0 2px;
     border-radius: 5px;
     display: inline-block;
     width: 30px;

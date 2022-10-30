@@ -2,6 +2,7 @@ import Vue from "vue";
 import ApiService from "@/core/services/api.service";
 import sign from "jwt-encode"
 import jwt_decode from 'jwt-decode'
+import dayjs from 'dayjs'
 
 const Helper = {
   globalHelper() {
@@ -323,6 +324,10 @@ const Helper = {
             var currency = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             return currency;
           }
+        },
+        getDayJS(waktu, text) {
+          let date = dayjs().add(waktu, text).toDate()
+          return date;
         },
       },
     });

@@ -10,11 +10,12 @@
 		</div> -->
 		<div class="min">
 			<span class="number">{{ minutes }}</span>
-			<div class="format">{{ wordString.minutes }}</div>
+			<!-- <div class="format">{{ wordString.minutes }}</div> -->
 		</div>
+		:
 		<div class="sec">
 			<span class="number">{{ seconds }}</span>
-			<div class="format">{{ wordString.seconds }}</div>
+			<!-- <div class="format">{{ wordString.seconds }}</div> -->
 		</div>
 		<!-- <div class="message">{{ message }}</div>
 		<div class="status-tag" :class="statusType">{{ statusText }}</div> -->
@@ -22,7 +23,7 @@
 </template>
 <script>
 export default {
-  props: ['starttime','endtime','trans','kondisi','selesaitombol'],
+  props: ['starttime','endtime','trans','kondisi','selesaitombol','updateWaktu'],
   data() {
     return{
 			timer:"",
@@ -43,11 +44,17 @@ export default {
 	watch: {
 		kondisi(value){
 			this.kondisiTimer = value
+			// console.log(this.kondisiTimer, value);
 			if(this.kondisiTimer == false){
 				this.start = new Date(this.starttime).getTime();
 				this.end = new Date(this.endtime).getTime();
 				this.timerCount(this.start,this.end);
 				this.interval = setInterval(() => {
+					if(this.updateWaktu == true){
+						this.start = new Date(this.starttime).getTime();
+						this.end = new Date(this.endtime).getTime();
+						this.$emit("updateTime", false);
+					}
 					this.timerCount(this.start,this.end);
 				}, 1000);
 			}else{

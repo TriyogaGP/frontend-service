@@ -10,7 +10,7 @@ export default [
     component: () => import('@/views/LoginUser.vue')
   },
   {
-    path: '/forgotpass',
+    path: '/forgotpass/:siteLogin',
     name: 'ForgotPass',
     component: () => import('@/views/ForgotPass.vue')
   },

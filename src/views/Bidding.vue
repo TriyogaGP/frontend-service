@@ -9,7 +9,7 @@
 								<div class="scrollTextUser">
 									<v-list dense class="light-blue darken-3">
 										<v-list-item v-for="(item, i) in dataUser" :key="i" class="SelectedTile">
-											<v-icon left v-if="item.is_admin == 0">person</v-icon>
+											<v-icon left v-if="item.isAdmin == 0">person</v-icon>
 											<v-icon left v-else>admin_panel_settings</v-icon>
 											<v-list-item-title>
 												<span class="tulisanNamaPeserta">{{ item.nama }}</span>
@@ -23,7 +23,7 @@
 								<div class="scrollText kotakTengah pa-1" ref="scrollText">
 									<div v-for="(item, i) in dataMessageRoom" :key="i">
 										<div class="message" :id="item.nama != namaPeserta ? `kotakchatleft` : `kotakchatright`">
-											<div class="tulisanChat">{{ item.nama }} {{ item.is_admin == 1 && `(Admin Lelang)` }}</div>
+											<div class="tulisanChat">{{ item.nama }} {{ item.isAdmin == 1 && `(Admin Lelang)` }}</div>
 											<span style="white-space: pre-line" v-html="item.pesan" />
 											<div style="float: right; margin-top: 15px; font-size: 8pt; font-weight: bold;">{{ item.jam }}</div>
 										</div>
@@ -60,23 +60,23 @@
 								<h4 class="text-center"><u>Data Event</u></h4>
 								<h5 class="tulisan2">Nama Event : {{ namaEvent }}</h5>
 								<h5 class="tulisan2">No Lot : {{ noLot }}</h5>
-								<h5 class="tulisan2">Harga Awal : Rp. {{ currencyDotFormat(dataRoom.harga_awal) }}</h5>
+								<h5 class="tulisan2">Harga Awal : Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}</h5>
 								<h4 class="text-center"><u>Data Barang</u></h4>
-								<h5 class="tulisan2">Kategori : <span v-html="data_barang_lelang.kategori"/></h5>
-								<h5 class="tulisan2">Nama Barang : <span v-html="data_barang_lelang.nama_barang_lelang"/></h5>
-								<h5 class="tulisan2">Lokasi Barang : <span v-html="data_barang_lelang.lokasi_barang"/></h5>
+								<h5 class="tulisan2">Kategori : <span v-html="data_barang_lelang.KategoriLelang.namaKategori"/></h5>
+								<h5 class="tulisan2">Nama Barang : <span v-html="data_barang_lelang.namaBarangLelang"/></h5>
+								<h5 class="tulisan2">Lokasi Barang : <span v-html="data_barang_lelang.lokasiBarang"/></h5>
 								<h4 class="text-center"><u>Bid Terakhir</u></h4>
 								<div class="kotakBid">
 									<h4 class="text-center"><u>HARGA AWAL</u></h4>
-									Rp. {{ currencyDotFormat(dataRoom.harga_awal) }}
+									Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
 								</div>
 								<div class="kotakBid">
 									<h4 class="text-center"><u>HARGA TAWARAN</u></h4>
-									Rp. {{ currencyDotFormat(dataRoom.harga_awal) }}
+									Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
 								</div>
 								<div class="kotakBid">
 									<h4 class="text-center"><u>PEMENANG</u></h4>
-									Rp. {{ currencyDotFormat(dataRoom.harga_awal) }}
+									Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
 								</div>
 							</v-col>
 						</v-row>
@@ -104,21 +104,8 @@ export default {
 		dataUser: [],
 		dataMessageRoom: [],
 		dataRoom: {},
-		dataEvent: {
-			id_event: '',
-			kode_event: '',
-			nama_event: '',
-			alamat_event: '',
-			gambar: '',
-			tanggalevent: '',
-			waktu_event: '',
-		},
-		data_barang_lelang: {
-			kategori: '',
-			id_barang_lelang: '',
-			nama_barang_lelang: '',
-			lokasi_barang: '',
-		},
+		dataEvent: '',
+		data_barang_lelang: '',
 		hiddenLog: true,
 	}),
 	watch: {
@@ -162,27 +149,14 @@ export default {
 		getEvent(nolot) {
 			let payload = {
 				method: "get",
-				url: `moduleMain/getRoomEvent?no_lot=${nolot}`,
+				url: `lelang/getRoomEvent?no_lot=${nolot}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
 				this.dataRoom = res.data.result;
-				this.dataEvent = {
-					id_event: this.dataRoom.data_event.id_event,
-					kode_event: this.dataRoom.data_event.kode_event,
-					nama_event: this.dataRoom.data_event.nama_event,
-					alamat_event: this.dataRoom.data_event.alamat_event,
-					gambar: this.dataRoom.data_event.gambar,
-					tanggalevent: this.dataRoom.data_event.tanggalevent,
-					waktu_event: this.dataRoom.data_event.waktu_event,
-				}
-				this.data_barang_lelang = {
-					kategori: this.dataRoom.data_barang_lelang.data_kategori.kategori,
-					id_barang_lelang: this.dataRoom.data_barang_lelang.id_barang_lelang,
-					nama_barang_lelang: this.dataRoom.data_barang_lelang.nama_barang_lelang,
-					lokasi_barang: this.dataRoom.data_barang_lelang.lokasi_barang,
-				}
+				this.dataEvent = this.dataRoom.Event
+				this.data_barang_lelang = this.dataRoom.BarangLelang
 				this.getMessage();
 			})
 			.catch((err) => {
@@ -192,7 +166,7 @@ export default {
 		getMessage() {
 			const socket = io(this.url_socket);
 			// socket.emit("join", { name: localStorage.getItem('nama'), room: this.noLot + "_" + this.namaEvent, device: "laptop", is_admin: 1 });
-			socket.emit("join", { room: this.noLot + "_" + this.namaEvent, id_peserta: localStorage.getItem('roleID') == 1 ? localStorage.getItem('idLogin') : 1, id_event: this.dataEvent.id_event, device: "laptop", is_admin: 1 });
+			socket.emit("join", { room: this.noLot + "_" + this.namaEvent, id_peserta: localStorage.getItem('roleID') == 1 ? localStorage.getItem('idLogin') : 1, id_event: this.dataEvent.idEvent, device: "laptop", is_admin: 1 });
 			socket.on("message", ({ pesan, id, data }) => {
 				this.joinPesan = pesan;
 				this.hiddenLog = false
@@ -214,7 +188,7 @@ export default {
 		},
 		sendMessage() {
 			const socket = io(this.url_socket);
-			socket.emit("kirimMessage", { room: this.noLot + "_" + this.namaEvent, id_peserta: localStorage.getItem('roleID') == 1 ? localStorage.getItem('idLogin') : 1, id_event: this.dataEvent.id_event, is_admin: 1, pesan: this.pesan });
+			socket.emit("kirimMessage", { room: this.noLot + "_" + this.namaEvent, id_peserta: localStorage.getItem('roleID') == 1 ? localStorage.getItem('idLogin') : 1, id_event: this.dataEvent.idEvent, is_admin: 1, pesan: this.pesan });
 			this.pesan = ''
 			this.scrollToEnd()
 		},

@@ -71,7 +71,7 @@
                           </v-col>
                         </v-form>
                         <h3 class="tombolLupaPass">
-                          <router-link :to="{name: 'ForgotPass'}">Lupa Kata Sandi ?</router-link>
+                          <router-link :to="{name: 'ForgotPass', params: { siteLogin: 'Admin' }}">Lupa Kata Sandi ?</router-link>
                         </h3>
                       </v-card-text>
                       <div class="text-center mt-3 mb-10">
@@ -194,9 +194,13 @@ export default {
     notifikasiText: '',
     notifikasiButton: '',
   }),
-  props: {
-    source: String
-  },
+  metaInfo: {
+		title: "Login Administrator - WIN.ID",
+		htmlAttrs: {
+			lang: "id",
+			amp: true,
+		},
+	},
   mounted() {
     if(localStorage.getItem('user_token')) return this.$router.push({name: "Dashboard"});
     // this.$getLocation({

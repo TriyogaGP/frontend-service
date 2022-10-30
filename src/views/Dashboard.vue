@@ -184,7 +184,7 @@
     <v-container v-if="siteLogin == 'Peserta'">
 			<v-layout row wrap>
         <v-flex sm6 xs12 md6 lg3 v-for="(item, i) in DataEventActive" :key="i">
-					<v-card class="ma-3" height="420">
+					<v-card class="ma-3" height="370"> <!-- height="420" -->
 						<v-list-item>
 							<v-list-item-content>
                 <img :src="item.gambar ? `${API_URL}image/event/${item.gambar}` : `${API_URL}No_Image_Available.jpg`" width="200" height="150"/>
@@ -201,10 +201,11 @@
                   dense
                   label="Kata Sandi Event"
                   color="light-blue darken-3"
-                  class="mb-2"
                   hide-details
                   clearable
+                  @keyup.enter="enterRoom(item)"
                 >
+                  <!-- class="mb-2" -->
                   <template v-slot:append>
                     <v-icon
                       color="light-blue darken-3"
@@ -214,7 +215,7 @@
                     >
                   </template>
                 </v-text-field>
-                <v-autocomplete
+                <!-- <v-autocomplete
                   v-model="dataPass[i].no_npl"
                   :items="DataNPL.filter((el) => el.id_event == item.idEvent)"
                   item-text="no_npl"
@@ -227,7 +228,7 @@
                   hide-details
                   no-data-text="Tidak ada data yang tersedia"
                   clearable
-                />
+                /> -->
 							</v-list-item-content>
 						</v-list-item>
             <div class="text-right">
@@ -237,7 +238,7 @@
                 dense
                 depressed
                 class="ma-2 white--text text--darken-2"
-                @click="enterRoom(item)"
+                @click="() => { enterRoom(item); }"
               >
                 <v-icon small>exit_to_app</v-icon> Masuk Room
               </v-btn>
@@ -253,49 +254,87 @@
         <v-card class="ma-3 pa-1" style="border: 5px solid #000; border-radius: 5px;">
           <v-row class="ma-1">
             <v-col cols="3" class="light-blue darken-3 kotakleft">
-              <h5 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h5>
+              <h6 class="text-center white--text text--darken-2"><u>Bid Terakhir</u></h6>
               <div class="kotakBid">
-                <h5 class="text-center"><u>HARGA AWAL</u></h5>
+                <h6 class="text-center"><u>HARGA AWAL</u></h6>
                 Rp. {{ currencyDotFormat(dataRoom.hargaAwal) }}
               </div>
               <div class="kotakBid">
-                <h5 class="text-center"><u>HARGA SEKARANG</u></h5>
+                <h6 class="text-center"><u>HARGA SEKARANG</u></h6>
                 Rp. {{ currencyDotFormat(dataBidding.harga.toString()) }}
               </div>
-              <h5 class="text-center white--text text--darken-2"><u>NAMA</u></h5>
+              <h6 class="text-center white--text text--darken-2"><u>NAMA</u></h6>
               <div class="kotakBid">
                 <h6 class="text-center" style="font-size: 8pt">{{ dataBidding.nama }} ({{ dataBidding.no_npl }})</h6>
               </div>
-              <h5 class="text-center white--text text--darken-2"><u>PEMENANG</u></h5>
+              <h6 class="text-center white--text text--darken-2"><u>PEMENANG</u></h6>
               <div class="kotakBid">
-                <h5 class="text-center"><u>PEMENANG</u></h5>
+                <h6 class="text-center"><u>PEMENANG</u></h6>
                 <h6 class="text-center" style="font-size: 8pt">{{ dataPemenang.nama }} ({{ dataPemenang.no_npl }})</h6>
                 Rp. {{ currencyDotFormat(dataPemenang.harga.toString()) }}
               </div>
-              <h5 class="text-center white--text text--darken-2"><u>Waktu Lelang</u></h5>
-                <div class="timer">
-                  <Countdown 
-                    :starttime="starttime" 
-                    :endtime="endtime"
-                    :kondisi="timerKondisi" 
-                    trans='{  
-                    "day":"Hari",
-                    "hours":"Jam",
-                    "minutes":"Menit",
-                    "seconds":"Detik",
-                    "expired":"Event has been expired.",
-                    "running":"Till the end of event.",
-                    "upcoming":"Till start of event.",
-                    "status": {
-                      "expired":"Expired",
-                      "running":"Running",
-                      "upcoming":"Future"
-                    }}'/>
-                </div>
-              <div class="d-flex justify-center mt-5">
+              <h6 class="text-center white--text text--darken-2"><u>Waktu Lelang</u></h6>
+              <div class="timer">
+                <Countdown 
+                  :starttime="starttime" 
+                  :endtime="endtime"
+                  :kondisi="timerKondisi" 
+                  :updateWaktu="updateTimer"
+                  trans='{  
+                  "day":"Hari",
+                  "hours":"Jam",
+                  "minutes":"Menit",
+                  "seconds":"Detik",
+                  "expired":"Event has been expired.",
+                  "running":"Till the end of event.",
+                  "upcoming":"Till start of event.",
+                  "status": {
+                    "expired":"Expired",
+                    "running":"Running",
+                    "upcoming":"Future"
+                  }}'
+                  @updateTime="valuesData3"
+                />
+              </div>
+              <div class="d-flex justify-center mt-3">
                 <v-btn
                   color="lime accent-3"
-                  large
+                  small
+                  dense
+                  depressed
+                  class="mr-1 black--text text--darken-2"
+                  :disabled="tombolBid"
+                  @click="() => { NominalBid += parseInt('500000') }"
+                >
+                  Rp. 500.000
+                </v-btn>
+                <v-btn
+                  color="lime accent-3"
+                  small
+                  dense
+                  depressed
+                  class="ml-1 black--text text--darken-2"
+                  :disabled="tombolBid"
+                  @click="() => { NominalBid += parseInt('1000000') }"
+                >
+                  Rp. 1.000.000
+                </v-btn>
+              </div>
+              <div class="d-flex justify-center mt-2">
+                <vuetify-money
+                  v-model="NominalBid"
+                  outlined
+                  dense
+                  :options="optionsUang"
+                  hide-details
+                  clearable
+                  :disabled="tombolBid"
+                />
+              </div>
+              <div class="d-flex justify-center mt-2">
+                <v-btn
+                  color="lime accent-3"
+                  small
                   dense
                   depressed
                   class="black--text text--darken-2"
@@ -315,41 +354,48 @@
                     :key="i"
                   >
                     <v-row class="ma-1" align="center" justify="center">
-                      <img :src="pic ? `${API_URL}image/kelengkapan-barang-lelang/${pic}` : `${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
+                      <img :src="pic ? `${API_URL}image/kelengkapan-barang-lelang/${pic.gambar}` : `${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
                     </v-row>
+                    <h4>{{ pic.title }}</h4>
                   </v-carousel-item>
                 </v-carousel>
                 <img v-else :src="`${API_URL}No_Image_Available.jpg`" width="450" height="250"/>
               </div>
-              <h5><u>Kelengkapan Barang Lelang</u></h5>
-              <v-row no-gutters>
-                <v-col cols="12" class="text-center">
-                  <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
-                  <img :src="data_barang_lelang.stnk ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.stnk}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS STNK" width="120" height="90" class="ma-2"/>
-                  <img :src="data_barang_lelang.bpkb ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.bpkb}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS BPKB" width="120" height="90" class="ma-2"/>
-                  <img :src="data_barang_lelang.faktur ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.faktur}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS FAKTUR" width="120" height="90" class="ma-2"/>
-                  <img :src="data_barang_lelang.kwitansi ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.kwitansi}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KWITANSI" width="120" height="90" class="ma-2"/>
-                </v-col>
+              <div v-if="data_barang_lelang.namaKategori == 'Mobil' || data_barang_lelang.namaKategori == 'Motor'">
+                <h6><u>Kelengkapan Barang Lelang</u></h6>
+                <v-row no-gutters>
+                  <v-col cols="12" class="text-center">
+                    <img :src="data_barang_lelang.ktpPemilik ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.ktpPemilik}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KTP" width="120" height="90" class="ma-2"/>
+                    <img :src="data_barang_lelang.stnk ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.stnk}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS STNK" width="120" height="90" class="ma-2"/>
+                    <img :src="data_barang_lelang.bpkb ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.bpkb}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS BPKB" width="120" height="90" class="ma-2"/>
+                    <img :src="data_barang_lelang.faktur ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.faktur}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS FAKTUR" width="120" height="90" class="ma-2"/>
+                    <img :src="data_barang_lelang.kwitansi ? `${API_URL}image/kelengkapan-barang-lelang/${data_barang_lelang.kwitansi}` : `${API_URL}No_Image_Available.jpg`" title="BERKAS KWITANSI" width="120" height="90" class="ma-2"/>
+                  </v-col>
+                </v-row>
+              </div>
+              <v-row no-gutters class="font-weight-bold">
+                <v-col cols="3"><h6>Kategori Barang Lelang<span style="float: right;">:</span></h6></v-col>
+                <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.namaKategori }}</h6></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3"><h5>Nama Barang Lelang<span style="float: right;">:</span></h5></v-col>
-                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.namaBarangLelang }}</h5></v-col>
+                <v-col cols="3"><h6>Nama Barang Lelang<span style="float: right;">:</span></h6></v-col>
+                <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.namaBarangLelang }}</h6></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3"><h5>Tahun<span style="float: right;">:</span></h5></v-col>
-                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.tahun }}</h5></v-col>
+                <v-col cols="3"><h6>Tahun<span style="float: right;">:</span></h6></v-col>
+                <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.tahun }}</h6></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3"><h5>Lokasi<span style="float: right;">:</span></h5></v-col>
-                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.lokasiBarang }}</h5></v-col>
+                <v-col cols="3"><h6>Lokasi<span style="float: right;">:</span></h6></v-col>
+                <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.lokasiBarang }}</h6></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3"><h5>Grade Barang<span style="float: right;">:</span></h5></v-col>
-                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.grade }}</h5></v-col>
+                <v-col cols="3"><h6>Grade Barang<span style="float: right;">:</span></h6></v-col>
+                <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.grade }}</h6></v-col>
               </v-row>
               <v-row no-gutters class="font-weight-bold">
-                <v-col cols="3"><h5>Deskripsi<span style="float: right;">:</span></h5></v-col>
-                <v-col cols="8"><h5>&nbsp;{{ data_barang_lelang.deskripsi }}</h5></v-col>
+                <v-col cols="3"><h6>Deskripsi<span style="float: right;">:</span></h6></v-col>
+                <v-col cols="8"><h6>&nbsp;{{ data_barang_lelang.deskripsi }}</h6></v-col>
               </v-row>
               <v-row>
                 <v-col cols="6">
@@ -374,7 +420,7 @@
                     dense
                     depressed
                     class="mt-2 white--text text--darken-2"
-                    @click="() => { EventPanel = false }"
+                    @click="() => { EventPanel = false; kondisiTimer = true; getBidLelang(); }"
                   >
                     <v-icon small>exit_to_app</v-icon> Keluar Panel
                   </v-btn>
@@ -425,6 +471,7 @@ export default {
     tombolStop: true,
     tombolLanjut: true,
     kondisiTimer: true,
+    updateWaktu: false,
     dataPass: [{
       id_event: '',
       katasandi: '', 
@@ -450,9 +497,17 @@ export default {
     fotoArray: [],
     dataEvent: '',
     data_barang_lelang: '',
+    NominalBid: 0,
+    optionsUang: {
+      locale: "pt-BR",
+      prefix: "Rp.",
+      suffix: "",
+      length: 15,
+      precision: 0
+    },
 
-    starttime: new Date(), 
-    endtime: "",
+    starttime: '', 
+    endtime: '',
     EventPanel: false,
 
     //notifikasi
@@ -472,22 +527,73 @@ export default {
     timerKondisi() {
       return this.kondisiTimer
     },
+    updateTimer() {
+      return this.updateWaktu
+    },
+  },
+  watch: {
+    NominalBid: {
+      deep: true,
+      handler(value){
+        if(value == '') { this.NominalBid = 0 }
+      }
+    } 
   },
   created() {
     this.siteLogin = localStorage.getItem('siteLogin')
     if(this.siteLogin == 'Peserta') {
       this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
       const socket = io(this.API_URL);
+      socket.on("LanjutRoomBid", (noLot) => {
+        this.getDataNPL(this.dataEvent.idEvent)
+        let data = this.dataPass.filter((val) => val.id_event == this.dataEvent.idEvent)
+        const dataNPL = this.DataNPL.filter((val) => val.id_event == data[0].id_event)
+        let randomNPL = Math.floor(Math.random() * dataNPL.length);
+        if(!dataNPL.length){
+          data[0].katasandi = ''
+          // data[0].no_npl = ''
+          data[0].panel = false
+          this.EventPanel = false
+          return this.notifikasi("warning", "No. NPL anda sudah tidak tersedia !", "1")
+        }
+        console.log(dataNPL[randomNPL].no_npl);
+        this.dataBidding = {
+          harga: 0,
+          nama: '',
+          no_npl: '',
+          id_bidding: '',
+        }
+        this.dataPemenang = {
+          harga: 0,
+          nama: '',
+          no_npl: '',
+        }
+        this.currentNPL = dataNPL[randomNPL].no_npl
+        this.getEvent(noLot)
+      });
       socket.on("tombolJoin", (tombol) => {
         this.tombolJoin = tombol
       });
       socket.on("done-bidding", (pesan) => {
         this.tombolBid = true
         this.tombolJoin = true
-        this.DataEventActive = []
-        this.DataNPL = []
-        this.getBidLelang()
+        // this.DataEventActive = []
+        // this.DataNPL = []
+        // this.getBidLelang()
         this.notifikasi("success", pesan, "1")
+      });
+      socket.on("send-pemenang", (dataPemenang) => {
+        this.dataPemenang = {
+          harga: parseInt(dataPemenang.nominal),
+          nama: dataPemenang.nama,
+          no_npl: dataPemenang.no_npl,
+        }
+      });
+      socket.on("hitung-mundur", (data) => {
+        // console.log(data.expiredAt);
+        this.kondisiTimer = false
+        this.starttime = new Date()
+        this.endtime = data.expiredAt
       });
     }
   },
@@ -514,6 +620,31 @@ export default {
 				console.log(err)
 			});
 		},
+		getDataNPL(id_event) {
+      this.DataNPL = []
+			let payload = {
+				method: "get",
+				url: `lelang/getNPL?kategori=withNPL&id_event=${id_event}&id_peserta=${localStorage.getItem('idLogin')}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				let dataNPL = res.data.result;
+        dataNPL.map(val => {
+          val.NPL.filter(value => value.statusNPL == 0).map((valNPL) => {
+            this.DataNPL.push({ 
+              id_event: valNPL.idEvent,
+              no_npl: valNPL.noNpl,
+              npl: valNPL.npl,
+              status_npl: valNPL.statusNPL,
+            })
+          })
+        })
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+		},
 		getBidLelang() {
       this.DataEventActive = []
       this.DataNPL = []
@@ -530,7 +661,7 @@ export default {
         this.DataNPL = []
         this.DataPembelianNPL.map((val) => {
           this.DataEventActive.push(val.Event)
-          val.NPL.map((valNPL) => {
+          val.NPL.filter(value => value.statusNPL == 0).map((valNPL) => {
             this.DataNPL.push({ 
               id_event: valNPL.idEvent,
               no_npl: valNPL.noNpl,
@@ -569,8 +700,13 @@ export default {
 				this.dataRoom = res.data.result;
 				this.dataEvent = this.dataRoom.Event
 				this.data_barang_lelang = this.dataRoom.BarangLelang
-        this.dataRoom.dataFotoBarangLelang.map((el) => {
-          this.fotoArray.push(el.gambar)
+        let FotoUtama = this.dataRoom.dataFotoBarangLelang.FotoMobil
+        let FotoKondisi = this.dataRoom.dataFotoBarangLelang.FotoKondisiMobil
+        FotoUtama.map((el) => {
+          this.fotoArray.push({
+            title: el.title,
+            gambar: el.gambar,
+          })
         })
         // console.log(this.fotoArray)
 			})
@@ -579,31 +715,46 @@ export default {
 			});
 		},
     enterRoom(item) {
+      let filterdata = this.dataPass.filter((val) => val.panel == true)
+      if(filterdata.length) {
+        filterdata[0].panel = false
+        this.EventPanel = false
+      }
+      // console.log(filterdata);
       let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
-      const dataNPL = this.DataNPL.filter((val) => val.no_npl == data[0].no_npl && val.id_event == data[0].id_event)
+      // const dataNPL = this.DataNPL.filter((val) => val.no_npl == data[0].no_npl && val.id_event == data[0].id_event)
+      const dataNPL = this.DataNPL.filter((val) => val.id_event == data[0].id_event)
+      let randomNPL = Math.floor(Math.random() * dataNPL.length);
 
+      // console.log(dataNPL[randomNPL].no_npl);
       if(!data[0].katasandi){
         data[0].katasandi = ''
-        data[0].no_npl = ''
+        // data[0].no_npl = ''
         data[0].panel = false
         this.EventPanel = false
         return this.notifikasi("warning", "Masukan Kata Sandi Event !", "1")
-      }else if(!data[0].no_npl){
+      // }else if(!data[0].no_npl){
+      //   data[0].katasandi = ''
+      //   data[0].no_npl = ''
+      //   data[0].panel = false
+      //   this.EventPanel = false
+      //   return this.notifikasi("warning", "Pilih No. NPL anda !", "1")
+      // }else if(dataNPL[0].status_npl != 0){
+      //   data[0].katasandi = ''
+      //   data[0].no_npl = ''
+      //   data[0].panel = false
+      //   this.EventPanel = false
+      //   return this.notifikasi("warning", "No. NPL anda sudah digunakan !", "1")
+      }else if(!dataNPL.length){
         data[0].katasandi = ''
-        data[0].no_npl = ''
+        // data[0].no_npl = ''
         data[0].panel = false
         this.EventPanel = false
-        return this.notifikasi("warning", "Pilih No. NPL anda !", "1")
-      }else if(dataNPL[0].status_npl != 0){
-        data[0].katasandi = ''
-        data[0].no_npl = ''
-        data[0].panel = false
-        this.EventPanel = false
-        return this.notifikasi("warning", "No. NPL anda sudah digunakan !", "1")
+        return this.notifikasi("warning", "No. NPL anda sudah tidak tersedia !", "1")
       }else if(data[0].katasandi == item.kataSandiEvent){
         if(!item.LOT.length){
           data[0].katasandi = ''
-          data[0].no_npl = ''
+          // data[0].no_npl = ''
           data[0].panel = false
           this.EventPanel = false
           return this.notifikasi("warning", "Event ini Belum siap !", "1")
@@ -612,15 +763,16 @@ export default {
             this.noLOT.push(el.noLot)
           })
           data[0].katasandi = ''
-          this.currentNPL = data[0].no_npl
-          data[0].no_npl = ''
+          // this.currentNPL = data[0].no_npl
+          this.currentNPL = dataNPL[randomNPL].no_npl
+          // data[0].no_npl = ''
           data[0].panel = true
           this.EventPanel = true
           this.getEvent(item.LOT[0].noLot)
         }
       }else{
         data[0].katasandi = ''
-        data[0].no_npl = ''
+        // data[0].no_npl = ''
         data[0].panel = false
         this.EventPanel = false
         return this.notifikasi("warning", "Kata Sandi Event tidak cocok !", "1")
@@ -647,10 +799,6 @@ export default {
         device: "laptop", 
         is_admin: 0
       });
-      socket.on("lot-data", (data) => {
-        this.kondisiTimer = false
-        this.endtime = data.expiredAt
-			});
 			socket.on("join-message", (pesan) => {
         this.joinPesan = pesan;
 				this.hiddenLog = false
@@ -660,14 +808,15 @@ export default {
 				}, 5000);
 			});
 			socket.on("bid", ({ dataBid }) => {
+        // console.log(dataBid);
         if(dataBid.totalUserBid > 0) {
           this.dataBidding = {
-            harga: parseInt(dataBid.nilaiAkhir) + parseInt(this.dataRoom.harga_awal),
+            harga: parseInt(dataBid.nilaiAkhir) + parseInt(this.dataRoom.hargaAwal),
             nama: dataBid.dataBidding.nama,
             no_npl: dataBid.dataBidding.no_npl,
-            id_bidding: dataBid.dataBidding.id_bidding,
+            id_bidding: dataBid.dataBidding.idBidding,
           }
-          if(this.dataBidding.nama != localStorage.getItem('nama') && this.dataRoom.id_lot == dataBid.dataBidding.id_lot) return this.tombolBid = false
+          if(this.dataBidding.nama != localStorage.getItem('nama') && this.dataRoom.idLot == dataBid.dataBidding.idLot) return this.tombolBid = false
           this.tombolBid = true
         }else{
           this.dataBidding = {
@@ -682,13 +831,27 @@ export default {
     BidLelang() {
       this.tombolBid = true
       const socket = io(this.API_URL);
+      if(this.kondisiTimer == false) {
+        this.updateWaktu = true
+        socket.emit("hitung-mundur", {
+          room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
+          id_lot: this.dataRoom.idLot, 
+        });
+        socket.on("hitung-mundur", (data) => {
+          // console.log(data);
+          this.kondisiTimer = false
+          this.starttime = new Date()
+          this.endtime = data.expiredAt
+        });
+      }
       socket.emit("bid", { 
         room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_npl: this.currentIDNPL, 
         id_lot: this.dataRoom.idLot, 
-        harga_bidding: this.dataEvent.kelipatanBid, 
+        harga_bidding: this.NominalBid == 0 ? this.dataEvent.kelipatanBid : this.NominalBid, 
         is_admin: 0
       });
+      this.NominalBid = 0
     },
     sendMessage(item) {
       let data = this.dataPass.filter((val) => val.id_event == item.idEvent)
@@ -724,6 +887,11 @@ export default {
       }
 
       // console.log(item)
+    },
+    valuesData3(val) {
+      if (val) {
+        this.updateWaktu = val
+      }
     },
     onClickVisible(i) {
       this.dataPass[i].passType = !this.dataPass[i].passType
@@ -875,6 +1043,7 @@ img {
 	background: #FFF;
 	color: #000;
 	margin: 5px;
+  font-size: 14px;
 }
 .timer {
   font-size: 20px;
