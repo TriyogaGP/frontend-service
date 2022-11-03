@@ -49,6 +49,13 @@ export default [
         component: () => import('@/views/page-content/E-Mall/V_EMall.vue')
       },
 
+      //Notifikasi
+      {
+        path: '/Notifikasi',
+        name: 'Notifikasi',
+        component: () => import('@/views/Notifikasi.vue')
+      },
+
       //Testing
       {
         path: '/Testing',

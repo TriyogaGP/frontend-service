@@ -561,7 +561,7 @@ export default {
     SelesaiBidding(done = false) {
       const socket = io(this.API_URL);
       socket.emit("tombolBid", true);
-      socket.emit("done-bidding", `Lot dengan no ${this.currentLOT} telah berakhir,pemenang lelang adalah ${this.dataBidding.nama}(${this.dataBidding.no_npl}) dengan nominal Rp.${this.currencyDotFormat(this.dataBidding.harga.toString())} dan silahkan pindah ke Lot selanjutnya terimakasih !`);
+      socket.emit("done-bidding", `Lot dengan no ${this.currentLOT} telah berakhir, pemenang lelang adalah ${this.dataBidding.nama}(${this.dataBidding.no_npl}) dengan nominal Rp.${this.currencyDotFormat(this.dataBidding.harga.toString())} !`);
       this.tombolLanjut = false
       this.tombolBid = true
       this.tombolHitungMundur = true
@@ -600,10 +600,12 @@ export default {
       const socket = io(this.API_URL);
       socket.emit("send-pemenang", {
         create_by: localStorage.getItem('idLogin'),
+        room: this.currentLOT + "_" + this.dataEvent.namaEvent, 
         id_bidding: this.dataBidding.id_bidding,
         nominal: this.dataBidding.harga,
         nama: this.dataBidding.nama,
         no_npl: this.dataBidding.no_npl,
+        remarks: `Lot dengan no ${this.currentLOT} telah berakhir, pemenang lelang adalah ${this.dataBidding.nama}(${this.dataBidding.no_npl}) dengan nominal Rp.${this.currencyDotFormat(this.dataBidding.harga.toString())} !`,
       });
     },
     HitungMundur() {

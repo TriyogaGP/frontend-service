@@ -3,15 +3,71 @@
 		<v-app-bar color="light-blue darken-3" dark app>
 			<v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 			<v-spacer />
-			<v-badge
-				content="6"
-				value="6"
-				color="green"
-				overlap
-				class="badgeNotif"
+			<v-menu
+				v-if="siteLogin == 'Peserta'"
+				open-on-hover
+				rounded="t-xs b-lg"
+				offset-y
+				transition="slide-y-transition"
+				bottom
 			>
-				<v-icon medium>notifications</v-icon>
-			</v-badge>
+				<template v-slot:activator="{ attrs, on }">
+					<span
+						class="white--text ma-5"
+						v-bind="attrs"
+						v-on="on"
+					>
+						<v-badge
+							:content="jumlahNotif"
+							:value="jumlahNotif"
+							color="green"
+							overlap
+							class="badgeNotif"
+						>
+							<v-icon medium>notifications</v-icon>
+						</v-badge>
+					</span>
+					<!-- <v-badge
+						content="6"
+						value="6"
+						color="green"
+						overlap
+						class="badgeNotif"
+						v-bind="attrs"
+						v-on="on"
+					>
+						<v-icon medium>notifications</v-icon>
+					</v-badge> -->
+				</template>
+
+				<v-list dense style="width: 350px;">
+					<div class="scrollNotif">
+						<div
+							v-for="(notif, index) in dataNotif"
+							:key="index"
+						>
+							
+							<div @click="() => { Hasil(notif.idNotification, notif.params); }" class="SelectedMenuNotif pa-2" active-class="SelectedMenuNotif-active">
+								<p class="kondisiNotif">{{notif.isRead ? 'sudah dibaca' : 'belum dibaca' }} <v-icon small :color="notif.isRead == true ? 'green' : 'red'">{{ notif.isRead == true ? 'check' : 'clear' }}</v-icon></p>
+								<p class="judulNotif">{{notif.judul}}</p>
+								<p class="pesanNotif">{{(notif.pesan || '').length > 60 ? `${notif.pesan.substring(0, 60)}...` : notif.pesan}}</p>
+								<p class="tanggalNotif">{{notif.createdAt}}</p>
+							</div>
+							<div class="mt-2 mb-2"><v-divider /></div>
+						</div>
+					</div>
+					<v-list-item
+						router to="/Notifikasi"
+						class="SelectedMenuNotif"
+						active-class="SelectedMenuNotif-active"
+					>
+						<v-list-item-title>
+							<span>Lihat Semua Notifikasi</span>
+						</v-list-item-title>
+						<v-icon right>arrow_forward</v-icon>
+					</v-list-item>
+				</v-list>
+			</v-menu>
 			<v-menu
 				open-on-hover
 				rounded="t-xs b-lg"
@@ -143,6 +199,7 @@
 <script>
 import { mapActions } from "vuex";
 import PopUpNotifikasiVue from "../views/Layout/PopUpNotifikasi.vue";
+import io from 'socket.io-client'
 export default {
 	components: {
     PopUpNotifikasiVue
@@ -153,13 +210,16 @@ export default {
 			{text: 'Profile', route: '/profile', icon: 'person'},
 		],
 		menuNav: [],
+		API_URL: '',
 		roleID: '',
 		nama: '',
 		Token: '',
 		siteLogin: '',
 		dataProfile: {
-      fotoPeserta: '',
+			fotoPeserta: '',
     },
+		jumlahNotif: 0,
+		dataNotif: [],
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -167,6 +227,18 @@ export default {
     notifikasiText: '',
     notifikasiButton: '',
 	}),
+	created() {
+    this.siteLogin = localStorage.getItem('siteLogin')
+    if(this.siteLogin == 'Peserta') {
+      this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
+      const socket = io(this.API_URL);
+      socket.on("notifikasi", (value) => {
+				if(value) {
+					this.getNotification(localStorage.getItem("idLogin"))
+				}
+      });
+		}
+	},
 	mounted() {
 		if(!localStorage.getItem('user_token')) return this.$router.push({name: `${localStorage.getItem('siteLogin') == 'Admin' ? 'Login' : 'LoginUser'}`});
 		this.nama = localStorage.getItem('nama')
@@ -176,6 +248,7 @@ export default {
     this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
 		this.getMenu(this.roleID)
 		this.getProfile(localStorage.getItem("idLogin"), localStorage.getItem("siteLogin"))
+		localStorage.getItem("siteLogin") == 'Peserta' && this.getNotification(localStorage.getItem("idLogin"))
 		// this.$getLocation({
     //   enableHighAccuracy: false, //defaults to false
     //   timeout: Infinity, //defaults to Infinity
@@ -219,6 +292,26 @@ export default {
 				console.log(err)
 			});
 		},
+		getNotification(id) {
+			this.jumlahNotif = 0
+			this.dataNotif = []
+			let payload = {
+				method: "get",
+				url: `settings/getNotification?id_peserta=${id}&limit=5&is_read=0&look=ONE`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.dataNotif = res.data.result.data;
+				this.jumlahNotif = res.data.result.count;
+			})
+			.catch((err) => {
+				console.log(err)
+			});
+		},
+		Hasil(idNotif, params) {
+			console.log(idNotif, params);
+		},
 		keluar() {
 			this.notifikasi("question", "Apakah anda yakin ingin keluar ?", "2")
 		},
@@ -254,7 +347,6 @@ export default {
 	border-radius: 2px;
 	background: #455A64
 }
-
 .SelectedTile-active {
 	border-radius: 2px;
 	background: rgba(10, 204, 117, 0.19)
@@ -263,15 +355,52 @@ export default {
 	border-radius: 2px;
 	background: #939494
 }
-
 .SelectedMenu-active {
 	border-radius: 2px;
 	background: rgba(132, 131, 195, 0.19)
+}
+.SelectedMenuNotif:hover {
+	border-radius: 2px;
+	background: #939494;
+	cursor: pointer;
+}
+.SelectedMenuNotif-active {
+	border-radius: 2px;
+	background: rgba(132, 131, 195, 0.19);
+	cursor: pointer;
 }
 .badgeNotif {
 	cursor: pointer;
 }
 .UserPanel {
 	cursor: pointer;
+}
+.scrollNotif{
+  max-height: 500px !important;
+  overflow-y: auto !important;
+}
+.judulNotif {
+	margin-bottom: 2px !important;
+	font-size: 14px;
+	font-weight: bold;
+}
+.pesanNotif {
+	margin-bottom: 2px !important;
+	font-size: 12px;
+	font-weight: 500;
+	text-align: justify;
+}
+.tanggalNotif {
+	margin-bottom: 1px !important;
+	font-size: 10px;
+	font-weight: 500;
+	text-align: right;
+	font-style: italic;
+}
+.kondisiNotif {
+	margin-bottom: 1px !important;
+	font-size: 10px;
+	text-align: right;
+	font-style: italic;
 }
 </style>
