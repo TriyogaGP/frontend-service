@@ -34,7 +34,7 @@
 									:key="index"
 								>
 									
-									<div class="SelectedMenuNotif pa-2" active-class="SelectedMenuNotif-active">
+									<div @click="() => { Hasil(notif); }" class="SelectedMenuNotif pa-2" active-class="SelectedMenuNotif-active">
 										<p v-if="i == 0" class="kondisiNotif">{{notif.isRead ? 'sudah dibaca' : 'belum dibaca' }} <v-icon small :color="notif.isRead == true ? 'green' : 'red'">{{ notif.isRead == true ? 'check' : 'clear' }}</v-icon></p>
 										<p class="judulNotif">{{notif.judul}}</p>
 										<p class="pesanNotif">{{(notif.pesan || '').length > 60 ? `${notif.pesan.substring(0, 60)}...` : notif.pesan}}</p>
@@ -49,11 +49,39 @@
 				</v-tabs-items>
 			</v-card>
 		</v-card>
+		<v-bottom-sheet
+      v-model="DialogDetailNotifikasi"
+      persistent
+			inset
+    >
+      <v-sheet
+        height="150px"
+				style="border-top-left-radius: 10px; border-top-right-radius: 10px;"
+      >	
+				<div class="text-right">
+					<v-btn
+						class="ma-2"
+						text
+						color="error"
+						@click="() => { DialogDetailNotifikasi = false; Notifikasi = { idNotification: '', idPeserta: '', judul: '', pesan: '', isRead: '', createdAt: '' } }"
+					>
+						Keluar
+					</v-btn>
+				</div>
+        <div class="pa-5">
+          <!-- <p class="kondisiNotif">{{Notifikasi.isRead ? 'sudah dibaca' : 'belum dibaca' }} <v-icon small :color="Notifikasi.isRead == true ? 'green' : 'red'">{{ Notifikasi.isRead == true ? 'check' : 'clear' }}</v-icon></p> -->
+					<p class="judulNotif">{{Notifikasi.judul}}</p>
+					<p class="pesanNotif">{{(Notifikasi.pesan || '').length > 60 ? `${Notifikasi.pesan.substring(0, 60)}...` : Notifikasi.pesan}}</p>
+					<p class="tanggalNotif">{{Notifikasi.createdAt}}</p>
+        </div>
+      </v-sheet>
+    </v-bottom-sheet>
 	</div>
 </template>
 
 <script>
 import { mapActions } from "vuex";
+import io from 'socket.io-client'
 export default {
 	name: 'Notifikasi',
   data: () => ({
@@ -68,7 +96,16 @@ export default {
 			All: 0,
 			Read: 0,
 			unRead: 0,
-		}
+		},
+		DialogDetailNotifikasi: false,
+		Notifikasi: {
+			idNotification: '',
+			idPeserta: '',
+			judul: '',
+			pesan: '',
+			isRead: '',
+			createdAt: '',
+    },
 	}),
 	metaInfo: {
 		title: "Notifikasi - WIN.ID",
@@ -121,6 +158,41 @@ export default {
 			.catch((err) => {
 				console.log(err)
 			});
+		},
+		UbahNotifikasi() {
+      let bodyData = {
+        id_notification: this.Notifikasi.idNotification,
+        id_peserta: this.Notifikasi.idPeserta,
+      }
+      let payload = {
+				method: "post",
+				url: `settings/postNotification`,
+        body: bodyData,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.getNotification(localStorage.getItem("idLogin"), '0')
+				this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
+      	const socket = io(this.API_URL);
+				socket.emit("notifikasi", true);
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+    },
+		Hasil(item) {
+			// console.log(item);
+			this.Notifikasi = {
+				idNotification: item.idNotification,
+				idPeserta: item.idPeserta,
+				judul: item.judul,
+				pesan: item.pesan,
+				isRead: item.isRead,
+				createdAt: item.createdAt,
+			}
+			this.DialogDetailNotifikasi = true
+			this.UbahNotifikasi()
 		},
 		tester() {
 			console.log('ahha');

@@ -47,7 +47,7 @@
 							:key="index"
 						>
 							
-							<div @click="() => { Hasil(notif.idNotification, notif.params); }" class="SelectedMenuNotif pa-2" active-class="SelectedMenuNotif-active">
+							<div @click="() => { Hasil(notif.idNotification); }" class="SelectedMenuNotif pa-2" active-class="SelectedMenuNotif-active">
 								<p class="kondisiNotif">{{notif.isRead ? 'sudah dibaca' : 'belum dibaca' }} <v-icon small :color="notif.isRead == true ? 'green' : 'red'">{{ notif.isRead == true ? 'check' : 'clear' }}</v-icon></p>
 								<p class="judulNotif">{{notif.judul}}</p>
 								<p class="pesanNotif">{{(notif.pesan || '').length > 60 ? `${notif.pesan.substring(0, 60)}...` : notif.pesan}}</p>
@@ -179,6 +179,33 @@
 				</v-list-item>
 			</v-list>
 		</v-navigation-drawer>
+		<v-bottom-sheet
+      v-model="DialogDetailNotifikasi"
+      persistent
+			inset
+    >
+      <v-sheet
+        height="150px"
+				style="border-top-left-radius: 10px; border-top-right-radius: 10px;"
+      >	
+				<div class="text-right">
+					<v-btn
+						class="ma-2"
+						text
+						color="error"
+						@click="() => { DialogDetailNotifikasi = false; Notifikasi = { idNotification: '', idPeserta: '', judul: '', pesan: '', isRead: '', createdAt: '' } }"
+					>
+						Keluar
+					</v-btn>
+				</div>
+        <div class="pa-5">
+          <!-- <p class="kondisiNotif">{{Notifikasi.isRead ? 'sudah dibaca' : 'belum dibaca' }} <v-icon small :color="Notifikasi.isRead == true ? 'green' : 'red'">{{ Notifikasi.isRead == true ? 'check' : 'clear' }}</v-icon></p> -->
+					<p class="judulNotif">{{Notifikasi.judul}}</p>
+					<p class="pesanNotif">{{(Notifikasi.pesan || '').length > 60 ? `${Notifikasi.pesan.substring(0, 60)}...` : Notifikasi.pesan}}</p>
+					<p class="tanggalNotif">{{Notifikasi.createdAt}}</p>
+        </div>
+      </v-sheet>
+    </v-bottom-sheet>
 		<v-dialog
 			v-model="dialogNotifikasi"
 			transition="dialog-bottom-transition"
@@ -220,6 +247,15 @@ export default {
     },
 		jumlahNotif: 0,
 		dataNotif: [],
+		DialogDetailNotifikasi: false,
+		Notifikasi: {
+			idNotification: '',
+			idPeserta: '',
+			judul: '',
+			pesan: '',
+			isRead: '',
+			createdAt: '',
+    },
 
 		//notifikasi
     dialogNotifikasi: false,
@@ -234,7 +270,7 @@ export default {
       const socket = io(this.API_URL);
       socket.on("notifikasi", (value) => {
 				if(value) {
-					this.getNotification(localStorage.getItem("idLogin"))
+					this.getNotification(localStorage.getItem("idLogin"), '')
 				}
       });
 		}
@@ -248,7 +284,7 @@ export default {
     this.API_URL = process.env.VUE_APP_NODE_ENV === "production" ? process.env.VUE_APP_VIEW_PROD_API_URL : process.env.VUE_APP_VIEW_DEV_API_URL
 		this.getMenu(this.roleID)
 		this.getProfile(localStorage.getItem("idLogin"), localStorage.getItem("siteLogin"))
-		localStorage.getItem("siteLogin") == 'Peserta' && this.getNotification(localStorage.getItem("idLogin"))
+		localStorage.getItem("siteLogin") == 'Peserta' && this.getNotification(localStorage.getItem("idLogin"), '')
 		// this.$getLocation({
     //   enableHighAccuracy: false, //defaults to false
     //   timeout: Infinity, //defaults to Infinity
@@ -292,25 +328,60 @@ export default {
 				console.log(err)
 			});
 		},
-		getNotification(id) {
+		getNotification(id, kondisi) {
 			this.jumlahNotif = 0
 			this.dataNotif = []
+			let urlLink = kondisi == 'detail' ? `id_notifikasi=${id}` : `id_peserta=${id}&limit=5&is_read=0&look=ONE`
 			let payload = {
 				method: "get",
-				url: `settings/getNotification?id_peserta=${id}&limit=5&is_read=0&look=ONE`,
+				url: `settings/getNotification?${urlLink}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.dataNotif = res.data.result.data;
-				this.jumlahNotif = res.data.result.count;
+				if(kondisi == 'detail') {
+					let data = res.data.result;
+					this.Notifikasi = {
+						idNotification: data.idNotification,
+						idPeserta: data.idPeserta,
+						judul: data.judul,
+						pesan: data.pesan,
+						isRead: data.isRead,
+						createdAt: data.createdAt,
+					}
+					this.DialogDetailNotifikasi = true
+					this.UbahNotifikasi()
+				}else{
+					this.dataNotif = res.data.result.data;
+					this.jumlahNotif = res.data.result.count;
+				}
 			})
 			.catch((err) => {
 				console.log(err)
 			});
 		},
-		Hasil(idNotif, params) {
-			console.log(idNotif, params);
+		UbahNotifikasi() {
+      let bodyData = {
+        id_notification: this.Notifikasi.idNotification,
+        id_peserta: this.Notifikasi.idPeserta,
+      }
+      let payload = {
+				method: "post",
+				url: `settings/postNotification`,
+        body: bodyData,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.getNotification(localStorage.getItem('idLogin'), '')
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+    },
+		Hasil(idNotif) {
+			this.getNotification(idNotif, 'detail')
+			// console.log(idNotif);
 		},
 		keluar() {
 			this.notifikasi("question", "Apakah anda yakin ingin keluar ?", "2")
