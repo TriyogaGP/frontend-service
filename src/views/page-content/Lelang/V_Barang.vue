@@ -1124,6 +1124,7 @@
                   small
                   dense
                   depressed
+                  :loading="btnProses"
                   :disabled="kondisiTombol"
                   @click="SimpanForm(0, KumpulFile)"
                 >
@@ -1136,6 +1137,7 @@
                   small
                   dense
                   depressed
+                  :loading="btnProses"
                   :disabled="kondisiTombol"
                   @click="SimpanForm(1, KumpulFile)"
                 >
@@ -1415,6 +1417,7 @@ export default {
 	components: { PopUpNotifikasiVue, PDFViewer, Cropper },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
     roleID: '',
 		DataBarangLelang: [],
 		page: 1,
@@ -1537,7 +1540,7 @@ export default {
 		tahunOptions(){
 			let date = new Date().toISOString().slice(0,10)
 			const [tahun, bulan, hari] = date.split("-");
-			let tahun_awal = parseInt(tahun) - 10
+			let tahun_awal = parseInt(tahun) - 50
 			let tahun_akhir = parseInt(tahun) + 10
 			let result = []
 			for(let i=tahun_awal; i<=tahun_akhir; i++){
@@ -1624,8 +1627,7 @@ export default {
           if(value.id_kategori != '' && value.nama_barang_lelang != '' && value.nama_pemilik != '' && value.brand != '' && value.warna != '' && value.tahun != '' &&
             value.lokasi_barang != '' && value.no_rangka != '' && value.no_mesin != '' && value.tipe_model != '' && value.transmisi != '' && value.bahan_bakar != '' &&
             value.odometer != '' && value.grade != '' && value.grade_interior != '' && value.grade_eksterior != '' && value.grade_mesin != '' && value.no_polisi != '' &&
-            value.sph != '' && value.kir != '' && value.kapasitas_kendaraan != '' && value.deskripsi != '' && value.filestnk != '' && value.filebpkb != '' &&
-            value.filefaktur != '' && value.filektp != '' && value.filekwitansi != ''){
+            value.sph != '' && value.deskripsi != '' && value.filebpkb != ''){
             this.kondisiTombol = false
           }else{
             this.kondisiTombol = true
@@ -1766,6 +1768,7 @@ export default {
       this.DialogBarangLelang = false
     },
 		async SimpanForm(index, dataUpload) {
+      this.btnProses = true
 			let bodyData = {
 				jenis: index == 0 ? 'ADD' : 'EDIT',
 				UnixText: this.inputBarangLelang.UnixText,
@@ -1810,22 +1813,45 @@ export default {
 			this.fetchData(payload)
 			.then(async (res) => {
 				if(this.FileSTNK || this.FileBPKB || this.FileFAKTUR || this.FileKTP || this.FileKWITANSI || this.FileSPH || this.FileKIR){
-					let uploadSTNK = await this.uploadLampiran(index, dataUpload.fileSTNK, 'stnk')
-					let uploadBPKB = await this.uploadLampiran(index, dataUpload.fileBPKB, 'bpkb')
-					let uploadFAKTUR = await this.uploadLampiran(index, dataUpload.fileFAKTUR, 'faktur')
-					let uploadKTP = await this.uploadLampiran(index, dataUpload.fileKTP, 'ktp')
-					let uploadKWITANSI = await this.uploadLampiran(index, dataUpload.fileKWITANSI, 'kwitansi')
-					let uploadSPH = await this.uploadLampiranBerkas(index, this.FileSPH, 'sph')
-					let uploadKIR = await this.uploadLampiranBerkas(index, this.FileKIR, 'kir')
-          // console.log(uploadSPH, uploadKIR);
+          let uploadSTNK = null, uploadBPKB = null, uploadFAKTUR = null, uploadKTP = null, uploadKWITANSI = null, uploadSPH = null, uploadKIR = null
           let aksi = []
-          if(uploadSTNK != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
-          if(uploadBPKB != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
-          if(uploadFAKTUR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
-          if(uploadKTP != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
-          if(uploadKWITANSI != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
-          if(uploadSPH != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
-          if(uploadKIR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+          if(this.namaKategori == 'Mobil') {
+            uploadSTNK = await this.uploadLampiran(index, dataUpload.fileSTNK, 'stnk')
+            uploadBPKB = await this.uploadLampiran(index, dataUpload.fileBPKB, 'bpkb')
+            uploadFAKTUR = await this.uploadLampiran(index, dataUpload.fileFAKTUR, 'faktur')
+            uploadKTP = await this.uploadLampiran(index, dataUpload.fileKTP, 'ktp')
+            uploadKWITANSI = await this.uploadLampiran(index, dataUpload.fileKWITANSI, 'kwitansi')
+            uploadSPH = await this.uploadLampiranBerkas(index, this.FileSPH, 'sph')
+            uploadKIR = await this.uploadLampiranBerkas(index, this.FileKIR, 'kir')
+            if(uploadSTNK != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadBPKB != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadFAKTUR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKTP != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKWITANSI != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadSPH != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKIR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+          }else if(this.namaKategori == 'Motor') {
+            uploadSTNK = await this.uploadLampiran(index, dataUpload.fileSTNK, 'stnk')
+            uploadBPKB = await this.uploadLampiran(index, dataUpload.fileBPKB, 'bpkb')
+            uploadFAKTUR = await this.uploadLampiran(index, dataUpload.fileFAKTUR, 'faktur')
+            uploadKTP = await this.uploadLampiran(index, dataUpload.fileKTP, 'ktp')
+            uploadKWITANSI = await this.uploadLampiran(index, dataUpload.fileKWITANSI, 'kwitansi')
+            uploadSPH = await this.uploadLampiranBerkas(index, this.FileSPH, 'sph')
+            if(uploadSTNK != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadBPKB != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadFAKTUR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKTP != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKWITANSI != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadSPH != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+          }else{
+            uploadFAKTUR = await this.uploadLampiran(index, dataUpload.fileFAKTUR, 'faktur')
+            uploadKTP = await this.uploadLampiran(index, dataUpload.fileKTP, 'ktp')
+            uploadKWITANSI = await this.uploadLampiran(index, dataUpload.fileKWITANSI, 'kwitansi')
+            if(uploadFAKTUR != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKTP != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+            if(uploadKWITANSI != undefined){ aksi.push('sukses') }else{ aksi.push('gagal') }
+          }
+          console.log(aksi);
 					if(aksi.filter(el => el == 'sukses').length){
 						this.notifikasi("success", res.data.message, "1")
 					}else{
@@ -1837,11 +1863,11 @@ export default {
         // this.notifikasi("success", res.data.message, "1")
         this.clearForm()
 				this.DialogBarangLelang = false
+        this.btnProses = false
 				this.getBarangLelang()
 			})
 			.catch((err) => {
-				this.DialogBarangLelang = false
-				this.getBarangLelang()
+        this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
@@ -1864,7 +1890,9 @@ export default {
 				} catch (err) {
 					this.notifikasi("error", err.response.data.message, "1")
 				}
-			}
+			}else{
+        return undefined
+      }
 		},
 		async uploadLampiranBerkas(index, dataUpload, part) {
 			if(dataUpload){
@@ -1886,7 +1914,9 @@ export default {
 				} catch (err) {
 					this.notifikasi("error", err.response.data.message, "1")
 				}
-			}
+			}else{
+        return undefined
+      }
 		},
     HapusRecord(item) {
       let bodyData = {

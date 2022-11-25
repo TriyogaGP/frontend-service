@@ -446,6 +446,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(0, FileBUKTI)"
 								>
@@ -458,6 +459,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(1, FileBUKTI)"
 								>
@@ -594,6 +596,7 @@ export default {
 	components: { PopUpNotifikasiVue, Cropper },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
 		roleID: '',
 		DataAllPemenang: [],
 		page: 1,
@@ -753,6 +756,7 @@ export default {
       this.DialogPemenang = false
     },
 		SimpanForm(index, dataUpload) {
+			this.btnProses = true
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
         id_pemenang_lelang: index == 0 ? '' : this.inputPemenang.id_pemenang_lelang,
@@ -783,9 +787,11 @@ export default {
 					this.notifikasi("success", res.data.message, "1")
 				}
         this.DialogPemenang = false
+        this.btnProses = false
         this.getAllPemenang()
 			})
 			.catch((err) => {
+				this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },

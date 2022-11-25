@@ -448,9 +448,10 @@
                   small
                   dense
                   depressed
+                  :loading="btnProses"
                   :disabled="kondisiTombol"
                   @click="SimpanForm(0)"
-                >
+                  >
                   Simpan Data
                 </v-btn> 
                 <v-btn
@@ -460,6 +461,7 @@
                   small
                   dense
                   depressed
+                  :loading="btnProses"
                   :disabled="kondisiTombol"
                   @click="SimpanForm(1)"
                 >
@@ -497,6 +499,7 @@ export default {
   },
   data: () => ({
     isLoading: false,
+    btnProses: false,
 		DataAdmin: [],
 		AdminOptions: [],
 		page: 1,
@@ -701,6 +704,7 @@ export default {
       this.DialogAdmin = false
     },
     SimpanForm(index) {
+      this.btnProses = true
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
         id_admin: index == 0 ? '' : this.inputDataAdmin.id_admin,
@@ -724,10 +728,12 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogAdmin = false
+        this.btnProses = false
         this.getAdministrator()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
+        this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },

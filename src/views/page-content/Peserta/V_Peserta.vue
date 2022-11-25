@@ -810,6 +810,7 @@
                   small
                   dense
                   depressed
+                  :loading="btnProses"
                   :disabled="kondisiTombol"
                   @click="SimpanForm(0, KumpulFile)"
                 >
@@ -822,6 +823,7 @@
                   small
                   dense
                   depressed
+                  :loading="btnProses"
                   :disabled="kondisiTombol"
                   @click="SimpanForm(1, KumpulFile)"
                 >
@@ -965,6 +967,7 @@ export default {
   },
   data: () => ({
     isLoading: false,
+    btnProses: false,
 		DataPeserta: [],
 		page: 1,
     pageCount: 0,
@@ -1192,6 +1195,7 @@ export default {
       this.DialogPeserta = false
     },
     async SimpanForm(index, dataUpload) {
+      this.btnProses = true
 			let bodyData = {
 				jenis: index == 0 ? 'ADD' : 'EDIT',
 				id_peserta: index == 0 ? '' : this.inputDataPeserta.id_peserta,
@@ -1246,9 +1250,11 @@ export default {
         this.clearForm()
         this.clearForm2()
 				this.DialogPeserta = false
+				this.btnProses = false
 				this.getPeserta()
 			})
 			.catch((err) => {
+        this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
@@ -1271,7 +1277,9 @@ export default {
 				} catch (err) {
 					this.notifikasi("error", err.response.data.message, "1")
 				}
-			}
+			}else{
+        return undefined
+      }
 		},
     HapusRecord(item) {
       let bodyData = {

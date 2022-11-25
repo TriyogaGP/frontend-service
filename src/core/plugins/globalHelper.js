@@ -219,6 +219,23 @@ const Helper = {
           const [year, month, day] = data.split("-");
           return `${year}${month}${day}`;
         },
+        convertDateTime(str) {
+          const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+          let date = new Date(str),
+          mnth = bulan[date.getMonth()],
+          day = ("0" + date.getDate()).slice(-2);
+          const valueConvertDate = [day, mnth, date.getFullYear()].join(" ");
+        
+          let time = new Date(str),
+          jam = ("0" + time.getHours()).slice(-2),
+          menit = ("0" + time.getMinutes()).slice(-2),
+          detik = ("0" + time.getSeconds()).slice(-2);
+          const valueConvertTime = [jam, menit, detik].join(":");
+        
+          const datetime = [valueConvertDate, valueConvertTime].join(" ");
+        
+          return datetime
+        },
         uppercaseLetterFirst(textInput) {
           textInput = textInput.toLowerCase();
           var stringArray = textInput.split(/\b(\s)/);

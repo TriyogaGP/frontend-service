@@ -197,6 +197,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									@click="SimpanForm()"
 								>
 									Ubah Status
@@ -304,6 +305,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanFormRefund(FileBUKTI)"
 								>
@@ -426,6 +428,7 @@ export default {
 	components: { PopUpNotifikasiVue, Cropper },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
 		roleID: '',
 		DataNPL: [],
 		page: 1,
@@ -557,6 +560,7 @@ export default {
       this.DialogNPL = false
     },
 		async SimpanForm() {
+			this.btnProses = true
 			let kirim = await Promise.all(this.inputNPL.no_npl.map(async (el, i) => {
 				let status = []
 				let bodyData = {
@@ -587,9 +591,11 @@ export default {
 			}
 			this.clearForm()
 			this.DialogNPL = false
+			this.btnProses = false
 			this.getNPL()
     },
 		async SimpanFormRefund(dataUpload) {
+			this.btnProses = true
 			let uploadBUKTI = await this.uploadLampiran(dataUpload)
 			if(uploadBUKTI.data.status == 200){
 				this.notifikasi("success", 'Berhasil upload bukti refund', "1")
@@ -598,6 +604,7 @@ export default {
 			}
 			this.clearForm()
 			this.DialogBuktiRefund = false
+			this.btnProses = false
 			this.getNPL()
     },
 		async uploadLampiran(dataUpload) {

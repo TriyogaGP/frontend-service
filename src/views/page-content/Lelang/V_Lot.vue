@@ -416,6 +416,7 @@ export default {
 	components: { PopUpNotifikasiVue },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
 		roleID: '',
 		DataLot: [],
 		page: 1,
@@ -591,6 +592,7 @@ export default {
       this.DialogLot = false
     },
 		SimpanForm(index) {
+			this.btnProses = true
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
         id_lot: index == 0 ? '' : this.inputLot.id_lot,
@@ -612,10 +614,12 @@ export default {
 				this.notifikasi("success", res.data.message, "1")
 				this.clearForm()
         this.DialogLot = false
+        this.btnProses = false
         this.getLot()
 				this.getBarangLelang()
 			})
 			.catch((err) => {
+				this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },

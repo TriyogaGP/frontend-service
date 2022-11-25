@@ -190,6 +190,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(0)"
 								>
@@ -202,6 +203,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(1)"
 								>
@@ -237,6 +239,7 @@ export default {
 	components: { PopUpNotifikasiVue },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
 		roleID: '',
 		DataKategoriBarangLelang: [],
 		page: 1,
@@ -322,7 +325,7 @@ export default {
 			if(index == 0){
 				this.clearForm()
       }else{
-				this.inputKategoriBarang.id_kategori = item.id_kategori
+				this.inputKategoriBarang.id_kategori = item.idKategori
         this.inputKategoriBarang.kategori = item.kategori
 			}
 			this.DialogKategoriLelang = true
@@ -332,6 +335,7 @@ export default {
       this.DialogKategoriLelang = false
     },
 		SimpanForm(index) {
+			this.btnProses = true
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
         id_kategori: index == 0 ? '' : this.inputKategoriBarang.id_kategori,
@@ -347,10 +351,12 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogKategoriLelang = false
+        this.btnProses = false
         this.getKategoriBarangLelang()
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
+				this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },

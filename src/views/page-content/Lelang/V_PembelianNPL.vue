@@ -14,6 +14,16 @@
 					>
 						<v-icon small>add</v-icon>	Tambah
 					</v-btn>
+					<v-btn
+						color="light-blue darken-3"
+						small
+						dense
+						depressed
+						class="ma-2 white--text text--darken-2"
+						@click.stop="bukaDialogManajemenNPL()"
+					>
+						<v-icon small>pin</v-icon>	Manajemen NPL
+					</v-btn>
 				</v-col>
 				<v-col cols="12" md="6">
 					<v-text-field
@@ -94,7 +104,7 @@
 					</template>
 					<template #[`item.statusAktif`]="{ item }">
 						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
-						<v-icon small v-else-if="item.statusAktif == V_FasilitasMallVue" color="red">clear</v-icon>
+						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
 						<br>
 						<span v-html="item.statusAktif == true ? 'Active' : 'Non Active'" /> 
 					</template>
@@ -288,9 +298,11 @@
                     label="Event"
                     outlined
                     dense
-                    hide-details
+										hide-details="auto"
+										:rules="rules"
                     :clearable="editedIndex != 2"
                     :readonly="editedIndex == 2"
+										@change="EventChange($event)"
                   >
 										<template v-slot:selection="{ item }">
 											{{item.kodeEvent}} - {{item.namaEvent}} ({{item.tanggalEvent}})
@@ -386,6 +398,33 @@
               </v-row>
 							<v-row no-gutters>
 								<v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center"
+                >
+                  Jumlah No NPL (yang di pesan)
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-text-field
+                    v-model="inputPembelianNPL.jml_nonpl"
+                    placeholder="Jumlah No NPL"
+                    outlined
+                    dense
+                    label="Jumlah No NPL"
+                    color="light-blue darken-3"
+										@keypress.native="onlyNumber($event, 2, inputPembelianNPL.jml_nonpl)"
+                    hide-details
+                    clearable
+										@input="jmlChange()"
+                  />
+                </v-col>
+							</v-row>
+							<v-row no-gutters>
+								<v-col
 									cols="12"
 									md="4"
 									class="pt-2 d-flex align-center"
@@ -405,8 +444,7 @@
 										label="Nominal"
 										color="light-blue darken-3"
 										hide-details
-										:clearable="editedIndex != 2"
-                    :readonly="editedIndex == 2"
+                    readonly
 										:options="optionsUang"
 									/>
 								</v-col>
@@ -520,6 +558,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(0)"
 								>
@@ -532,6 +571,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(1)"
 								>
@@ -675,10 +715,11 @@
                     dense
                     label="Jumlah No NPL"
                     color="light-blue darken-3"
-										@keypress.native="onlyNumber($event, 2, inputVerifikasi.jml_nonpl)"
                     hide-details
-                    clearable
-                  />
+										readonly
+									/>
+										<!-- @keypress.native="onlyNumber($event, 2, inputVerifikasi.jml_nonpl)"
+                    clearable -->
 									Last No. NPL : <strong>{{lastNoNPL}}</strong> 
 									<div v-if="inputVerifikasi.jml_nonpl != ''">
 										No. NPL : 
@@ -707,6 +748,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol2"
 									@click="SimpanFormVerifikasi(FileBUKTI)"
 								>
@@ -747,6 +789,89 @@
               <img :src="this.urlView" width="400"/>
             </v-card-text>
           </div>
+        </v-card>
+      </v-card>
+		</v-dialog>
+		<v-dialog
+      v-model="DialogManajemenNPL"
+      width="600px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Data Manajemen NPL</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="DialogManajemenNPL = false"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card tile>
+          <div class="scrollText">
+            <div class="px-5">
+              <v-divider />
+            </div>
+						<v-card-text>
+							<v-row no-gutters>
+								<v-col cols="12" md="12">
+									<v-btn
+										color="light-blue darken-3"
+										small
+										dense
+										depressed
+										class="ma-2 white--text text--darken-2"
+										@click.stop="bukaDialog(null, 0)"
+									>
+										<v-icon small>add</v-icon>	Tambah
+									</v-btn>
+								</v-col>
+							</v-row>
+							<v-data-table
+								loading-text="Sedang memuat... Harap tunggu"
+								no-data-text="Tidak ada data yang tersedia"
+								no-results-text="Tidak ada catatan yang cocok ditemukan"
+								:options.sync="query"
+								:headers="headersManajemen"
+								:loading="isLoading"
+								:items="ManajemenNPL"
+								item-key="idManajemenNPL"
+								hide-default-footer
+								class="elevation-1"
+								:page.sync="page"
+								:items-per-page="itemsPerPage"
+								@page-count="pageCount = $event"
+							>
+								<template #[`item.number`]="{ item }">
+									{{ ManajemenNPL.indexOf(item) + 1 }}
+								</template>
+								<template #[`item.kategori`]="{ item }">
+									<span v-html="item.KategoriLelang.kategori" />
+								</template>
+								<template #[`item.nominal`]="{ item }">
+									Rp.<span v-html="currencyDotFormat(item.nominal)" />
+								</template>
+							</v-data-table>
+							<v-row>
+								<v-col cols="12" class="mt-2 pa-2 px-5">
+									<v-pagination
+										v-if="ManajemenNPL.length > 0"
+										v-model="page"
+										:length="pageCount"
+										:total-visible="5"
+									/>
+								</v-col>
+							</v-row>
+						</v-card-text>
+					</div>
         </v-card>
       </v-card>
 		</v-dialog>
@@ -830,6 +955,7 @@ export default {
 	components: { PopUpNotifikasiVue, Cropper },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
 		roleID: '',
 		DataPembelianNPL: [],
 		page: 1,
@@ -850,15 +976,24 @@ export default {
       { text: "Event", value: "event", sortable: false },
       { text: "Peserta", value: "peserta", sortable: false },
       { text: "No. Pembelian", value: "noPembelian", sortable: false },
+      { text: "Jumlah NPL", value: "jmlNPL", sortable: false },
       { text: "Nominal", value: "nominal", sortable: false },
       { text: "Verifikasi", value: "verifikasi", sortable: false },
       { text: "Status", value: "statusAktif", sortable: false },
     ],
+		headersManajemen: [
+      { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "Kategori", value: "kategori", sortable: false },
+      { text: "Nominal", value: "nominal", sortable: false },
+    ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+		rules: [],
 		DataPeserta: [],
 		DataEvent: [],
+		ManajemenNPL: [],
 		DialogPembelianNPL: false,
+		DialogManajemenNPL: false,
 		DialogViewLampiranPembelianNPL: false,
 		DialogCropPembelianNPL: false,
 		DialogVerifikasi: false,
@@ -886,10 +1021,12 @@ export default {
 			UnixTextPeserta: '',
 			id_event: '',
 			id_peserta: '',
+			id_kategori: '',
 			type_pembelian: '',
 			type_transaksi: '',
 			no_pembelian: '',
 			verifikasi: '',
+			jml_nonpl: '',
 			nominal: '',
 			tanggal_transfer: '',
 		},
@@ -931,22 +1068,25 @@ export default {
 		inputPembelianNPL: {
 			deep: true,
 			handler(value){
-
 				if(value.id_peserta == null){ this.inputPembelianNPL.id_peserta = '' }
 				if(value.id_event == null){ this.inputPembelianNPL.id_event = '' }
 				if(value.type_pembelian == null){ this.inputPembelianNPL.type_pembelian = '' }
 				if(value.type_transaksi == null){ this.inputPembelianNPL.type_transaksi = '' }
-				if(value.nominal == null){ this.inputPembelianNPL.nominal = '' }
+				if(value.jml_nonpl == null){ this.inputPembelianNPL.jml_nonpl = '' }
+				if(value.jml_nonpl == '' || value.jml_nonpl.length){ this.kumpulNoNpl = [] }
 				if(value.tanggal_transfer == null){ this.inputPembelianNPL.tanggal_transfer = '' }
+				
+				if(value.id_peserta != '') {
+					if(this.editedIndex == 0) { this.tampungNoPembelian = `${this.makeRandomAngka(10)}.${value.id_peserta}` }
+				}				
 
-				if(this.editedIndex == 0 && !this.tampungNoPembelian) { this.tampungNoPembelian = `${this.makeRandomAngka(10)}.${value.id_peserta}` }
 				if(this.editedIndex == 1) {
 					let split = this.tampungNoPembelian.split('.')
 					this.tampungNoPembelian = `${split[0]}.${value.id_peserta}` 
 				}
-        
-				if(value.id_peserta != '' && value.id_event != '' && value.type_pembelian != '' && value.type_transaksi != '' && value.nominal != '' && 
-				value.tanggal_transfer != '' && this.tampungNoPembelian != ''){
+
+				if(value.id_peserta != '' && value.id_event != '' && value.type_pembelian != '' && value.type_transaksi != '' && value.jml_nonpl != '' && 
+				value.nominal != 0 && value.tanggal_transfer != '' && this.tampungNoPembelian != ''){
 					this.kondisiTombol = false
 				}else{
 					this.kondisiTombol = true	
@@ -975,11 +1115,7 @@ export default {
 				if(value.pesan_verifikasi != '' && value.bukti != ''){
 					this.kondisiTombol2 = false
 				}else{
-					if(value.jml_nonpl != ''){
-						this.kondisiTombol2 = false
-					}else{
-						this.kondisiTombol2 = true	
-					}
+					this.kondisiTombol2 = true	
 				}
 			}
 		},
@@ -1046,10 +1182,53 @@ export default {
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				if(Object.entries(res.data.result).length){
-					this.lastNoNPL = res.data.result.dataNPL.no_npl;
+				if(res.data.result.dataNPL != null){
+					this.lastNoNPL = res.data.result.dataNPL.noNpl;
 				}else{
 					this.lastNoNPL = 'NPL-00000';
+				}
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+		getManajemenNPL(id_kategori) {
+			let query = id_kategori ? `?id_kategori=${id_kategori}&sort=DESC` : `?sort=DESC`
+			this.ManajemenNPL = []
+			let payload = {
+				method: "get",
+				url: `lelang/getManajemenNPL${query}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.ManajemenNPL = res.data.result;
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
+		getLot(id_event) {
+			let payload = {
+				method: "get",
+				url: `lelang/getLot?id_event=${id_event}`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				let data = res.data.result
+				if(data.length) {
+					this.inputPembelianNPL.id_kategori = data[0].BarangLelang.idKategori
+					this.rules = []
+					this.getManajemenNPL(this.inputPembelianNPL.id_kategori)
+				}else{
+					this.rules = [ 
+						value => 'Data LOT tidak di temukan'
+					]
+					this.inputPembelianNPL.id_kategori = ''
+					this.inputPembelianNPL.jml_nonpl = ''
+					this.inputPembelianNPL.nominal = 0
+					this.ManajemenNPL = []
 				}
 			})
 			.catch((err) => {
@@ -1062,6 +1241,7 @@ export default {
 			this.getPeserta(null, false)
 			if(index == 0){
 				this.clearForm()
+				this.inputPembelianNPL.nominal = 0
       }else{
 				this.inputPembelianNPL.id_pembelian_npl = item.idPembelianNPL ? item.idPembelianNPL : ''
 				this.inputPembelianNPL.id_peserta = item.idPeserta ? item.idPeserta : ''
@@ -1069,11 +1249,13 @@ export default {
         this.inputPembelianNPL.type_pembelian = item.typePembelian ? item.typePembelian : ''
         this.inputPembelianNPL.type_transaksi = item.typeTransaksi ? item.typeTransaksi : ''
         this.inputPembelianNPL.verifikasi = item.verifikasi
-        this.inputPembelianNPL.nominal = item.nominal ? item.nominal : ''
+        this.inputPembelianNPL.jml_nonpl = item.jmlNPL ? item.jmlNPL : ''
+        this.inputPembelianNPL.nominal = item.nominal ? parseInt(item.nominal) : ''
         this.inputPembelianNPL.tanggal_transfer = item.tanggalTransfer ? this.convertDateToPicker2(item.tanggalTransfer) : ''
         this.tampungNoPembelian = item.noPembelian ? item.noPembelian : ''
         this.inputVerifikasi.bukti = item.bukti ? item.bukti : ''
         this.inputVerifikasi.pesan_verifikasi = item.pesanVerifikasi ? item.pesanVerifikasi : ''
+				this.getLot(this.inputPembelianNPL.id_event)
 			}
 			this.DialogPembelianNPL = true
 		},
@@ -1082,7 +1264,12 @@ export default {
 			this.editedIndex = 3
       this.DialogPembelianNPL = false
     },
+		bukaDialogManajemenNPL(){
+			this.getManajemenNPL()
+			this.DialogManajemenNPL = true
+		},
 		SimpanForm(index) {
+			this.btnProses = true
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
 				id_pembelian_npl: index == 0 ? '' : this.inputPembelianNPL.id_pembelian_npl,
@@ -1091,6 +1278,7 @@ export default {
 				type_pembelian: this.inputPembelianNPL.type_pembelian,
 				type_transaksi: this.inputPembelianNPL.type_transaksi,
 				no_pembelian: this.tampungNoPembelian,
+				jml_nonpl: this.inputPembelianNPL.jml_nonpl,
 				nominal: this.inputPembelianNPL.nominal,
 				tanggal_transfer: this.inputPembelianNPL.tanggal_transfer,
         create_update_by: localStorage.getItem('idLogin'),
@@ -1106,13 +1294,16 @@ export default {
 				this.notifikasi("success", res.data.message, "1")
 				this.clearForm()
         this.DialogPembelianNPL = false
+        this.btnProses = false
         this.getPembelianNPL()
 			})
 			.catch((err) => {
+				this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
 		SimpanFormVerifikasi(dataUpload) {
+			this.btnProses = true
       let bodyData = {
 				jenis: 'VERIFIKASI',
 				id_pembelian_npl: this.inputPembelianNPL.id_pembelian_npl,
@@ -1144,9 +1335,11 @@ export default {
 				// this.notifikasi("success", res.data.message, "1")
 				this.clearForm()
         this.DialogVerifikasi = false
+        this.btnProses = false
         this.getPembelianNPL()
 			})
 			.catch((err) => {
+				this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
@@ -1219,9 +1412,11 @@ export default {
 			this.inputPembelianNPL.id_pembelian_npl = ''
 			this.inputPembelianNPL.id_peserta = ''
 			this.inputPembelianNPL.id_event = ''
+			this.inputPembelianNPL.id_kategori = ''
 			this.inputPembelianNPL.type_pembelian = ''
 			this.inputPembelianNPL.type_transaksi = ''
 			this.inputPembelianNPL.verifikasi = ''
+			this.inputPembelianNPL.jml_nonpl = ''
 			this.inputPembelianNPL.nominal = ''
 			this.inputPembelianNPL.tanggal_transfer = ''
 			this.tampungNoPembelian = ''
@@ -1290,17 +1485,19 @@ export default {
 			this.DialogVerifikasi = false
 		},
 		questionProses(item, verif) {
-			this.inputPembelianNPL.id_pembelian_npl = item.id_pembelian_npl ? item.id_pembelian_npl : ''
-			this.inputPembelianNPL.id_peserta = item.id_peserta ? item.id_peserta : ''
-			this.inputPembelianNPL.id_event = item.id_event ? item.id_event : ''
+			this.inputPembelianNPL.id_pembelian_npl = item.idPembelianNPL ? item.idPembelianNPL : ''
+			this.inputPembelianNPL.id_peserta = item.idPeserta ? item.idPeserta : ''
+			this.inputPembelianNPL.id_event = item.idEvent ? item.idEvent : ''
+			this.inputPembelianNPL.jml_nonpl = item.jmlNPL ? item.jmlNPL : ''
 			this.inputPembelianNPL.verifikasi = verif
-			this.inputPembelianNPL.tanggal_transfer = item.tanggal_transfer ? this.convertDateToPicker2(item.tanggal_transfer) : ''
-			this.inputPembelianNPL.UnixTextPeserta = item.data_peserta.UnixText ? item.data_peserta.UnixText : ''
-			this.inputVerifikasi.pesan_verifikasi = item.pesan_verifikasi ? item.pesan_verifikasi : ''
+			this.inputPembelianNPL.tanggal_transfer = item.tanggalTransfer ? this.convertDateToPicker2(item.tanggalTransfer) : ''
+			this.inputPembelianNPL.UnixTextPeserta = item.UnixText ? item.UnixText : ''
+			this.inputVerifikasi.pesan_verifikasi = item.pesanVerifikasi ? item.pesanVerifikasi : ''
 			this.inputVerifikasi.bukti = item.bukti ? item.bukti : ''
+			this.inputVerifikasi.jml_nonpl = this.inputPembelianNPL.jml_nonpl
 			if(verif == 1){
 				this.notifikasi('questionProses', 'Apakah anda ingin upload bukti dan menambahkan pesan verifikasi ?', '2')
-				this.getNoNPL(item.id_event)
+				this.getNoNPL(item.idEvent)
 			}else{
 				this.StatusVerifikasi(this.inputVerifikasi.bukti)		
 			}
@@ -1333,6 +1530,24 @@ export default {
 			.catch((err) => {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
+		},
+		EventChange(e){
+			if(typeof e == 'object') {
+				this.rules = []
+				this.inputPembelianNPL.id_kategori = ''
+				this.inputPembelianNPL.jml_nonpl = ''
+				this.inputPembelianNPL.nominal = 0
+				this.ManajemenNPL = []
+			}
+			this.inputPembelianNPL.jml_nonpl = ''
+			this.getLot(e)
+		},
+		jmlChange(){
+			if(this.inputPembelianNPL.jml_nonpl != '' && this.ManajemenNPL.length) {
+				this.inputPembelianNPL.nominal = parseInt(this.ManajemenNPL[0].nominal) * this.inputPembelianNPL.jml_nonpl
+			}else{
+				this.inputPembelianNPL.nominal = 0
+			}
 		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true

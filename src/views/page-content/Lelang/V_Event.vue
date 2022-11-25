@@ -520,6 +520,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(0, FileEVENT)"
 								>
@@ -532,6 +533,7 @@
 									small
 									dense
 									depressed
+									:loading="btnProses"
 									:disabled="kondisiTombol"
 									@click="SimpanForm(1, FileEVENT)"
 								>
@@ -668,6 +670,7 @@ export default {
 	components: { PopUpNotifikasiVue, Cropper },
 	data: () => ({
 		isLoading: false,
+		btnProses: false,
 		roleID: '',
 		DataEvent: [],
 		page: 1,
@@ -830,6 +833,7 @@ export default {
       this.DialogEvent = false
     },
 		SimpanForm(index, dataUpload) {
+			this.btnProses = true
       let bodyData = {
         jenis: index == 0 ? 'ADD' : 'EDIT',
         id_event: index == 0 ? '' : this.inputEvent.id_event,
@@ -868,9 +872,11 @@ export default {
 				// this.notifikasi("success", res.data.message, "1")
 				this.clearForm()
         this.DialogEvent = false
+        this.btnProses = false
         this.getEvent()
 			})
 			.catch((err) => {
+				this.btnProses = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
