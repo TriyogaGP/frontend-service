@@ -829,7 +829,7 @@
 										dense
 										depressed
 										class="ma-2 white--text text--darken-2"
-										@click.stop="bukaDialog(null, 0)"
+										@click.stop="bukaDialogTambahManajemenNPL()"
 									>
 										<v-icon small>add</v-icon>	Tambah
 									</v-btn>
@@ -919,6 +919,124 @@
         </v-btn>
       </v-card>
 		</v-dialog>
+		<v-dialog
+      v-model="DialogTambahManajemenNPL"
+      max-width="600px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Dialog Tambah Manajemen NPL</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="() => { DialogTambahManajemenNPL = false }"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card>
+					<div class="scrollText">
+            <div class="px-5">
+              <v-divider />
+            </div>
+						<v-card-text>
+							<v-row no-gutters>
+                <v-col
+                  cols="12"
+                  md="4"
+                  class="pt-2 d-flex align-center"
+                >
+                  Kategori
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="8"
+                  class="pt-3"
+                >
+                  <v-autocomplete
+                    v-model="inputManajemenNPL.id_kategori"
+                    :items="kategoriOptions"
+                    item-text="kategori"
+                    item-value="idKategori"
+                    placeholder="Kategori"
+                    label="Kategori"
+                    outlined
+                    dense
+                    hide-details
+                    clearable
+                  >
+										<template v-slot:selection="{ item }">
+											{{item.kategori}}
+										</template>
+										<template v-slot:item="{ item }">
+											{{item.kategori}}
+										</template>
+									</v-autocomplete>
+                </v-col>
+              </v-row>
+							<v-row no-gutters>
+								<v-col
+									cols="12"
+									md="4"
+									class="pt-2 d-flex align-center"
+								>
+									Nominal
+								</v-col>
+								<v-col
+									cols="12"
+									md="8"
+									class="pt-3"
+								>
+									<vuetify-money
+										v-model="inputManajemenNPL.nominal"
+										placeholder="Nominal"
+										outlined
+										dense
+										label="Nominal"
+										color="light-blue darken-3"
+										hide-details
+                    clearable
+										:options="optionsUang"
+									/>
+								</v-col>
+							</v-row>
+						</v-card-text>
+					</div>
+					<v-card-actions>
+						<v-row 
+							no-gutters
+							class="mt-1 mr-3"
+						>
+							<v-col
+								class="text-end"
+								cols="12"
+							>
+								<v-btn
+									color="light-blue darken-3"
+									class="white--text text--darken-2"
+									small
+									dense
+									depressed
+									:loading="btnProses"
+									:disabled="kondisiTombol3"
+									@click="SimpanManajemenNPL()"
+								>
+									Simpan
+								</v-btn>
+							</v-col>
+						</v-row>
+					</v-card-actions>	
+				</v-card>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 
@@ -991,15 +1109,18 @@ export default {
 		rules: [],
 		DataPeserta: [],
 		DataEvent: [],
+		kategoriOptions: [],
 		ManajemenNPL: [],
 		DialogPembelianNPL: false,
 		DialogManajemenNPL: false,
 		DialogViewLampiranPembelianNPL: false,
 		DialogCropPembelianNPL: false,
 		DialogVerifikasi: false,
+		DialogTambahManajemenNPL: false,
 		editedIndex: 3,
     kondisiTombol: true,
     kondisiTombol2: true,
+    kondisiTombol3: true,
 		tampungNoPembelian: '',
 		TypePembelianOptions: [
 			{text: 'Online', value: 1},
@@ -1034,6 +1155,10 @@ export default {
 			pesan_verifikasi: '',
 			bukti: '',
 			jml_nonpl: '',
+		},
+		inputManajemenNPL: {
+			id_kategori: '',
+			nominal: '',
 		},
 		lastNoNPL: '',
 		kumpulNoNpl: [],
@@ -1099,7 +1224,7 @@ export default {
 				if(value.pesan_verifikasi == null){ this.inputVerifikasi.pesan_verifikasi = '' }
 				if(value.jml_nonpl == null){ this.inputVerifikasi.jml_nonpl = '' }
 				if(value.jml_nonpl == '' || value.jml_nonpl.length){ this.kumpulNoNpl = [] }
-
+				
 				let result = []
 				let lastHit = this.lastNoNPL
 				for (let index = 0; index < value.jml_nonpl; index++) {
@@ -1119,6 +1244,19 @@ export default {
 				}
 			}
 		},
+		inputManajemenNPL: {
+			deep: true,
+			handler(value){
+				if(value.id_kategori == null){ this.inputManajemenNPL.id_kategori = '' }
+				if(value.nominal == null){ this.inputVerifikasi.nominal = '' }
+
+				if(value.id_kategori != '' && value.nominal){
+					this.kondisiTombol3 = false
+				}else{
+					this.kondisiTombol3 = true
+				}
+			}
+		}
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
@@ -1235,6 +1373,20 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
 		},
+		getKategoriBarangLelang() {
+			let payload = {
+				method: "get",
+				url: `lelang/getKategoriLelang?status_aktif=1`,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+				this.kategoriOptions = res.data.result;
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+		},
 		bukaDialog(item, index){
 			this.editedIndex = index
 			this.getEvent()
@@ -1267,6 +1419,10 @@ export default {
 		bukaDialogManajemenNPL(){
 			this.getManajemenNPL()
 			this.DialogManajemenNPL = true
+		},
+		bukaDialogTambahManajemenNPL(){
+			this.getKategoriBarangLelang()
+			this.DialogTambahManajemenNPL = true
 		},
 		SimpanForm(index) {
 			this.btnProses = true
@@ -1337,6 +1493,30 @@ export default {
         this.DialogVerifikasi = false
         this.btnProses = false
         this.getPembelianNPL()
+			})
+			.catch((err) => {
+				this.btnProses = false
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+    },
+		SimpanManajemenNPL() {
+			this.btnProses = true
+      let bodyData = {
+				id_kategori: this.inputManajemenNPL.id_kategori,
+				nominal: this.inputManajemenNPL.nominal,
+				create_update_by: localStorage.getItem('idLogin'),
+      }
+      let payload = {
+				method: "post",
+				url: `lelang/postManajemenNPL`,
+        body: bodyData,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then(async (res) => {
+        this.DialogTambahManajemenNPL = false
+        this.btnProses = false
+        this.getManajemenNPL()
 			})
 			.catch((err) => {
 				this.btnProses = false
