@@ -1,7 +1,7 @@
 <template>
   <div>
-		<v-card :class="roleID == 5 && 'mt-2 mb-2 pa-1'" :outlined="roleID == 5" elevation="0">
-			<h1 class="subheading grey--text">Panel Pembelian NPL</h1>
+		<h1 class="subheading grey--text">Panel Pembelian NPL</h1>
+		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6">
 					<v-btn
@@ -27,15 +27,16 @@
 				</v-col>
 				<v-col cols="12" md="6">
 					<v-text-field
-						v-model="searchData"
-						append-icon="mdi-magnify"
-						label="Pencarian..."
-						single-line
-						hide-details
-						solo
-						color="light-blue darken-3"
+            v-model="searchData"
+            append-icon="mdi-magnify"
+            label="Pencarian..."
+            single-line
+            hide-details
 						clearable
-					/>
+            solo
+            color="light-blue darken-3"
+            @keyup.enter="getPembelianNPL(1, limit, searchData)"
+          />
 				</v-col>
 			</v-row>
 			<div class="px-1">
@@ -43,9 +44,7 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headers"
-					:search="searchData"
 					:loading="isLoading"
 					:items="DataPembelianNPL"
 					:single-expand="singleExpand"
@@ -54,7 +53,6 @@
 					item-key="idPembelianNPL"
 					hide-default-footer
 					class="elevation-1"
-					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
@@ -200,7 +198,7 @@
 					</template>
 				</v-data-table>
 			</div>
-			<v-row>
+			<!-- <v-row>
 				<v-col cols="12" class="mt-2 pa-2 px-5">
 					<v-pagination
 						v-if="DataPembelianNPL.length > 0"
@@ -208,6 +206,41 @@
 						:length="pageCount"
 						:total-visible="5"
 					/>
+				</v-col>
+			</v-row> -->
+			<v-row>
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataPembelianNPL.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataPembelianNPL.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getPembelianNPL(pageSummary.page - 1, limit, searchData)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataPembelianNPL.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getPembelianNPL(pageSummary.page + 1, limit, searchData)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
 				</v-col>
 			</v-row>
 		</v-card>
@@ -418,9 +451,14 @@
                     color="light-blue darken-3"
 										@keypress.native="onlyNumber($event, 2, inputPembelianNPL.jml_nonpl)"
                     hide-details
-                    clearable
+										:readonly="!inputPembelianNPL.id_event"
 										@input="jmlChange()"
-                  />
+                  >
+										<template v-slot:append>
+											<v-icon @click="() => { inputPembelianNPL.jml_nonpl = Number(inputPembelianNPL.jml_nonpl) + 1; jmlChange(); }" color="light-blue darken-3" :disabled="inputPembelianNPL.jml_nonpl == 99">add</v-icon>
+											<v-icon @click="() => { inputPembelianNPL.jml_nonpl = Number(inputPembelianNPL.jml_nonpl) - 1; jmlChange(); }" color="light-blue darken-3" :disabled="inputPembelianNPL.jml_nonpl == 0">remove</v-icon>
+										</template>
+									</v-text-field>
                 </v-col>
 							</v-row>
 							<v-row no-gutters>
@@ -542,6 +580,7 @@
               </v-row>
 						</v-card-text>
 					</div>
+					<v-divider />
 					<v-card-actions>
 						<v-row 
 							no-gutters
@@ -839,37 +878,40 @@
 								loading-text="Sedang memuat... Harap tunggu"
 								no-data-text="Tidak ada data yang tersedia"
 								no-results-text="Tidak ada catatan yang cocok ditemukan"
-								:options.sync="query"
 								:headers="headersManajemen"
 								:loading="isLoading"
 								:items="ManajemenNPL"
 								item-key="idManajemenNPL"
 								hide-default-footer
 								class="elevation-1"
-								:page.sync="page"
-								:items-per-page="itemsPerPage"
-								@page-count="pageCount = $event"
+								:page.sync="pageManajemennpl"
+								:items-per-page="itemsPerPageManajemennpl"
+								@page-count="pageCountManajemennpl = $event"
 							>
 								<template #[`item.number`]="{ item }">
 									{{ ManajemenNPL.indexOf(item) + 1 }}
 								</template>
 								<template #[`item.kategori`]="{ item }">
-									<span v-html="item.KategoriLelang.kategori" />
+									<span v-html="item.kategori" />
 								</template>
 								<template #[`item.nominal`]="{ item }">
-									Rp.<span v-html="currencyDotFormat(item.nominal)" />
+									Rp.<span v-html="currencyDotFormat(item.dataManajemenNPL[0].nominal)" />
+								</template>
+								<template #[`item.detail`]="{ item }">
+									<v-tooltip bottom>
+										<template v-slot:activator="{ on, attrs }">
+											<v-icon v-bind="attrs" v-on="on" middle>info</v-icon>
+										</template>
+										<strong>Nominal History</strong><br>
+										<div
+											v-for="(data, i) in item.dataManajemenNPL"
+											:key="i"
+										>
+											Rp.{{ currencyDotFormat(data.nominal) }} <span v-if="i == 0" >(<v-icon small color="red">check</v-icon> Default)</span>
+										</div>
+									</v-tooltip>
 								</template>
 							</v-data-table>
-							<v-row>
-								<v-col cols="12" class="mt-2 pa-2 px-5">
-									<v-pagination
-										v-if="ManajemenNPL.length > 0"
-										v-model="page"
-										:length="pageCount"
-										:total-visible="5"
-									/>
-								</v-col>
-							</v-row>
 						</v-card-text>
 					</div>
         </v-card>
@@ -1010,6 +1052,7 @@
 							</v-row>
 						</v-card-text>
 					</div>
+					<v-divider />
 					<v-card-actions>
 						<v-row 
 							no-gutters
@@ -1076,18 +1119,29 @@ export default {
 		btnProses: false,
 		roleID: '',
 		DataPembelianNPL: [],
-		page: 1,
+		pageManajemennpl: 1,
+    pageCountManajemennpl: 0,
+    itemsPerPageManajemennpl: 5,
+    page: 1,
     pageCount: 0,
-    itemsPerPage: 5,
+    itemsPerPage: 100,
     expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    limit: 10,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -1103,6 +1157,7 @@ export default {
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "Kategori", value: "kategori", sortable: false },
       { text: "Nominal", value: "nominal", sortable: false },
+      { text: "Detail", value: "detail", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -1147,18 +1202,18 @@ export default {
 			type_transaksi: '',
 			no_pembelian: '',
 			verifikasi: '',
-			jml_nonpl: '',
-			nominal: '',
+			jml_nonpl: 0,
+			nominal: 0,
 			tanggal_transfer: '',
 		},
 		inputVerifikasi: {
 			pesan_verifikasi: '',
 			bukti: '',
-			jml_nonpl: '',
+			jml_nonpl: 0,
 		},
 		inputManajemenNPL: {
 			id_kategori: '',
-			nominal: '',
+			nominal: 0,
 		},
 		lastNoNPL: '',
 		kumpulNoNpl: [],
@@ -1197,10 +1252,10 @@ export default {
 				if(value.id_event == null){ this.inputPembelianNPL.id_event = '' }
 				if(value.type_pembelian == null){ this.inputPembelianNPL.type_pembelian = '' }
 				if(value.type_transaksi == null){ this.inputPembelianNPL.type_transaksi = '' }
-				if(value.jml_nonpl == null){ this.inputPembelianNPL.jml_nonpl = '' }
-				if(value.jml_nonpl == '' || value.jml_nonpl.length){ this.kumpulNoNpl = [] }
+				if(value.jml_nonpl == null){ this.inputPembelianNPL.jml_nonpl = 0 }
+				if(value.jml_nonpl == 0){ this.kumpulNoNpl = [] }
 				if(value.tanggal_transfer == null){ this.inputPembelianNPL.tanggal_transfer = '' }
-				
+
 				if(value.id_peserta != '') {
 					if(this.editedIndex == 0) { this.tampungNoPembelian = `${this.makeRandomAngka(10)}.${value.id_peserta}` }
 				}				
@@ -1210,7 +1265,7 @@ export default {
 					this.tampungNoPembelian = `${split[0]}.${value.id_peserta}` 
 				}
 
-				if(value.id_peserta != '' && value.id_event != '' && value.type_pembelian != '' && value.type_transaksi != '' && value.jml_nonpl != '' && 
+				if(value.id_peserta != '' && value.id_event != '' && value.type_pembelian != '' && value.type_transaksi != '' && value.jml_nonpl != 0 && 
 				value.nominal != 0 && value.tanggal_transfer != '' && this.tampungNoPembelian != ''){
 					this.kondisiTombol = false
 				}else{
@@ -1222,8 +1277,8 @@ export default {
 			deep: true,
 			handler(value){
 				if(value.pesan_verifikasi == null){ this.inputVerifikasi.pesan_verifikasi = '' }
-				if(value.jml_nonpl == null){ this.inputVerifikasi.jml_nonpl = '' }
-				if(value.jml_nonpl == '' || value.jml_nonpl.length){ this.kumpulNoNpl = [] }
+				if(value.jml_nonpl == null){ this.inputVerifikasi.jml_nonpl = 0 }
+				if(value.jml_nonpl == 0){ this.kumpulNoNpl = [] }
 				
 				let result = []
 				let lastHit = this.lastNoNPL
@@ -1248,35 +1303,63 @@ export default {
 			deep: true,
 			handler(value){
 				if(value.id_kategori == null){ this.inputManajemenNPL.id_kategori = '' }
-				if(value.nominal == null){ this.inputVerifikasi.nominal = '' }
+				if(value.nominal == null){ this.inputManajemenNPL.nominal = 0 }
 
-				if(value.id_kategori != '' && value.nominal){
+				if(value.id_kategori != '' && value.nominal != 0){
 					this.kondisiTombol3 = false
 				}else{
 					this.kondisiTombol3 = true
 				}
 			}
+		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getPembelianNPL(1, value, this.searchData)
+			}
+		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getPembelianNPL(1, this.limit, this.searchData)
+        }
+			}
 		}
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
-		this.getPembelianNPL()
+		this.getPembelianNPL(1, this.limit, this.searchData)
 	},
 	methods: {
 		...mapActions({
       fetchData: "fetchData",
       uploadFiles: "upload/uploadFiles",
     }),
-		getPembelianNPL() {
+		getPembelianNPL(page = 1, limit, keyword) {
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+      this.DataPembelianNPL = []
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getNPL`,
+				url: `lelang/getNPL?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataPembelianNPL = res.data.result;
+				let resdata = res.data.result;
+				this.DataPembelianNPL = resdata.records;
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				this.isLoading = false
 			})
 			.catch((err) => {
@@ -1287,7 +1370,7 @@ export default {
 		getPeserta() {
 			let payload = {
 				method: "get",
-				url: `admin/getPeserta?status_aktif=1`,
+				url: `settings/optionUser?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1301,7 +1384,7 @@ export default {
 		getEvent() {
 			let payload = {
 				method: "get",
-				url: `lelang/getEvent?status_aktif=1`,
+				url: `settings/optionEvent?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1349,24 +1432,32 @@ export default {
 		getLot(id_event) {
 			let payload = {
 				method: "get",
-				url: `lelang/getLot?id_event=${id_event}`,
+				url: `settings/optionLot?id_event=${id_event}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
 				let data = res.data.result
-				if(data.length) {
-					this.inputPembelianNPL.id_kategori = data[0].BarangLelang.idKategori
-					this.rules = []
-					this.getManajemenNPL(this.inputPembelianNPL.id_kategori)
+				if(id_event != null) {
+					if(data.length > 0) {
+						this.inputPembelianNPL.id_kategori = data[0].BarangLelang.idKategori
+						this.rules = []
+						this.getManajemenNPL(this.inputPembelianNPL.id_kategori)
+						this.inputPembelianNPL.jml_nonpl = 0
+						this.inputPembelianNPL.nominal = 0
+					}else{
+						this.rules = [ 
+							value => 'Data LOT tidak di temukan'
+						]
+						this.inputPembelianNPL.id_kategori = ''
+						this.inputPembelianNPL.jml_nonpl = 0
+						this.inputPembelianNPL.nominal = 0
+						this.ManajemenNPL = []
+					}
 				}else{
-					this.rules = [ 
-						value => 'Data LOT tidak di temukan'
-					]
-					this.inputPembelianNPL.id_kategori = ''
-					this.inputPembelianNPL.jml_nonpl = ''
+					this.rules = []
+					this.inputPembelianNPL.jml_nonpl = 0
 					this.inputPembelianNPL.nominal = 0
-					this.ManajemenNPL = []
 				}
 			})
 			.catch((err) => {
@@ -1376,7 +1467,7 @@ export default {
 		getKategoriBarangLelang() {
 			let payload = {
 				method: "get",
-				url: `lelang/getKategoriLelang?status_aktif=1`,
+				url: `settings/optionKategori?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1401,8 +1492,8 @@ export default {
         this.inputPembelianNPL.type_pembelian = item.typePembelian ? item.typePembelian : ''
         this.inputPembelianNPL.type_transaksi = item.typeTransaksi ? item.typeTransaksi : ''
         this.inputPembelianNPL.verifikasi = item.verifikasi
-        this.inputPembelianNPL.jml_nonpl = item.jmlNPL ? item.jmlNPL : ''
-        this.inputPembelianNPL.nominal = item.nominal ? parseInt(item.nominal) : ''
+        this.inputPembelianNPL.jml_nonpl = item.jmlNPL ? item.jmlNPL : 0
+        this.inputPembelianNPL.nominal = item.nominal ? parseInt(item.nominal) : 0
         this.inputPembelianNPL.tanggal_transfer = item.tanggalTransfer ? this.convertDateToPicker2(item.tanggalTransfer) : ''
         this.tampungNoPembelian = item.noPembelian ? item.noPembelian : ''
         this.inputVerifikasi.bukti = item.bukti ? item.bukti : ''
@@ -1451,7 +1542,7 @@ export default {
 				this.clearForm()
         this.DialogPembelianNPL = false
         this.btnProses = false
-        this.getPembelianNPL()
+        this.getPembelianNPL(1, this.limit, this.searchData)
 			})
 			.catch((err) => {
 				this.btnProses = false
@@ -1492,7 +1583,7 @@ export default {
 				this.clearForm()
         this.DialogVerifikasi = false
         this.btnProses = false
-        this.getPembelianNPL()
+        this.getPembelianNPL(1, this.limit, this.searchData)
 			})
 			.catch((err) => {
 				this.btnProses = false
@@ -1558,7 +1649,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPembelianNPL = false
-        this.getPembelianNPL()
+        this.getPembelianNPL(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -1580,7 +1671,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPembelianNPL = false
-        this.getPembelianNPL()
+        this.getPembelianNPL(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -1596,8 +1687,8 @@ export default {
 			this.inputPembelianNPL.type_pembelian = ''
 			this.inputPembelianNPL.type_transaksi = ''
 			this.inputPembelianNPL.verifikasi = ''
-			this.inputPembelianNPL.jml_nonpl = ''
-			this.inputPembelianNPL.nominal = ''
+			this.inputPembelianNPL.jml_nonpl = 0
+			this.inputPembelianNPL.nominal = 0
 			this.inputPembelianNPL.tanggal_transfer = ''
 			this.tampungNoPembelian = ''
 			this.FileBUKTI = ''
@@ -1685,7 +1776,7 @@ export default {
 		StatusVerifikasi(bukti) {
 			if(bukti == ''){
 				this.DialogPembelianNPL = false
-        this.getPembelianNPL()
+        this.getPembelianNPL(1, this.limit, this.searchData)
         this.notifikasi("warning", 'Bukti Transfer tidak di temukan, tolong Upload Bukti Transfer !', "1")
 				return
 			}
@@ -1704,7 +1795,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPembelianNPL = false
-        this.getPembelianNPL()
+        this.getPembelianNPL(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -1724,7 +1815,7 @@ export default {
 		},
 		jmlChange(){
 			if(this.inputPembelianNPL.jml_nonpl != '' && this.ManajemenNPL.length) {
-				this.inputPembelianNPL.nominal = parseInt(this.ManajemenNPL[0].nominal) * this.inputPembelianNPL.jml_nonpl
+				this.inputPembelianNPL.nominal = parseInt(this.ManajemenNPL[0].dataManajemenNPL[0].nominal) * this.inputPembelianNPL.jml_nonpl
 			}else{
 				this.inputPembelianNPL.nominal = 0
 			}

@@ -126,7 +126,7 @@
 			</v-layout>
 		</v-container>
 		<v-divider style="border: 1px solid #000" />
-		<v-card v-if="LelangPanel != 0" class="mt-2 mb-2 pa-1" outlined elevation="0">
+		<v-card v-if="LelangPanel != 0" class="mt-2 mb-2 pa-1" elevation="0">
 			<V_KategoriBarang v-if="LelangPanel == 1" />
 			<V_Barang v-else-if="LelangPanel == 2" />
 			<V_Event v-else-if="LelangPanel == 3" />

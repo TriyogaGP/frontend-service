@@ -125,9 +125,9 @@
                     depressed
                     class="mr-1 black--text text--darken-2"
                     :disabled="tombolBid"
-                    @click="() => { NominalBid += parseInt('500000') }"
+                    @click="() => { NominalBid += parseInt(dataEvent.kelipatanBid) }"
                   >
-                    Rp. 500.000
+                    Rp. {{ currencyDotFormat(dataEvent.kelipatanBid) }}
                   </v-btn>
                   <v-btn
                     color="lime accent-3"
@@ -138,7 +138,7 @@
                     :disabled="tombolBid"
                     @click="() => { NominalBid += parseInt('1000000') }"
                   >
-                    Rp. 1.000.000
+                    Rp. {{ currencyDotFormat((parseInt(dataEvent.kelipatanBid) * 2).toString()) }}
                   </v-btn>
                 </div>
                 <div class="d-flex justify-center mt-2">
@@ -539,8 +539,8 @@ export default {
             no_npl: dataBid.dataBidding.no_npl,
             id_bidding: dataBid.dataBidding.idBidding,
           }
-          if(this.dataBidding.nama != localStorage.getItem('nama') && this.dataRoom.idLot == dataBid.dataBidding.idLot) return this.tombolBid = false
-          this.tombolBid = true
+          // if(this.dataBidding.nama != localStorage.getItem('nama') && this.dataRoom.idLot == dataBid.dataBidding.idLot) return this.tombolBid = false
+          // this.tombolBid = true
         }else{
           this.dataBidding = {
             harga: 0,
@@ -559,6 +559,7 @@ export default {
       });
     },
     SelesaiBidding(done = false) {
+      if(this.dataBidding.id_bidding === "") return this.notifikasi("warning", "LOT ini belum ada yang Bidding maka tidak bisa ditetapkan pemenang !", "1")
       const socket = io(this.API_URL);
       socket.emit("tombolBid", true);
       socket.emit("done-bidding", `Lot dengan no ${this.currentLOT} telah berakhir, pemenang lelang adalah ${this.dataBidding.nama}(${this.dataBidding.no_npl}) dengan nominal Rp.${this.currencyDotFormat(this.dataBidding.harga.toString())} !`);
@@ -572,7 +573,8 @@ export default {
       this.selesaiBid = done
     },
     BidLelang() {
-      this.tombolBid = true
+      // this.tombolBid = true
+      if(this.NominalBid !== 0 && this.NominalBid < this.dataEvent.kelipatanBid) return this.notifikasi("warning", `Nominal BID kurang dari Nilai Kelipatan BID Rp. ${this.currencyDotFormat(this.dataEvent.kelipatanBid)}`, "1")
       const socket = io(this.API_URL);
       if(this.kondisiTimer == false) {
         this.updateWaktu = true

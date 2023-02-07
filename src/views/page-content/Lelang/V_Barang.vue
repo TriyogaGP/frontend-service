@@ -1,7 +1,7 @@
 <template>
   <div>
-    <v-card :class="roleID == 5 && 'mt-2 mb-2 pa-1'" :outlined="roleID == 5" elevation="0">
-      <h1 class="subheading grey--text">Panel Barang Lelang</h1>
+    <h1 class="subheading grey--text">Panel Barang Lelang</h1>
+    <v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
       <v-row no-gutters class="pa-2">
         <v-col cols="12" md="6">
           <v-btn
@@ -22,9 +22,10 @@
             label="Pencarian..."
             single-line
             hide-details
+						clearable
             solo
             color="light-blue darken-3"
-            clearable
+            @keyup.enter="getBarangLelang(1, limit, searchData)"
           />
         </v-col>
       </v-row>
@@ -33,9 +34,7 @@
           loading-text="Sedang memuat... Harap tunggu"
           no-data-text="Tidak ada data yang tersedia"
           no-results-text="Tidak ada catatan yang cocok ditemukan"
-          :options.sync="query"
           :headers="headers"
-          :search="searchData"
           :loading="isLoading"
           :items="DataBarangLelang"
           :single-expand="singleExpand"
@@ -44,7 +43,6 @@
           item-key="idBarangLelang"
           hide-default-footer
           class="elevation-1"
-          :page.sync="page"
           :items-per-page="itemsPerPage"
           @page-count="pageCount = $event"
         >
@@ -160,7 +158,7 @@
           </template>
         </v-data-table>
       </div>
-      <v-row>
+      <!-- <v-row>
         <v-col cols="12" class="mt-2 pa-2 px-5">
           <v-pagination
             v-if="DataBarangLelang.length > 0"
@@ -169,7 +167,42 @@
             :total-visible="10"
           />
         </v-col>
-      </v-row>
+      </v-row> -->
+      <v-row>
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataBarangLelang.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataBarangLelang.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getBarangLelang(pageSummary.page - 1, limit, searchData)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataBarangLelang.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getBarangLelang(pageSummary.page + 1, limit, searchData)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
+				</v-col>
+			</v-row>
     </v-card>
 		<v-dialog
       v-model="DialogBarangLelang"
@@ -1108,6 +1141,7 @@
               </div>
             </v-card-text>
 					</div>
+          <v-divider />
           <v-card-actions>
             <v-row 
               no-gutters
@@ -1422,16 +1456,24 @@ export default {
 		DataBarangLelang: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 10,
+    itemsPerPage: 100,
     expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    limit: 10,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -1643,6 +1685,20 @@ export default {
         }
 
 			}
+		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getBarangLelang(1, value, this.searchData)
+			}
+		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getBarangLelang(1, this.limit, this.searchData)
+        }
+			}
 		}
 	},
   updated(){
@@ -1650,7 +1706,7 @@ export default {
 	},
 	mounted() {
     this.roleID = localStorage.getItem("roleID")
-		this.getBarangLelang()
+		this.getBarangLelang(1, this.limit, this.searchData)
 	},
 	methods: {
 		...mapActions({
@@ -1658,16 +1714,30 @@ export default {
       uploadFiles: "upload/uploadFiles",
       uploadBerkas: "upload/uploadBerkas",
     }),
-		getBarangLelang() {
+		getBarangLelang(page = 1, limit, keyword) {
+      this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+      this.DataBarangLelang = []
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `lelang/getBarangLelang`,
+				url: `lelang/getBarangLelang?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.DataBarangLelang = res.data.result;
+        let resdata = res.data.result;
+				this.DataBarangLelang = resdata.records;
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
         this.isLoading = false
 			})
 			.catch((err) => {
@@ -1678,7 +1748,7 @@ export default {
 		getKategoriBarangLelang() {
 			let payload = {
 				method: "get",
-				url: `lelang/getKategoriLelang?status_aktif=1`,
+				url: `settings/optionKategori?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1864,7 +1934,7 @@ export default {
         this.clearForm()
 				this.DialogBarangLelang = false
         this.btnProses = false
-				this.getBarangLelang()
+				this.getBarangLelang(1, this.limit, this.searchData)
 			})
 			.catch((err) => {
         this.btnProses = false
@@ -1935,12 +2005,12 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogBarangLelang = false
-        this.getBarangLelang()
+        this.getBarangLelang(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.DialogBarangLelang = false
-				this.getBarangLelang()
+				this.getBarangLelang(1, this.limit, this.searchData)
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
@@ -1961,12 +2031,12 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogBarangLelang = false
-        this.getBarangLelang()
+        this.getBarangLelang(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
 				this.DialogBarangLelang = false
-				this.getBarangLelang()
+				this.getBarangLelang(1, this.limit, this.searchData)
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
@@ -2267,7 +2337,7 @@ export default {
       }
       this.clearForm()
       this.DialogUploadMultipleBarangLelang = false
-      this.getBarangLelang()
+      this.getBarangLelang(1, this.limit, this.searchData)
     },
 		UpperCaseLetter(str) {
 			return str.toUpperCase()

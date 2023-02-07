@@ -1,7 +1,7 @@
 <template>
   <div>
-		<v-card :class="roleID == 5 && 'mt-2 mb-2 pa-1'" :outlined="roleID == 5" elevation="0">
-			<h1 class="subheading grey--text">Panel Lot</h1>
+		<h1 class="subheading grey--text">Panel Lot</h1>
+		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6">
 					<v-btn
@@ -17,15 +17,16 @@
 				</v-col>
 				<v-col cols="12" md="6">
 					<v-text-field
-						v-model="searchData"
-						append-icon="mdi-magnify"
-						label="Pencarian..."
-						single-line
-						hide-details
-						solo
-						color="light-blue darken-3"
+            v-model="searchData"
+            append-icon="mdi-magnify"
+            label="Pencarian..."
+            single-line
+            hide-details
 						clearable
-					/>
+            solo
+            color="light-blue darken-3"
+            @keyup.enter="getLot(1, limit, searchData)"
+          />
 				</v-col>
 			</v-row>
 			<div class="px-1">
@@ -33,9 +34,7 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headers"
-					:search="searchData"
 					:loading="isLoading"
 					:items="DataLot"
 					:single-expand="singleExpand"
@@ -44,7 +43,6 @@
 					item-key="idLot"
 					hide-default-footer
 					class="elevation-1"
-					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
@@ -156,7 +154,7 @@
 					</template>
 				</v-data-table>
 			</div>
-			<v-row>
+			<!-- <v-row>
 				<v-col cols="12" class="mt-2 pa-2 px-5">
 					<v-pagination
 						v-if="DataLot.length > 0"
@@ -164,6 +162,41 @@
 						:length="pageCount"
 						:total-visible="5"
 					/>
+				</v-col>
+			</v-row> -->
+			<v-row>
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataLot.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataLot.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getLot(pageSummary.page - 1, limit, searchData)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataLot.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getLot(pageSummary.page + 1, limit, searchData)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
 				</v-col>
 			</v-row>
 		</v-card>
@@ -352,6 +385,7 @@
               </v-row>
 						</v-card-text>
 					</div>
+					<v-divider />
 					<v-card-actions>
 						<v-row 
 							no-gutters
@@ -421,16 +455,24 @@ export default {
 		DataLot: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 5,
+    itemsPerPage: 100,
     expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    limit: 10,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -499,24 +541,52 @@ export default {
 					this.kondisiTombol = true	
 				}
 			}
+		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getLot(1, value, this.searchData)
+			}
+		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getLot(1, this.limit, this.searchData)
+        }
+			}
 		}
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
-		this.getLot()
+		this.getLot(1, this.limit, this.searchData)
 	},
 	methods: {
 		...mapActions(["fetchData"]),
-		getLot() {
+		getLot(page = 1, limit, keyword) {
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+			this.DataLot = []
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getLot`,
+				url: `lelang/getLot?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataLot = res.data.result;
+				let resdata = res.data.result;
+				this.DataLot = resdata.records;
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				this.isLoading = false
 			})
 			.catch((err) => {
@@ -528,7 +598,7 @@ export default {
 			this.DataBarangLelang = []
 			let payload = {
 				method: "get",
-				url: `lelang/getBarangLelang?status_aktif=1`,
+				url: `settings/optionBarangLelang?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -559,7 +629,7 @@ export default {
 		getEvent() {
 			let payload = {
 				method: "get",
-				url: `lelang/getEvent?status_aktif=1`,
+				url: `settings/optionEvent?status_aktif=1`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -615,7 +685,7 @@ export default {
 				this.clearForm()
         this.DialogLot = false
         this.btnProses = false
-        this.getLot()
+        this.getLot(1, this.limit, this.searchData)
 				this.getBarangLelang()
 			})
 			.catch((err) => {
@@ -638,7 +708,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogLot = false
-        this.getLot()
+        this.getLot(1, this.limit, this.searchData)
 				this.getBarangLelang()
         this.notifikasi("success", res.data.message, "1")
 			})
@@ -661,7 +731,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogLot = false
-        this.getLot()
+        this.getLot(1, this.limit, this.searchData)
 				this.getBarangLelang()
         this.notifikasi("success", res.data.message, "1")
 			})

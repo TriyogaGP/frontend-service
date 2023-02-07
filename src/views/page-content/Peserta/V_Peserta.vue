@@ -22,9 +22,10 @@
             label="Pencarian..."
             single-line
             hide-details
+						clearable
             solo
             color="light-blue darken-3"
-            clearable
+            @keyup.enter="getPeserta(1, limit, searchData)"
           />
         </v-col>
       </v-row>
@@ -33,9 +34,7 @@
           loading-text="Sedang memuat... Harap tunggu"
           no-data-text="Tidak ada data yang tersedia"
           no-results-text="Tidak ada catatan yang cocok ditemukan"
-          :options.sync="query"
           :headers="headers"
-          :search="searchData"
           :loading="isLoading"
           :items="DataPeserta"
           :single-expand="singleExpand"
@@ -44,7 +43,6 @@
           item-key="idPeserta"
           hide-default-footer
           class="elevation-1"
-          :page.sync="page"
           :items-per-page="itemsPerPage"
           @page-count="pageCount = $event"
         >
@@ -123,7 +121,7 @@
           </template>
         </v-data-table>
       </div>
-      <v-row>
+      <!-- <v-row>
         <v-col cols="12" class="mt-2 pa-2 px-5">
           <v-pagination
             v-if="DataPeserta.length > 0"
@@ -132,7 +130,42 @@
             :total-visible="5"
           />
         </v-col>
-      </v-row>
+      </v-row> -->
+      <v-row>
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataPeserta.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataPeserta.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getPeserta(pageSummary.page - 1, limit, searchData)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataPeserta.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getPeserta(pageSummary.page + 1, limit, searchData)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
+				</v-col>
+			</v-row>
     </v-card>
     <v-dialog
       v-model="DialogPeserta"
@@ -794,6 +827,7 @@
               </v-row> -->
             </v-card-text>
           </div>
+          <v-divider />
           <v-card-actions>
             <v-row 
               no-gutters
@@ -971,16 +1005,24 @@ export default {
 		DataPeserta: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 5,
+    itemsPerPage: 100,
     expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    limit: 10,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -1122,29 +1164,57 @@ export default {
         }
       }
     },
+    limit: {
+			deep: true,
+			handler(value) {
+				this.getPeserta(1, value, this.searchData)
+			}
+		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getPeserta(1, this.limit, this.searchData)
+        }
+			}
+		}
   },
   updated(){
 		// if(this.editedIndex == 0){ this.inputDataPeserta.UnixText = `Peserta${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}` }
 	},
   mounted() {
     this.idLog = localStorage.getItem('idLogin')
-		this.getPeserta();
+		this.getPeserta(1, this.limit, this.searchData);
 	},
 	methods: {
 		...mapActions({
       fetchData: "fetchData",
       uploadFiles: "upload/uploadFiles",
     }),
-		getPeserta() {
+		getPeserta(page = 1, limit, keyword) {
+      this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+      this.DataPeserta = []
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `admin/getPeserta`,
+				url: `admin/getPeserta?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-        this.DataPeserta = res.data.result;
+        let resdata = res.data.result;
+        this.DataPeserta = resdata.records;
+        this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
         this.isLoading = false
 			})
 			.catch((err) => {
@@ -1251,7 +1321,7 @@ export default {
         this.clearForm2()
 				this.DialogPeserta = false
 				this.btnProses = false
-				this.getPeserta()
+				this.this.getPeserta(1, this.limit, this.searchData)
 			})
 			.catch((err) => {
         this.btnProses = false
@@ -1298,7 +1368,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPeserta = false
-        this.getPeserta()
+        this.this.getPeserta(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -1322,7 +1392,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPeserta = false
-        this.getPeserta()
+        this.this.getPeserta(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {

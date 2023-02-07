@@ -1,20 +1,21 @@
 <template>
   <div>
-		<v-card :class="roleID == 5 && 'mt-2 mb-2 pa-1'" :outlined="roleID == 5" elevation="0">
-			<h1 class="subheading grey--text">Panel Nomor Peserta Lelang</h1>
+		<h1 class="subheading grey--text">Panel Nomor Peserta Lelang</h1>
+		<v-card class="mt-2 mb-2 pa-1" outlined elevation="0">
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6"/>
 				<v-col cols="12" md="6">
 					<v-text-field
-						v-model="searchData"
-						append-icon="mdi-magnify"
-						label="Pencarian..."
-						single-line
-						hide-details
-						solo
-						color="light-blue darken-3"
+            v-model="searchData"
+            append-icon="mdi-magnify"
+            label="Pencarian..."
+            single-line
+            hide-details
 						clearable
-					/>
+            solo
+            color="light-blue darken-3"
+            @keyup.enter="getNPL(1, limit, searchData)"
+          />
 				</v-col>
 			</v-row>
 			<div class="px-1">
@@ -22,18 +23,12 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headers"
-					:search="searchData"
 					:loading="isLoading"
 					:items="DataNPL"
-					:single-expand="singleExpand"
-					:expanded.sync="expanded"
-					show-expand
-					item-key="idPembelianNPL"
+					item-key="nik"
 					hide-default-footer
 					class="elevation-1"
-					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
@@ -41,21 +36,9 @@
 						{{ DataNPL.indexOf(item) + 1 }}
 					</template>
 					<template #[`item.event`]="{ item }"> 
-						<strong><span v-html="item.namaEvent" /></strong>
-						<v-tooltip top>
-							<template v-slot:activator="{ on, attrs }">
-								<v-icon small v-bind="attrs" v-on="on">info</v-icon>
-							</template>
-							Kode Event : <span v-html="item.kodeEvent" /> <br>
-							Nama Event : <strong><span v-html="item.namaEvent" /></strong> <br>
-							Tanggal Event : (<span v-html="item.tanggalEvent" />)
-						</v-tooltip>
-						<v-tooltip v-if="item.statusEvent == false" bottom>
-							<template v-slot:activator="{ on, attrs }">
-								<strong>(<span v-bind="attrs" v-on="on">Non Active</span>)</strong>
-							</template>
-							<span>Harus Diubah Event tidak aktif</span>
-						</v-tooltip>
+						<span v-for="(val, i) in item.dataPembelianNPL" :key="i" class="box fourcorners" @click="bukadialogNPL(item.dataPembelianNPL[i])" style="cursor: pointer;">
+							<strong><span v-html="val.namaEvent" /></strong>
+						</span>
 					</template>
 					<template #[`item.peserta`]="{ item }">
 						<strong><span v-html="item.nama" /></strong>
@@ -74,33 +57,7 @@
 							<span>Harus Diubah Peserta tidak aktif</span>
 						</v-tooltip>
 					</template>
-					<template #[`item.noNpl`]="{ item }">
-						<v-row v-if="item.NPL.length" no-gutters>
-							<v-col>
-								<span v-for="(val, i) in item.NPL" :key="i" class="box fourcorners">
-									<v-tooltip top>
-										<template v-slot:activator="{ on, attrs }">
-												<strong>
-													<span v-if="val.statusNPL == 2 && !Object.entries(val.RefundNPL).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.noNpl" @click="bukaDialogBuktiRefund(val, item)" />
-													<span v-else-if="val.statusNPL == 2 && Object.entries(val.RefundNPL).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.noNpl" @click="viewLampiran(val.RefundNPL.bukti)" />
-													<span v-else style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="val.noNpl" @click="() => { notifikasi('warning', 'Tidak bisa mengajukan refund karena status no npl bukan Refund Jaminan', '1') }"/>
-												</strong>
-										</template>
-										<span>NPL : {{val.npl}}</span> <br>
-										<span>Status : {{val.statusNPL == 0 ? 'Belum digunakan' : val.statusNPL == 1 ? 'Sudah digunakan' : 'Refund jaminan'}}</span>
-									</v-tooltip>
-								</span>
-							</v-col>
-						</v-row>
-						<span v-else><strong>No NPL tidak tersedia</strong></span>
-					</template>
-					<!-- <template #[`item.status_aktif`]="{ item }">
-						<v-icon v-if="item.status_aktif == 1" color="green">check</v-icon>
-						<v-icon v-else-if="item.status_aktif == 0" color="red">clear</v-icon>
-						<br>
-						<span v-html="item.status_aktif == 1 ? 'Active' : 'Non Active'" /> 
-					</template> -->
-					<template #expanded-item="{ headers, item }">
+					<!-- <template #expanded-item="{ headers, item }">
 						<td :colspan="headers.length" class="white">
 							<v-btn
 								:value="item.idPembelianNPL"
@@ -109,17 +66,17 @@
 								dense
 								depressed
 								class="ma-2 white--text text--darken-2"
-								:disabled="!item.NPL.length"
 								@click="bukaDialog(item)"
 							>
+								:disabled="!item.NPL.length"
 							<v-icon small>edit</v-icon>	Ubah
 							</v-btn>
 							<v-divider />
 						</td>
-					</template>
+					</template> -->
 				</v-data-table>
 			</div>
-			<v-row>
+			<!-- <v-row>
 				<v-col cols="12" class="mt-2 pa-2 px-5">
 					<v-pagination
 						v-if="DataNPL.length > 0"
@@ -127,6 +84,41 @@
 						:length="pageCount"
 						:total-visible="10"
 					/>
+				</v-col>
+			</v-row> -->
+			<v-row>
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataNPL.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataNPL.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getNPL(pageSummary.page - 1, limit, searchData)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataNPL.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getNPL(pageSummary.page + 1, limit, searchData)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
 				</v-col>
 			</v-row>
 		</v-card>
@@ -350,6 +342,71 @@
       </v-card>
 		</v-dialog>
 		<v-dialog
+      v-model="DialogDetailNPL"
+      width="600px"
+      persistent
+      transition="dialog-bottom-transition"
+    >
+      <v-card>
+        <v-toolbar
+          dark
+          color="light-blue darken-3"
+        >
+          <v-toolbar-title>Detail</v-toolbar-title>
+          <v-spacer />
+          <v-toolbar-items>
+            <v-btn
+              icon
+              dark
+              @click="DialogDetailNPL = false"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card >
+					<v-card-text>
+						Kode Event : <span v-html="detaildata ? detaildata.kodeEvent : ''" /> <br>
+						Nama Event : <strong><span v-html="detaildata ? detaildata.namaEvent : ''" /></strong> <br>
+						Tanggal Event : (<span v-html="detaildata ? detaildata.tanggalEvent : ''" />) <br><br>
+						<h2>
+							Data NPL
+							<v-btn
+								color="#0bd369"
+								x-small
+								dense
+								depressed
+								class="white--text text--darken-2"
+								:disabled="!detailNPL.length"
+								@click="bukaDialog(detaildata)"
+							>
+								<v-icon small>edit</v-icon>	Ubah Status NPL
+							</v-btn>
+						</h2>
+						<br>
+						<v-row v-if="detailNPL.length" no-gutters>
+							<v-col>
+								<span v-for="(data, index) in detailNPL" :key="index" class="box fourcorners">
+									<v-tooltip top>
+										<template v-slot:activator="{ on, attrs }">
+											<strong>
+												<span v-if="data.statusNPL == 2 && !Object.entries(data.RefundNPL).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="data.noNpl" @click="bukaDialogBuktiRefund(data, detaildata)" />
+												<span v-else-if="data.statusNPL == 2 && Object.entries(data.RefundNPL).length" style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="data.noNpl" @click="viewLampiran(data.RefundNPL.bukti)" />
+												<span v-else style="cursor: pointer;" v-bind="attrs" v-on="on" v-html="data.noNpl" @click="() => { notifikasi('warning', 'Tidak bisa mengajukan refund karena status no npl bukan Refund Jaminan', '1') }"/>
+											</strong>
+										</template>
+										<span>NPL : {{data.npl}}</span> <br>
+										<span>Status : {{data.statusNPL == 0 ? 'Belum digunakan' : data.statusNPL == 1 ? 'Sudah digunakan' : 'Refund jaminan'}}</span>
+									</v-tooltip>
+								</span>
+							</v-col>
+						</v-row>
+						<span v-else><strong>No NPL tidak tersedia</strong></span>
+					</v-card-text>
+        </v-card>
+      </v-card>
+		</v-dialog>
+		<v-dialog
       v-model="DialogCropNPL"
       width="700px"
       height="700px"
@@ -433,22 +490,27 @@ export default {
 		DataNPL: [],
 		page: 1,
     pageCount: 0,
-    itemsPerPage: 10,
-    expanded: [],
-    singleExpand: true,
+    itemsPerPage: 100,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    limit: 10,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Event", value: "event", sortable: false },
       { text: "Peserta", value: "peserta", sortable: false },
-      { text: "No NPL", value: "noNpl", sortable: false },
+      { text: "Event", value: "event", sortable: false },
+      // { text: "No NPL", value: "noNpl", sortable: false },
       // { text: "Status", value: "status_aktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
@@ -457,7 +519,10 @@ export default {
 		DialogViewLampiranNPL: false,
 		DialogCropNPL: false,
 		DialogBuktiRefund: false,
+		DialogDetailNPL: false,
     kondisiTombol: true,
+		detaildata: [],
+		detailNPL: [],
 		inputNPL: {
 			id_npl: [],
 			id_pembelian_npl: '',
@@ -515,26 +580,54 @@ export default {
 				}
 			}
 		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getNPL(1, value, this.searchData)
+			}
+		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getNPL(1, this.limit, this.searchData)
+        }
+			}
+		}
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
-		this.getNPL()
+		this.getNPL(1, this.limit, this.searchData)
 	},
 	methods: {
 		...mapActions({
       fetchData: "fetchData",
       uploadFiles: "upload/uploadFiles",
     }),
-		getNPL() {
+		getNPL(page = 1, limit, keyword) {
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+      this.DataNPL = []
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getNPL?kategori=withNPL`,
+				url: `lelang/getNPL?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}&kategori=withNPL`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataNPL = res.data.result;
+				let resdata = res.data.result;
+				this.DataNPL = resdata.records;
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				this.isLoading = false
 			})
 			.catch((err) => {
@@ -592,7 +685,7 @@ export default {
 			this.clearForm()
 			this.DialogNPL = false
 			this.btnProses = false
-			this.getNPL()
+			this.getNPL(1, this.limit, this.searchData)
     },
 		async SimpanFormRefund(dataUpload) {
 			this.btnProses = true
@@ -604,8 +697,9 @@ export default {
 			}
 			this.clearForm()
 			this.DialogBuktiRefund = false
+			this.DialogDetailNPL = false
 			this.btnProses = false
-			this.getNPL()
+			this.getNPL(1, this.limit, this.searchData)
     },
 		async uploadLampiran(dataUpload) {
 			if(dataUpload){
@@ -670,7 +764,6 @@ export default {
 		bukaDialogBuktiRefund(dataNPL, dataPeserta) {
 			this.inputRefund.id_npl = dataNPL.idNpl
 			this.inputRefund.UnixText = dataPeserta.UnixText
-			// console.log(this.inputRefund);
 			this.DialogBuktiRefund = true
 		},
 		tutupDialogBuktiRefund() {
@@ -689,6 +782,11 @@ export default {
 			this.NPLData = []
 			this.FileBUKTI = ''
 			this.inputRefund.bukti = ''
+		},
+		bukadialogNPL(item){
+			this.detaildata = item
+			this.detailNPL = item.NPL
+			this.DialogDetailNPL = true
 		},
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
@@ -725,7 +823,7 @@ export default {
 	border-radius: 10px;
 	padding: 10px;
 	text-align: center;
-	font-size: 10px;
+	font-size: 12px;
 }
 .scrollText{
   max-height: 450px !important;

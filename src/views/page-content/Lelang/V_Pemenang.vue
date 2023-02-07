@@ -14,6 +14,7 @@
 						solo
 						color="light-blue darken-3"
 						clearable
+						@keyup.enter="getAllPemenang(1, limit, searchData)"
 					/>
 				</v-col>
 			</v-row>
@@ -22,9 +23,7 @@
 					loading-text="Sedang memuat... Harap tunggu"
 					no-data-text="Tidak ada data yang tersedia"
 					no-results-text="Tidak ada catatan yang cocok ditemukan"
-					:options.sync="query"
 					:headers="headers"
-					:search="searchData"
 					:loading="isLoading"
 					:items="DataAllPemenang"
 					:single-expand="singleExpand"
@@ -33,7 +32,6 @@
 					item-key="idPemenangLelang"
 					hide-default-footer
 					class="elevation-1"
-					:page.sync="page"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
@@ -50,10 +48,11 @@
 						<span v-html="item.tipePelunasan == null ? '-' : item.tipePelunasan == 1 ? 'Cash' : 'Transfer'" /> 
 					</template>
 					<template #[`item.status_pembayaran`]="{ item }">
-						<v-icon small v-if="item.statusPembayaran == 2" color="green">check</v-icon>
+						<v-icon small v-if="item.statusPembayaran == 3" color="red">gpp_bad</v-icon>
+						<v-icon small v-else-if="item.statusPembayaran == 2" color="green">check</v-icon>
 						<v-icon small v-else-if="item.statusPembayaran == 1" color="red">clear</v-icon>
 						<br>
-						<span v-html="item.statusPembayaran == 2 ? 'Sudah Bayar' : 'Belum Bayar'" /> 
+						<span v-html="item.statusPembayaran == 3 ? 'Menunggu Verifikasi' : item.statusPembayaran == 2 ? 'Sudah Bayar' : 'Belum Bayar'" /> 
 					</template>
 					<template #[`item.statusAktif`]="{ item }">
 						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
@@ -122,12 +121,24 @@
 							>
 								<v-icon small>info</v-icon>	Detail
 							</v-btn> 
+							<v-btn
+								:value="item.idPemenangLelang"
+								color="#0bd369"
+								small
+								dense
+								depressed
+								:disabled="item.statusPembayaran === 3 ? false : true"
+								class="ma-2 white--text text--darken-2"
+								@click="VerifikasiRecord(item)"
+							>
+								<v-icon small>verified_user</v-icon>	Verifikasi
+							</v-btn> 
 							<v-divider />
 						</td>
 					</template>
 				</v-data-table>
 			</div>
-			<v-row>
+			<!-- <v-row>
 				<v-col cols="12" class="mt-2 pa-2 px-5">
 					<v-pagination
 						v-if="DataAllPemenang.length > 0"
@@ -135,6 +146,41 @@
 						:length="pageCount"
 						:total-visible="10"
 					/>
+				</v-col>
+			</v-row> -->
+			<v-row>
+				<v-col cols="10" class="mt-2 d-flex justify-start align-center">
+					<span>Halaman <strong>{{ pageSummary.page ? pageSummary.page : 0 }}</strong> dari Total Halaman <strong>{{ pageSummary.totalPages ? pageSummary.totalPages : 0 }}</strong> (Records {{ pageSummary.total ? pageSummary.total : 0 }})</span>
+				</v-col>
+				<v-col cols="2" class="mt-2 text-right">
+					<div class="d-flex justify-end">
+						<v-autocomplete
+							v-model="limit"
+							:items="limitPage"
+							item-text="value"
+							item-value="value"
+							outlined
+							dense
+							hide-details
+							:disabled="DataAllPemenang.length ? false : true"
+						/>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataAllPemenang.length ? pageSummary.page != 1 ? false : true : true"
+							@click="getKategoriBarangLelang(pageSummary.page - 1, limit, searchData)"
+						>
+							keyboard_arrow_left
+						</v-icon>
+						<v-icon
+							style="cursor: pointer;"
+							large
+							:disabled="DataAllPemenang.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
+							@click="getKategoriBarangLelang(pageSummary.page + 1, limit, searchData)"
+						>
+							keyboard_arrow_right
+						</v-icon>
+					</div>
 				</v-col>
 			</v-row>
 		</v-card>
@@ -605,12 +651,20 @@ export default {
     expanded: [],
     singleExpand: true,
 		searchData: "",
-    query: {
-      limit: 10,
-      sort: ["-created_at"],
-      page: 1,
-      filter: "",
-    },
+    limit: 10,
+		limitPage: [
+			{ value: 5 },
+			{ value: 10 },
+			{ value: 20 },
+			{ value: 50 },
+			{ value: 100 },
+		],
+		pageSummary: {
+			page: '',
+			limit: '',
+			total: '',
+			totalPages: ''
+		},
 		headers: [
       { text: "No", value: "number", sortable: false, width: "7%" },
       { text: "", value: "data-table-expand", sortable: false, width: "5%" },
@@ -658,6 +712,7 @@ export default {
 		PembayaranOptions: [
 			{ text: 'Belum Bayar', value: 1 },
 			{ text: 'Sudah Bayar', value: 2 },
+			{ text: 'Menunggu Verifikasi', value: 3 },
 		],
 		menu1: false,
 		menu2: false,
@@ -682,7 +737,7 @@ export default {
 		inputPemenang: {
 			deep: true,
 			handler(value){
-				if(value.no_rek == null){ this.inputPemenang.no_rek = '' }
+				// if(value.no_rek == null){ this.inputPemenang.no_rek = '' } value.no_rek != '' && 
 				if(value.nama_pemilik == null){ this.inputPemenang.nama_pemilik = '' }
 				if(value.tanggal == null){ this.inputPemenang.tanggal = '' }
 				if(value.waktu == null){ this.inputPemenang.waktu = '' }
@@ -691,34 +746,62 @@ export default {
 
 				this.inputPemenang.tanggal_transfer = `${value.tanggal} ${value.waktu}`
 
-				if(value.no_rek != '' && value.nama_pemilik != '' && value.tanggal != '' && value.waktu != '' && value.tipe_pelunasan != '' && value.status_pembayaran != '' && 
+				if(value.nama_pemilik != '' && value.tanggal != '' && value.waktu != '' && value.tipe_pelunasan != '' && value.status_pembayaran != '' && 
 				value.bukti != ''){
 					this.kondisiTombol = false
 				}else{
 					this.kondisiTombol = true	
 				}
 			}
+		},
+		limit: {
+			deep: true,
+			handler(value) {
+				this.getAllPemenang(1, value, this.searchData)
+			}
+		},
+    searchData: {
+			deep: true,
+			handler(value) {
+        if (value == null) {
+          this.getAllPemenang(1, this.limit, this.searchData)
+        }
+			}
 		}
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
-		this.getAllPemenang()
+		this.getAllPemenang(1, this.limit, this.searchData)
 	},
 	methods: {
 		...mapActions({
       fetchData: "fetchData",
       uploadFiles: "upload/uploadFiles",
     }),
-		getAllPemenang() {
+		getAllPemenang(page = 1, limit, keyword) {
+			this.pageSummary = {
+				page: '',
+				limit: '',
+				total: '',
+				totalPages: ''
+			}
+      this.DataAllPemenang = []
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getPemenang`,
+				url: `lelang/getPemenang?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
 			.then((res) => {
-				this.DataAllPemenang = res.data.result;
+				let resdata = res.data.result;
+				this.DataAllPemenang = resdata.records;
+				this.pageSummary = {
+					page: resdata.pageSummary.page,
+					limit: resdata.pageSummary.limit,
+					total: resdata.pageSummary.total,
+					totalPages: resdata.pageSummary.totalPages
+				}
 				this.isLoading = false
 			})
 			.catch((err) => {
@@ -788,7 +871,7 @@ export default {
 				}
         this.DialogPemenang = false
         this.btnProses = false
-        this.getAllPemenang()
+        this.getAllPemenang(1, this.limit, this.searchData)
 			})
 			.catch((err) => {
 				this.btnProses = false
@@ -831,7 +914,7 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPemenang = false
-        this.getAllPemenang()
+        this.getAllPemenang(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
@@ -854,7 +937,29 @@ export default {
 			this.fetchData(payload)
 			.then((res) => {
         this.DialogPemenang = false
-        this.getAllPemenang()
+        this.getAllPemenang(1, this.limit, this.searchData)
+        this.notifikasi("success", res.data.message, "1")
+			})
+			.catch((err) => {
+				this.notifikasi("error", err.response.data.message, "1")
+			});
+    },
+		VerifikasiRecord(item) {
+      let bodyData = {
+        jenis: 'VERIFIKASI',
+        id_pemenang_lelang: item.idPemenangLelang,
+        status_pembayaran: 2,
+				create_update_by: localStorage.getItem('idLogin'),
+      }
+      let payload = {
+				method: "post",
+				url: `lelang/postPemenang`,
+        body: bodyData,
+				authToken: localStorage.getItem('user_token')
+			};
+			this.fetchData(payload)
+			.then((res) => {
+        this.getAllPemenang(1, this.limit, this.searchData)
         this.notifikasi("success", res.data.message, "1")
 			})
 			.catch((err) => {
