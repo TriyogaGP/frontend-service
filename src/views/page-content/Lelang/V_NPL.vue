@@ -358,7 +358,7 @@
             <v-btn
               icon
               dark
-              @click="DialogDetailNPL = false"
+              @click="() => { DialogDetailNPL = false; detailNPL = []; detaildata = []; }"
             >
               <v-icon>close</v-icon>
             </v-btn>
@@ -685,6 +685,9 @@ export default {
 			this.clearForm()
 			this.DialogNPL = false
 			this.btnProses = false
+			this.detaildata = []
+			this.detailNPL = []
+			this.DialogDetailNPL = false
 			this.getNPL(1, this.limit, this.searchData)
     },
 		async SimpanFormRefund(dataUpload) {

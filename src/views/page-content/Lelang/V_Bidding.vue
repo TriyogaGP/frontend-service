@@ -136,7 +136,7 @@
                     depressed
                     class="ml-1 black--text text--darken-2"
                     :disabled="tombolBid"
-                    @click="() => { NominalBid += parseInt('1000000') }"
+                    @click="() => { NominalBid += (parseInt(dataEvent.kelipatanBid) * 2) }"
                   >
                     Rp. {{ currencyDotFormat((parseInt(dataEvent.kelipatanBid) * 2).toString()) }}
                   </v-btn>

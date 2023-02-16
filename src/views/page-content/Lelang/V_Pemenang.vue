@@ -168,7 +168,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataAllPemenang.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getKategoriBarangLelang(pageSummary.page - 1, limit, searchData)"
+							@click="getAllPemenang(pageSummary.page - 1, limit, searchData)"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -176,7 +176,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataAllPemenang.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getKategoriBarangLelang(pageSummary.page + 1, limit, searchData)"
+							@click="getAllPemenang(pageSummary.page + 1, limit, searchData)"
 						>
 							keyboard_arrow_right
 						</v-icon>
