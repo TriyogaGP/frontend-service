@@ -43,12 +43,15 @@
 					item-key="idKategori"
 					hide-default-footer
 					class="elevation-1"
+					:header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataKategoriBarangLelang.indexOf(item) + 1 }}
-					</template>
+					</template> -->
 					<template #[`item.statusAktif`]="{ item }">
 						<v-icon small v-if="item.statusAktif == true" color="green">check</v-icon>
 						<v-icon small v-else-if="item.statusAktif == false" color="red">clear</v-icon>
@@ -140,7 +143,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataKategoriBarangLelang.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getKategoriBarangLelang(pageSummary.page - 1, limit, searchData)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -148,7 +151,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataKategoriBarangLelang.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getKategoriBarangLelang(pageSummary.page + 1, limit, searchData)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
@@ -297,10 +300,10 @@ export default {
 			totalPages: ''
 		},
 		headers: [
-      { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Kategori", value: "kategori", sortable: false },
-      { text: "Status", value: "statusAktif", sortable: false },
+      // { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "Kategori", value: "kategori", sortable: true },
+      { text: "Status", value: "statusAktif", sortable: true },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
@@ -493,6 +496,9 @@ export default {
 <style>
 .v-pagination {
   justify-content: flex-end !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-input .v-label {
   font-size: 11pt !important;

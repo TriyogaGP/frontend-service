@@ -167,7 +167,7 @@
 					</v-list-item-title>
 					<v-icon right>settings</v-icon>
 				</v-list-item>
-				<v-list-item
+				<!-- <v-list-item
 					router to="/Testing"
 					class="SelectedTile"
 					active-class="SelectedTile-active"
@@ -176,7 +176,7 @@
 						<span>Testing</span>
 					</v-list-item-title>
 					<v-icon right>settings</v-icon>
-				</v-list-item>
+				</v-list-item> -->
 			</v-list>
 		</v-navigation-drawer>
 		<v-bottom-sheet
@@ -299,12 +299,12 @@ export default {
 		getMenu(roleID) {
 			let payload = {
 				method: "get",
-				url: `settings/getMenu?idRole=${roleID}`,
+				url: `settings/getMenu?page=1&limit=100&idRole=${roleID}`,
 				authToken: this.Token
 			};
 			this.fetchData(payload)
 			.then((response) => {
-				this.menuNav = response.data.result;
+				this.menuNav = response.data.result.records;
 			})
 			.catch((err) => {
 				this.notifikasi("warning", err.response.data.message, "2")

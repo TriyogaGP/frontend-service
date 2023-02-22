@@ -5,17 +5,34 @@
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6"/>
 				<v-col cols="12" md="6">
-					<v-text-field
-            v-model="searchData"
-            append-icon="mdi-magnify"
-            label="Pencarian..."
-            single-line
-            hide-details
-						clearable
-            solo
-            color="light-blue darken-3"
-            @keyup.enter="getNPL(1, limit, searchData)"
-          />
+					<v-row no-gutters>
+						<v-col cols="12" md="9">
+							<v-text-field
+								v-model="searchData"
+								append-icon="mdi-magnify"
+								label="Pencarian..."
+								single-line
+								hide-details
+								clearable
+								solo
+								color="light-blue darken-3"
+								@keyup.enter="getNPL(1, limit, searchData)"
+							/>
+						</v-col>
+            <v-col cols="12" md="3" class="pl-2 d-flex justify-end align-center">
+              <v-autocomplete
+                v-model="page"
+                :items="pageOptions"
+                item-text="value"
+                item-value="value"
+                label="Page"
+                outlined
+                dense
+                hide-details
+                :disabled="DataNPL.length ? false : true"
+              />
+            </v-col>
+          </v-row>
 				</v-col>
 			</v-row>
 			<div class="px-1">
@@ -26,21 +43,29 @@
 					:headers="headers"
 					:loading="isLoading"
 					:items="DataNPL"
+					:sort-by="sortBy"
+					:sort-desc="sortDesc"
+					multi-sort
 					item-key="nik"
 					hide-default-footer
 					class="elevation-1"
+					:header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
+					@update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataNPL.indexOf(item) + 1 }}
-					</template>
-					<template #[`item.event`]="{ item }"> 
+					</template> -->
+					<template #[`item.namaEvent`]="{ item }"> 
 						<span v-for="(val, i) in item.dataPembelianNPL" :key="i" class="box fourcorners" @click="bukadialogNPL(item.dataPembelianNPL[i])" style="cursor: pointer;">
 							<strong><span v-html="val.namaEvent" /></strong>
 						</span>
 					</template>
-					<template #[`item.peserta`]="{ item }">
+					<template #[`item.nama`]="{ item }">
 						<strong><span v-html="item.nama" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
@@ -106,7 +131,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataNPL.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getNPL(pageSummary.page - 1, limit, searchData)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -114,7 +139,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataNPL.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getNPL(pageSummary.page + 1, limit, searchData)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
@@ -500,6 +525,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+		pageOptions: [
+      { value: 1 }
+    ],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -507,14 +535,17 @@ export default {
 			totalPages: ''
 		},
 		headers: [
-      { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "Peserta", value: "peserta", sortable: false },
-      { text: "Event", value: "event", sortable: false },
+      // { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "Peserta", value: "nama", sortable: true },
+      { text: "Event", value: "namaEvent", sortable: true },
       // { text: "No NPL", value: "noNpl", sortable: false },
       // { text: "Status", value: "status_aktif", sortable: false },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+		sortBy: [],
+    sortDesc: [],
+    kumpulSort: '',
 		DialogNPL: false,
 		DialogViewLampiranNPL: false,
 		DialogCropNPL: false,
@@ -580,6 +611,12 @@ export default {
 				}
 			}
 		},
+		page: {
+			deep: true,
+			handler(value) {
+				this.getNPL(value, this.limit, this.searchData)
+			}
+		},
 		limit: {
 			deep: true,
 			handler(value) {
@@ -593,7 +630,13 @@ export default {
           this.getNPL(1, this.limit, this.searchData)
         }
 			}
-		}
+		},
+		sortDesc: {
+			deep: true,
+			handler(value) {
+        this.getNPL(1, this.limit, this.searchData)
+			}
+		},
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
@@ -605,6 +648,8 @@ export default {
       uploadFiles: "upload/uploadFiles",
     }),
 		getNPL(page = 1, limit, keyword) {
+			this.itemsPerPage = limit
+			this.page = page
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -612,10 +657,11 @@ export default {
 				totalPages: ''
 			}
       this.DataNPL = []
+			this.pageOptions = [{ value: 1 }]
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getNPL?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}&kategori=withNPL`,
+				url: `lelang/getNPL?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}&kategori=withNPL&sort=${this.kumpulSort}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -628,9 +674,22 @@ export default {
 					total: resdata.pageSummary.total,
 					totalPages: resdata.pageSummary.totalPages
 				}
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
 				this.isLoading = false
 			})
 			.catch((err) => {
+				this.itemsPerPage = limit
+				this.page = page
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
+				this.DataNPL = []
+				this.pageOptions = [{ value: 1 }]
 				this.isLoading = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -791,6 +850,16 @@ export default {
 			this.detailNPL = item.NPL
 			this.DialogDetailNPL = true
 		},
+		updateSort(kondisi, data){
+      if(kondisi === 'by'){
+        this.sortBy = data
+      }else if(kondisi === 'desc'){
+        this.sortDesc = data
+      }
+      this.kumpulSort = this.sortBy.map((val, i) => {
+        return `${val}-${this.sortDesc[i] === false ? 'ASC' : 'DESC'}`
+      }).join(',')
+    },
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -805,6 +874,9 @@ export default {
 .v-pagination {
   justify-content: flex-end !important;
 }
+.v-data-table-header__icon {
+  opacity: 10;
+}
 .v-input .v-label {
   font-size: 11pt !important;
 }
@@ -818,7 +890,6 @@ export default {
 	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FAD502), to(#E89502), color-stop(1,#E89502));
 	margin: 2px;
 }
- 
 .fourcorners{
 	-moz-border-radius: 10px;
 	-webkit-border-radius: 10px;

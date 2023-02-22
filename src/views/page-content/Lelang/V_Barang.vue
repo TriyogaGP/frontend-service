@@ -16,17 +16,34 @@
           </v-btn>
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="searchData"
-            append-icon="mdi-magnify"
-            label="Pencarian..."
-            single-line
-            hide-details
-						clearable
-            solo
-            color="light-blue darken-3"
-            @keyup.enter="getBarangLelang(1, limit, searchData)"
-          />
+          <v-row no-gutters>
+            <v-col cols="12" md="9">
+              <v-text-field
+                v-model="searchData"
+                append-icon="mdi-magnify"
+                label="Pencarian..."
+                single-line
+                hide-details
+                clearable
+                solo
+                color="light-blue darken-3"
+                @keyup.enter="getBarangLelang(1, limit, searchData)"
+              />
+            </v-col>
+            <v-col cols="12" md="3" class="pl-2 d-flex justify-end align-center">
+              <v-autocomplete
+                v-model="page"
+                :items="pageOptions"
+                item-text="value"
+                item-value="value"
+                label="Page"
+                outlined
+                dense
+                hide-details
+                :disabled="DataBarangLelang.length ? false : true"
+              />
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
       <div class="px-1">
@@ -40,16 +57,24 @@
           :single-expand="singleExpand"
           :expanded.sync="expanded"
           show-expand
+          :sort-by="sortBy"
+          :sort-desc="sortDesc"
+          multi-sort
           item-key="idBarangLelang"
           hide-default-footer
           class="elevation-1"
+          :header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
           :items-per-page="itemsPerPage"
           @page-count="pageCount = $event"
+          @update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
         >
-          <template #[`item.number`]="{ item }">
+          <!-- <template #[`item.number`]="{ item }">
             {{ DataBarangLelang.indexOf(item) + 1 }}
-          </template>
-          <template #[`item.kategori`]="{ item }">
+          </template> -->
+          <template #[`item.namaKategori`]="{ item }">
             <span v-html="item.namaKategori" /><br> 
             <v-tooltip v-if="item.statusKategoriLelang == false" bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -188,7 +213,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataBarangLelang.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getBarangLelang(pageSummary.page - 1, limit, searchData)"
+              @click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -196,7 +221,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataBarangLelang.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getBarangLelang(pageSummary.page + 1, limit, searchData)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
@@ -1468,6 +1493,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+    pageOptions: [
+      { value: 1 }
+    ],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -1475,15 +1503,18 @@ export default {
 			totalPages: ''
 		},
 		headers: [
-      { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Kategori", value: "kategori", sortable: false },
-      { text: "Nama Barang", value: "namaBarangLelang", sortable: false },
+      // { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "Kategori", value: "namaKategori", sortable: true },
+      { text: "Nama Barang", value: "namaBarangLelang", sortable: true },
       { text: "No. Kelengkapan", value: "no_kelengkapan", sortable: false },
-      { text: "Status", value: "statusAktif", sortable: false },
+      { text: "Status", value: "statusAktif", sortable: true },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+    sortBy: [],
+    sortDesc: [],
+    kumpulSort: '',
 		kategoriOptions: [],
 		transmisiOptions: [
 			{value: 'Manual', text: 'Manual'},
@@ -1686,20 +1717,32 @@ export default {
 
 			}
 		},
-		limit: {
+    page: {
 			deep: true,
 			handler(value) {
-				this.getBarangLelang(1, value, this.searchData)
+				this.getBarangLelang(value, this.limit, this.searchData)
+			}
+		},
+		limit: {
+      deep: true,
+			handler(value) {
+        this.getBarangLelang(1, value, this.searchData)
 			}
 		},
     searchData: {
-			deep: true,
+      deep: true,
 			handler(value) {
         if (value == null) {
           this.getBarangLelang(1, this.limit, this.searchData)
         }
 			}
-		}
+		},
+    sortDesc: {
+      deep: true,
+			handler(value) {
+        this.getBarangLelang(1, this.limit, this.searchData)
+			}
+		},
 	},
   updated(){
 		// if(this.editedIndex == 0){ this.inputBarangLelang.UnixText = `BarangLelang${this.convertDate(new Date().toISOString().slice(0,10))}${this.makeRandom(8)}` }
@@ -1715,6 +1758,8 @@ export default {
       uploadBerkas: "upload/uploadBerkas",
     }),
 		getBarangLelang(page = 1, limit, keyword) {
+      this.itemsPerPage = limit
+      this.page = page
       this.pageSummary = {
 				page: '',
 				limit: '',
@@ -1722,10 +1767,11 @@ export default {
 				totalPages: ''
 			}
       this.DataBarangLelang = []
+      this.pageOptions = [{ value: 1 }]
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `lelang/getBarangLelang?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
+				url: `lelang/getBarangLelang?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}&sort=${this.kumpulSort}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -1738,9 +1784,22 @@ export default {
 					total: resdata.pageSummary.total,
 					totalPages: resdata.pageSummary.totalPages
 				}
+        for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
         this.isLoading = false
 			})
 			.catch((err) => {
+        this.itemsPerPage = limit
+        this.page = page
+        this.pageSummary = {
+          page: '',
+          limit: '',
+          total: '',
+          totalPages: ''
+        }
+        this.DataBarangLelang = []
+        this.pageOptions = [{ value: 1 }]
         this.isLoading = false
         this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -2342,6 +2401,16 @@ export default {
 		UpperCaseLetter(str) {
 			return str.toUpperCase()
 		},
+    updateSort(kondisi, data){
+      if(kondisi === 'by'){
+        this.sortBy = data
+      }else if(kondisi === 'desc'){
+        this.sortDesc = data
+      }
+      this.kumpulSort = this.sortBy.map((val, i) => {
+        return `${val}-${this.sortDesc[i] === false ? 'ASC' : 'DESC'}`
+      }).join(',')
+    },
 		notifikasi(kode, text, proses){
 			this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -2356,6 +2425,9 @@ export default {
 .scrollText{
   max-height: 450px !important;
   overflow-y: auto !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-pagination {
   justify-content: flex-end !important;

@@ -16,17 +16,34 @@
 					</v-btn>
 				</v-col>
 				<v-col cols="12" md="6">
-					<v-text-field
-            v-model="searchData"
-            append-icon="mdi-magnify"
-            label="Pencarian..."
-            single-line
-            hide-details
-						clearable
-            solo
-            color="light-blue darken-3"
-            @keyup.enter="getLot(1, limit, searchData)"
-          />
+					<v-row no-gutters>
+            <v-col cols="12" md="9">
+							<v-text-field
+								v-model="searchData"
+								append-icon="mdi-magnify"
+								label="Pencarian..."
+								single-line
+								hide-details
+								clearable
+								solo
+								color="light-blue darken-3"
+								@keyup.enter="getLot(1, limit, searchData)"
+							/>
+						</v-col>
+            <v-col cols="12" md="3" class="pl-2 d-flex justify-end align-center">
+              <v-autocomplete
+                v-model="page"
+                :items="pageOptions"
+                item-text="value"
+                item-value="value"
+                label="Page"
+                outlined
+                dense
+                hide-details
+                :disabled="DataLot.length ? false : true"
+              />
+            </v-col>
+          </v-row>
 				</v-col>
 			</v-row>
 			<div class="px-1">
@@ -40,16 +57,24 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
+					:sort-by="sortBy"
+					:sort-desc="sortDesc"
+					multi-sort
 					item-key="idLot"
 					hide-default-footer
 					class="elevation-1"
+					:header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
+					@update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataLot.indexOf(item) + 1 }}
-					</template>
-					<template #[`item.event`]="{ item }"> 
+					</template> -->
+					<template #[`item.namaEvent`]="{ item }"> 
 						<strong><span v-html="item.Event.namaEvent" /></strong>
 						<v-tooltip top>
 							<template v-slot:activator="{ on, attrs }">
@@ -66,7 +91,7 @@
 							<span>Harus Diubah Event tidak aktif</span>
 						</v-tooltip>
 					</template>
-					<template #[`item.barang_lelang`]="{ item }">
+					<template #[`item.namaBarangLelang`]="{ item }">
 						Kategori : <strong><span v-html="item.BarangLelang.KategoriLelang.namaKategori" /></strong> <br>
 						Nama Barang Lelang : <strong><span v-html="item.BarangLelang.namaBarangLelang" /></strong> <br>
 						<v-tooltip v-if="item.BarangLelang.KategoriLelang.statusKategoriLelang == false || item.BarangLelang.statusAktif == false" bottom>
@@ -76,10 +101,10 @@
 							<span>Harus Diubah Kategori atau Barang Lelang tidak aktif</span>
 						</v-tooltip>
 					</template>
-					<template #[`item.harga_awal`]="{ item }">
+					<template #[`item.hargaAwal`]="{ item }">
 						Rp.<span v-html="currencyDotFormat(item.hargaAwal)" />
 					</template>
-					<template #[`item.status_lot`]="{ item }">
+					<template #[`item.statusLot`]="{ item }">
 						<span v-html="item.statusLot == 1 ? 'Tidak Aktif' : item.statusLot == 2 ? 'Aktif' : item.statusLot == 3 ? 'Lelang' : 'Terjual'" /> 
 					</template>
 					<template #[`item.statusAktif`]="{ item }">
@@ -184,7 +209,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataLot.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getLot(pageSummary.page - 1, limit, searchData)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -192,7 +217,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataLot.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getLot(pageSummary.page + 1, limit, searchData)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
@@ -467,6 +492,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+		pageOptions: [
+      { value: 1 }
+    ],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -474,17 +502,20 @@ export default {
 			totalPages: ''
 		},
 		headers: [
-      { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Event", value: "event", sortable: false },
-      { text: "Barang Lelang", value: "barang_lelang", sortable: false },
-      { text: "No. Lot", value: "noLot", sortable: false },
-      { text: "harga Awal", value: "harga_awal", sortable: false },
-      { text: "Status Lot", value: "status_lot", sortable: false },
-      { text: "Status", value: "statusAktif", sortable: false },
+      // { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "Event", value: "namaEvent", sortable: true },
+      { text: "Barang Lelang", value: "namaBarangLelang", sortable: true },
+      { text: "No. Lot", value: "noLot", sortable: true },
+      { text: "harga Awal", value: "hargaAwal", sortable: true },
+      { text: "Status Lot", value: "statusLot", sortable: true },
+      { text: "Status", value: "statusAktif", sortable: true },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+		sortBy: [],
+    sortDesc: [],
+    kumpulSort: '',
 		DataBarangLelang: [],
 		DataEvent: [],
 		DialogLot: false,
@@ -542,6 +573,12 @@ export default {
 				}
 			}
 		},
+		page: {
+			deep: true,
+			handler(value) {
+				this.getLot(value, this.limit, this.searchData)
+			}
+		},
 		limit: {
 			deep: true,
 			handler(value) {
@@ -555,7 +592,13 @@ export default {
           this.getLot(1, this.limit, this.searchData)
         }
 			}
-		}
+		},
+		sortDesc: {
+			deep: true,
+			handler(value) {
+        this.getLot(1, this.limit, this.searchData)
+			}
+		},
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
@@ -564,6 +607,8 @@ export default {
 	methods: {
 		...mapActions(["fetchData"]),
 		getLot(page = 1, limit, keyword) {
+			this.itemsPerPage = limit
+			this.page = page
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -571,10 +616,11 @@ export default {
 				totalPages: ''
 			}
 			this.DataLot = []
+			this.pageOptions = [{ value: 1 }]
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getLot?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
+				url: `lelang/getLot?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}&sort=${this.kumpulSort}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -587,9 +633,22 @@ export default {
 					total: resdata.pageSummary.total,
 					totalPages: resdata.pageSummary.totalPages
 				}
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
 				this.isLoading = false
 			})
 			.catch((err) => {
+				this.itemsPerPage = limit
+				this.page = page
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
+				this.DataLot = []
+				this.pageOptions = [{ value: 1 }]
 				this.isLoading = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -747,6 +806,16 @@ export default {
 			this.inputLot.harga_awal = ''
 			this.inputLot.status_lot = ''
 		},
+		updateSort(kondisi, data){
+      if(kondisi === 'by'){
+        this.sortBy = data
+      }else if(kondisi === 'desc'){
+        this.sortDesc = data
+      }
+      this.kumpulSort = this.sortBy.map((val, i) => {
+        return `${val}-${this.sortDesc[i] === false ? 'ASC' : 'DESC'}`
+      }).join(',')
+    },
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -761,6 +830,9 @@ export default {
 .scrollText{
   max-height: 450px !important;
   overflow-y: auto !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-pagination {
   justify-content: flex-end !important;

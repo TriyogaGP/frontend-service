@@ -5,9 +5,9 @@
       <v-row no-gutters class="pa-2">
         <v-col cols="12" md="6">
           <v-btn
-            color="light-blue darken-3"
-            small
-            dense
+          color="light-blue darken-3"
+          small
+          dense
             depressed
             class="ma-2 white--text text--darken-2"
             @click.stop="bukaDialog(null, 0)"
@@ -16,17 +16,34 @@
           </v-btn>
         </v-col>
         <v-col cols="12" md="6">
-          <v-text-field
-            v-model="searchData"
-            append-icon="mdi-magnify"
-            label="Pencarian..."
-            single-line
-            hide-details
-						clearable
-            solo
-            color="light-blue darken-3"
-            @keyup.enter="getAdministrator(1, limit, searchData)"
-          />
+          <v-row no-gutters>
+            <v-col cols="12" md="9">
+              <v-text-field
+              v-model="searchData"
+              append-icon="mdi-magnify"
+              label="Pencarian..."
+                single-line
+                hide-details
+                clearable
+                solo
+                color="light-blue darken-3"
+                @keyup.enter="getAdministrator(1, limit, searchData)"
+              />
+            </v-col>
+            <v-col cols="12" md="3" class="pl-2 d-flex justify-end align-center">
+              <v-autocomplete
+                v-model="page"
+                :items="pageOptions"
+                item-text="value"
+                item-value="value"
+                label="Page"
+                outlined
+                dense
+                hide-details
+                :disabled="DataAdmin.length ? false : true"
+              />
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
       <div class="px-1">
@@ -40,15 +57,22 @@
           :single-expand="singleExpand"
           :expanded.sync="expanded"
           show-expand
+          :sort-by="sortBy"
+          :sort-desc="sortDesc"
           item-key="idAdmin"
           hide-default-footer
           class="elevation-1"
+          :header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
           :items-per-page="itemsPerPage"
           @page-count="pageCount = $event"
+          @update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
         >
-          <template #[`item.number`]="{ item }">
+          <!-- <template #[`item.number`]="{ item }">
             {{ DataAdmin.indexOf(item) + 1 }}
-          </template>
+          </template> -->
           <template #[`item.namaRole`]="{ item }">
             <span v-html="item.namaRole" /> 
           </template>
@@ -156,7 +180,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataAdmin.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getAdministrator(pageSummary.page - 1, limit, searchData)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -164,7 +188,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataAdmin.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getAdministrator(pageSummary.page + 1, limit, searchData)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
@@ -550,6 +574,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+    pageOptions: [
+      { value: 1 }
+    ],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -557,15 +584,18 @@ export default {
 			totalPages: ''
 		},
 		headers: [
-      { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Nama", value: "nama", sortable: false },
+      // { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "Nama", value: "nama", sortable: true },
       { text: "Email", value: "email", sortable: false },
-      { text: "Role", value: "namaRole", sortable: false },
-      { text: "Status", value: "statusAktif", sortable: false },
+      { text: "Role", value: "namaRole", sortable: true },
+      { text: "Status", value: "statusAktif", sortable: true },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+    sortBy: [],
+    sortDesc: [],
+    kumpulSort: '',
     roleID: '',
     idLog: '',
     DialogAdmin: false,
@@ -634,6 +664,12 @@ export default {
         }
       }
     },
+    page: {
+			deep: true,
+			handler(value) {
+				this.getAdministrator(value, this.limit, this.searchData)
+			}
+		},
     limit: {
 			deep: true,
 			handler(value) {
@@ -647,7 +683,13 @@ export default {
           this.getAdministrator(1, this.limit, this.searchData)
         }
 			}
-		}
+		},
+    sortDesc: {
+			deep: true,
+			handler(value) {
+        this.getAdministrator(1, this.limit, this.searchData)
+			}
+		},
   },
   mounted() {
     this.roleID = localStorage.getItem('roleID')
@@ -657,6 +699,8 @@ export default {
 	methods: {
 		...mapActions(["fetchData"]),
 		getAdministrator(page = 1, limit, keyword) {
+      this.itemsPerPage = limit
+      this.page = page
       this.pageSummary = {
 				page: '',
 				limit: '',
@@ -664,10 +708,11 @@ export default {
 				totalPages: ''
 			}
       this.DataAdmin = []
+      this.pageOptions = [{ value: 1 }]
       this.isLoading = true
 			let payload = {
         method: "get",
-				url: `admin/getAdmin?page=${page}&limit=${limit}&sort=DESC${keyword ? `&keyword=${keyword}` : ''}`,
+				url: `admin/getAdmin?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}&sort=${this.kumpulSort}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -685,9 +730,22 @@ export default {
 					total: resdata.pageSummary.total,
 					totalPages: resdata.pageSummary.totalPages
 				}
+        for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
         this.isLoading = false
 			})
 			.catch((err) => {
+        this.itemsPerPage = limit
+        this.page = page
+        this.DataAdmin = []
+        this.pageOptions = [{ value: 1 }]
+        this.pageSummary = {
+          page: '',
+          limit: '',
+          total: '',
+          totalPages: ''
+        }
         this.isLoading = false
         this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -887,6 +945,16 @@ export default {
 				this.notifikasi("error", err.response.data.message, "1")
 			});
     },
+    updateSort(kondisi, data){
+      if(kondisi === 'by'){
+        this.sortBy = data
+      }else if(kondisi === 'desc'){
+        this.sortDesc = data
+      }
+      this.kumpulSort = this.sortBy.map((val, i) => {
+        return `${val}-${this.sortDesc[i] === false ? 'ASC' : 'DESC'}`
+      }).join(',')
+    },
     notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -901,6 +969,9 @@ export default {
 .scrollText{
   max-height: 450px !important;
   overflow-y: auto !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-pagination {
   justify-content: flex-end !important;

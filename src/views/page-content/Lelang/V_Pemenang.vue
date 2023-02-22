@@ -5,17 +5,34 @@
 			<v-row no-gutters class="pa-2">
 				<v-col cols="12" md="6" />
 				<v-col cols="12" md="6">
-					<v-text-field
-						v-model="searchData"
-						append-icon="mdi-magnify"
-						label="Pencarian..."
-						single-line
-						hide-details
-						solo
-						color="light-blue darken-3"
-						clearable
-						@keyup.enter="getAllPemenang(1, limit, searchData)"
-					/>
+					<v-row no-gutters>
+						<v-col cols="12" md="9">
+							<v-text-field
+								v-model="searchData"
+								append-icon="mdi-magnify"
+								label="Pencarian..."
+								single-line
+								hide-details
+								solo
+								color="light-blue darken-3"
+								clearable
+								@keyup.enter="getAllPemenang(1, limit, searchData)"
+							/>
+						</v-col>
+            <v-col cols="12" md="3" class="pl-2 d-flex justify-end align-center">
+              <v-autocomplete
+                v-model="page"
+                :items="pageOptions"
+                item-text="value"
+                item-value="value"
+                label="Page"
+                outlined
+                dense
+                hide-details
+                :disabled="DataAllPemenang.length ? false : true"
+              />
+            </v-col>
+          </v-row>
 				</v-col>
 			</v-row>
 			<div class="px-1">
@@ -29,25 +46,33 @@
 					:single-expand="singleExpand"
 					:expanded.sync="expanded"
 					show-expand
+					:sort-by="sortBy"
+					:sort-desc="sortDesc"
+					multi-sort
 					item-key="idPemenangLelang"
 					hide-default-footer
 					class="elevation-1"
+					:header-props="{
+						'sort-icon': 'mdi-navigation'
+					}"
 					:items-per-page="itemsPerPage"
 					@page-count="pageCount = $event"
+					@update:sort-by="updateSort('by', $event)"
+          @update:sort-desc="updateSort('desc', $event)"
 				>
-					<template #[`item.number`]="{ item }">
+					<!-- <template #[`item.number`]="{ item }">
 						{{ DataAllPemenang.indexOf(item) + 1 }}
-					</template>
-					<template #[`item.nama_pemenang`]="{ item }">
-						<span v-html="item.data_bidding_terakhir.isAdmin == true ? `${item.details.nama} <b>(Admin Lelang)</b>` : item.details.nama" /> 
+					</template> -->
+					<template #[`item.namaPemenang`]="{ item }">
+						<span v-html="item.data_bidding_terakhir.isAdmin == true ? `${item.details.nama} <b>(Admin Lelang)</b><br>Nama Pemilik: ${item.namaPemilik ? item.namaPemilik : '-'}` : `${item.details.nama}<br>Nama Pemilik: ${item.namaPemilik ? item.namaPemilik : '-'}`" /> 
 					</template>
 					<template #[`item.nominal`]="{ item }">
 						Rp.<span v-html="currencyDotFormat(item.nominal)" /> 
 					</template>
-					<template #[`item.tipe_pelunasan`]="{ item }">
+					<template #[`item.tipePelunasan`]="{ item }">
 						<span v-html="item.tipePelunasan == null ? '-' : item.tipePelunasan == 1 ? 'Cash' : 'Transfer'" /> 
 					</template>
-					<template #[`item.status_pembayaran`]="{ item }">
+					<template #[`item.statusPembayaran`]="{ item }">
 						<v-icon small v-if="item.statusPembayaran == 3" color="red">gpp_bad</v-icon>
 						<v-icon small v-else-if="item.statusPembayaran == 2" color="green">check</v-icon>
 						<v-icon small v-else-if="item.statusPembayaran == 1" color="red">clear</v-icon>
@@ -168,7 +193,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataAllPemenang.length ? pageSummary.page != 1 ? false : true : true"
-							@click="getAllPemenang(pageSummary.page - 1, limit, searchData)"
+							@click="() => { page = pageSummary.page - 1 }"
 						>
 							keyboard_arrow_left
 						</v-icon>
@@ -176,7 +201,7 @@
 							style="cursor: pointer;"
 							large
 							:disabled="DataAllPemenang.length ? pageSummary.page != pageSummary.totalPages ? false : true : true"
-							@click="getAllPemenang(pageSummary.page + 1, limit, searchData)"
+							@click="() => { page = pageSummary.page + 1 }"
 						>
 							keyboard_arrow_right
 						</v-icon>
@@ -659,6 +684,9 @@ export default {
 			{ value: 50 },
 			{ value: 100 },
 		],
+		pageOptions: [
+      { value: 1 }
+    ],
 		pageSummary: {
 			page: '',
 			limit: '',
@@ -666,17 +694,20 @@ export default {
 			totalPages: ''
 		},
 		headers: [
-      { text: "No", value: "number", sortable: false, width: "7%" },
-      { text: "", value: "data-table-expand", sortable: false, width: "5%" },
-      { text: "Nama Pemenang", value: "nama_pemenang", sortable: false },
+      // { text: "No", value: "number", sortable: false, width: "7%" },
+      { text: "#", value: "data-table-expand", sortable: false, width: "5%" },
+      { text: "Nama Pemenang", value: "namaPemenang", sortable: true },
       // { text: "Nama Pemilik", value: "namaPemilik", sortable: false },
-      { text: "Nominal", value: "nominal", sortable: false },
-      { text: "Type Pelunasan", value: "tipe_pelunasan", sortable: false },
-      { text: "Status Pembayaran", value: "status_pembayaran", sortable: false },
-      { text: "Status", value: "statusAktif", sortable: false },
+      { text: "Nominal", value: "nominal", sortable: true },
+      { text: "Type Pelunasan", value: "tipePelunasan", sortable: false },
+      { text: "Status Pembayaran", value: "statusPembayaran", sortable: true },
+      { text: "Status", value: "statusAktif", sortable: true },
     ],
     rowsPerPageItems: { "items-per-page-options": [5, 10, 25, 50] },
     totalItems: 0,
+		sortBy: [],
+    sortDesc: [],
+    kumpulSort: '',
 		DialogPemenang: false,
 		DialogViewLampiranPemenang: false,
 		DialogCropPemenang: false,
@@ -754,6 +785,12 @@ export default {
 				}
 			}
 		},
+		page: {
+			deep: true,
+			handler(value) {
+				this.getAllPemenang(value, this.limit, this.searchData)
+			}
+		},
 		limit: {
 			deep: true,
 			handler(value) {
@@ -767,7 +804,13 @@ export default {
           this.getAllPemenang(1, this.limit, this.searchData)
         }
 			}
-		}
+		},
+		sortDesc: {
+			deep: true,
+			handler(value) {
+        this.getAllPemenang(1, this.limit, this.searchData)
+			}
+		},
 	},
 	mounted() {
 		this.roleID = localStorage.getItem("roleID")
@@ -779,6 +822,8 @@ export default {
       uploadFiles: "upload/uploadFiles",
     }),
 		getAllPemenang(page = 1, limit, keyword) {
+			this.itemsPerPage = limit
+			this.page = page
 			this.pageSummary = {
 				page: '',
 				limit: '',
@@ -786,10 +831,11 @@ export default {
 				totalPages: ''
 			}
       this.DataAllPemenang = []
+			this.pageOptions = [{ value: 1 }]
 			this.isLoading = true
 			let payload = {
 				method: "get",
-				url: `lelang/getPemenang?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}`,
+				url: `lelang/getPemenang?page=${page}&limit=${limit}${keyword ? `&keyword=${keyword}` : ''}&sort=${this.kumpulSort}`,
 				authToken: localStorage.getItem('user_token')
 			};
 			this.fetchData(payload)
@@ -802,9 +848,22 @@ export default {
 					total: resdata.pageSummary.total,
 					totalPages: resdata.pageSummary.totalPages
 				}
+				for (let index = 1; index <= this.pageSummary.totalPages; index++) {
+          this.pageOptions.push({ value: index })
+        }
 				this.isLoading = false
 			})
 			.catch((err) => {
+				this.itemsPerPage = limit
+				this.page = page
+				this.pageSummary = {
+					page: '',
+					limit: '',
+					total: '',
+					totalPages: ''
+				}
+				this.DataAllPemenang = []
+				this.pageOptions = [{ value: 1 }]
 				this.isLoading = false
 				this.notifikasi("error", err.response.data.message, "1")
 			});
@@ -1013,6 +1072,16 @@ export default {
 		clearForm() {
 			this.inputPemenang.id_bidding = ''
 		},
+		updateSort(kondisi, data){
+      if(kondisi === 'by'){
+        this.sortBy = data
+      }else if(kondisi === 'desc'){
+        this.sortDesc = data
+      }
+      this.kumpulSort = this.sortBy.map((val, i) => {
+        return `${val}-${this.sortDesc[i] === false ? 'ASC' : 'DESC'}`
+      }).join(',')
+    },
 		notifikasi(kode, text, proses){
       this.dialogNotifikasi = true
       this.notifikasiKode = kode
@@ -1027,6 +1096,9 @@ export default {
 .scrollText{
   max-height: 450px !important;
   overflow-y: auto !important;
+}
+.v-data-table-header__icon {
+  opacity: 10;
 }
 .v-pagination {
   justify-content: flex-end !important;
